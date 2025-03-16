@@ -29,23 +29,21 @@ let tags = {
 }
 const defaultMenu = {
   before: `
-◈ ━━━━━ *DyLux ┃ ˢᵉⁿⁿᵃ* ━━━━━ ◈
+◈ ━━━━━ *ᴋᴀɴʙᴏᴛ ᴠ2 ┃ ᵇʸ ˢᵗⁱⁱᵛᵉⁿ* ━━━━━ ◈
  
 👋🏻 Hola! *%name*
 👥 Usuarios : %totalreg
 🟢 Tiempo activo : %muptime
 %sbot
-▢ ADD
-• https://instagram.com/fg98_ff
+▢ FOLLOW ME
+• https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N
 ────────────
 %readmore
   ≡ *LISTA DE MENUS*
 
-Ⓟ = Premium
-ⓓ = Diamantes
 `.trimStart(),
   header: '┌─⊷ *%category*',
-  body: '▢ %cmd %isdiamond %isPremium',
+  body: '▢ %cmd ',
   footer: '└───────────\n',
   after: `
 `,

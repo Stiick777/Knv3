@@ -29,7 +29,7 @@ let tags = {
 }
 const defaultMenu = {
   before: `
-◈ ━━━━━ *ᴋᴀɴʙᴏᴛ ┃ ᵇʸ ⱽ²* ━━━━━ ◈
+◈ ━━━━━ *ᴋᴀɴʙᴏᴛ ┃ ⱽ²* ━━━━━ ◈
  
 👋🏻 Hola! *%name*
 👥 Usuarios : %totalreg
@@ -40,7 +40,6 @@ const defaultMenu = {
 ────────────
 %readmore
   ≡ *LISTA DE MENUS*
-
 
 `.trimStart(),
   header: '┌─⊷ *%category*',

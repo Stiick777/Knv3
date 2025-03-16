@@ -514,49 +514,52 @@ export async function participantsUpdate({ id, participants, action }) {
         await loadDatabase()
     let chat = global.db.data.chats[id] || {}
     let text = ''
-    switch (action) {
-        case 'add':
-        case 'remove':
-            if (chat.welcome) {
-                let groupMetadata = await this.groupMetadata(id) || (conn.chats[id] || {}).metadata
-                for (let user of participants) {
-                    let pp = 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg'
-                    let ppgp = 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg'
-                    try {
-                        pp = await this.profilePictureUrl(user, 'image')
-                        ppgp = await this.profilePictureUrl(id, 'image')
-                        } finally {
-                        text = (action === 'add' ? (chat.sWelcome || this.welcome || conn.welcome || 'Bienvenido, @user').replace('@group', await this.getName(id)).replace('@desc', groupMetadata.desc?.toString() || 'Desconocido') :
-                            (chat.sBye || this.bye || conn.bye || 'Adiós, @user')).replace('@user', '@' + user.split('@')[0])
-                         
-                            let wel = API('fgmods', '/api/welcome', {
-                                username: await this.getName(user),
-                                groupname: await this.getName(id),
-                                groupicon: ppgp,
-                                membercount: groupMetadata.participants.length,
-                                profile: pp,
-                                background: 'https://i.ibb.co/fkFmQC2/eve.jpg'
-                            }, 'apikey')
-
-                            let lea = API('fgmods', '/api/goodbye2', {
-                                username: await this.getName(user),
-                                groupname: await this.getName(id),
-                                groupicon: ppgp,
-                                membercount: groupMetadata.participants.length,
-                                profile: pp,
-                                background: 'https://i.ibb.co/jh9367t/akali.jpg'
-                            }, 'apikey')
-
-                            this.sendFile(id, action === 'add' ? wel : lea, 'pp.jpg', text, null, false, { mentions: [user] })
-                            //this.sendFile(id, pp, 'pp.jpg', text, null, false, { mentions: [user] })
-                            /*this.sendButton(id, text, mssg.ig, action === 'add' ? wel : lea, [
-                             [(action == 'add' ? '⦙☰ MENU' : 'BYE'), (action == 'add' ? '/help' : 'khajs')], 
-                             [(action == 'add' ? '⏍ RULES' : 'ッ'), (action == 'add' ? '/rules' : ' ')] ], null, {mentions: [user]})*/
-                          
-                    }
-                }
+switch (action) {
+    case 'add':
+    case 'remove':
+        if (chat.welcome) {
+            let groupMetadata = null;
+            try {
+                groupMetadata = await this.groupMetadata(id);
+            } catch (error) {
+                console.error('Error obteniendo metadata del grupo:', error);
             }
-            break
+            if (!groupMetadata) return;
+
+            for (let user of participants) {
+                let pp = 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg';
+                let ppgp = 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg';
+
+                try {
+                    pp = await this.profilePictureUrl(user, 'image');
+                } catch (error) {
+                    console.error('Error obteniendo la foto de perfil del usuario:', error);
+                }
+
+                try {
+                    ppgp = await this.profilePictureUrl(id, 'image');
+                } catch (error) {
+                    console.error('Error obteniendo la foto de perfil del grupo:', error);
+                }
+
+                // Mensaje de bienvenida o despedida
+                text = (action === 'add' ? 
+                    (chat.sWelcome || this.welcome || conn.welcome || 'Bienvenido, @user') :
+                    (chat.sBye || this.bye || conn.bye || 'Adiós, @user')
+                )
+                .replace('@group', await this.getName(id))
+                .replace('@desc', groupMetadata.desc?.toString() || 'Desconocido')
+                .replace('@user', '@' + user.split('@')[0]);
+
+                // Imagen fija en qu.ax
+                let imageUrl = 'https://qu.ax/OcWvv.jpg';
+
+                // Enviar la imagen con el mensaje
+                this.sendFile(id, imageUrl, 'imagen.jpg', text, null, false, { mentions: [user] });
+            }
+        }
+        break;
+
         case 'promote':
             text = (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador')
         case 'demote':

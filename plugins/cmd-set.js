@@ -1,7 +1,7 @@
 
 let handler = async (m, { text, usedPrefix, command }) => {
     global.db.data.sticker = global.db.data.sticker || {}
-    console.log(mssg);
+    console.trace('Origen de mssg:', mssg);
     if (!m.quoted) throw `✳️ ${mssg.reply}`
     if (!m.quoted.fileSha256) throw `⚠️ ${mssg.reply}`
     if (!text) throw `✳️ Falta el comando`

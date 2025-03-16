@@ -29,17 +29,18 @@ let tags = {
 }
 const defaultMenu = {
   before: `
-◈ ━━━━━ *ᴋᴀɴʙᴏᴛ ᴠ2 ┃ ᵇʸ ˢᵗⁱⁱᵛᵉⁿ* ━━━━━ ◈
+◈ ━━━━━ *ᴋᴀɴʙᴏᴛ ┃ ᵇʸ ⱽ²* ━━━━━ ◈
  
 👋🏻 Hola! *%name*
 👥 Usuarios : %totalreg
 🟢 Tiempo activo : %muptime
 %sbot
-▢ FOLLOW ME
+▢  FOLLOW ME
 • https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N
 ────────────
 %readmore
   ≡ *LISTA DE MENUS*
+
 
 `.trimStart(),
   header: '┌─⊷ *%category*',

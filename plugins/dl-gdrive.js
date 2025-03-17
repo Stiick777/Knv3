@@ -27,9 +27,9 @@ ${isLimit ? `\n▢ ${mssg.limitdl} *+${free} MB* ${mssg.limitdlTe} *${prem} MB*`
   }
 }
 handler.help = ['gdrive']
-handler.tags = ['dl', 'prem']
+handler.tags = ['dl']
 handler.command = ['gdrive']
-handler.diamond = true
+handler.group = true
 //handler.premium = true
 
 export default handler

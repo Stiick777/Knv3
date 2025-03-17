@@ -18,24 +18,25 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
                     header: '🎶 MP3',
                     title: "",
                     description: `▢ ⌚ *${mssg.duration}:* ${v.timestamp}\n▢ 👀 *${mssg.views}:* ${v.views}\n▢ 📌 *${mssg.title}* : ${v.title}\n▢ 📆 *${mssg.aploud}:* ${v.ago}\n`, 
-                    id: `${usedPrefix}fgmp3 ${v.url}`
+                    id: `${usedPrefix}yta ${v.url}`
                 },
                 {
                     header: "🎥 MP4",
                     title: "" ,
                     description: `▢ ⌚ *${mssg.duration}:* ${v.timestamp}\n▢ 👀 *${mssg.views}:* ${v.views}\n▢ 📌 *${mssg.title}* : ${v.title}\n▢ 📆 *${mssg.aploud}:* ${v.ago}\n`, 
-                    id: `${usedPrefix}fgmp4 ${v.url}`
+                    id: `${usedPrefix}ytv ${v.url}`
                 }
             ]
         });
     }
 
-    await conn.sendList(m.chat, '  ≡ *FG MUSIC*🔎', `\n 📀 Resultados de:\n *${text}*`, `Click Aqui`, ytres[0].image, listSections, m);
+    await conn.sendList(m.chat, '  ≡ *YT-SEARCH MUSIC*🔎', `\n 📀 Resultados de: *${text}*\n\nKanBot by Stiiven`, `Click Aqui`, ytres[0].image, listSections, m);
 };
 
-handler.help = ['play2']
+handler.help = ['yts']
 handler.tags = ['dl']
-handler.command = ['play2', 'playvid2', 'playlist', 'playlista'] 
+handler.command = ['yts', 'ytsearch'] 
 handler.disabled = false
+handler.group = true
 
 export default handler

@@ -1,26 +1,36 @@
- 
-import fetch from 'node-fetch';
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-    if (!args[0]) throw `✳️ ${mssg.useCmd}\n *${usedPrefix + command}* https://www.instagram.com/p/CYHeKxyMj-J/?igshid=YmMyMTA2M2Y=`
-    m.react(rwait)
+import { igdl } from "ruhend-scraper";
 
-try {
-    let res = await fetch(global.API('fgmods', '/api/downloader/igdl', { url: args[0] }, 'apikey'))
-    if (!res.ok) throw `❎ ${mssg.error}` 
-    let data = await res.json()
+let handler = async (m, { args, conn }) => { 
+  if (!args[0]) {
+    return conn.reply(m.chat, '🎈 *Ingresa un link de Instagram*', m,);
+  }
 
-    for (let item of data.result.url) {
-        conn.sendFile(m.chat, item, 'igdl.jpg', `✅ ${mssg.result}`, m)
+  // Verificación válida del enlace de Instagram
+  const instagramRegex = /^(https?:\/\/)?(www\.)?(instagram\.com|instagr\.am)\/.+$/;
+  if (!instagramRegex.test(args[0])) {
+    return conn.reply(m.chat, '💡 *El enlace proporcionado no es válido. Asegúrate de ingresar un enlace correcto de Instagram.*', m, );
+  }
+
+  try {
+    await m.react(rwait);
+
+    let res = await igdl(args[0]);
+    let data = res.data;
+
+    for (let media of data) {
+      await new Promise(resolve => setTimeout(resolve, 2000));    
+      await conn.sendFile(m.chat, media.url, 'instagram.mp4', '😎 *Tu video de Instagram by*\n' + textbot, fkontak);
+      await m.react(done);
     }
-  
-    } catch (error) {
-        m.reply(`❎ ${mssg.error}`)
-    }
-    
-}
-handler.help = ['instagram <link ig>']
-handler.tags = ['dl']
-handler.command = ['ig', 'igdl', 'instagram', 'igimg', 'igvid']
-handler.diamond = true
+  } catch {
+    await m.react(error);
+    conn.reply(m.chat, '❌ Ocurrió un error.', m,);
+  }
+};
 
-export default handler
+handler.command = ['instagram', 'ig'];
+handler.tags = ['dl'];
+handler.help = ['instagram'];
+handler.group = true;
+
+export default handler;

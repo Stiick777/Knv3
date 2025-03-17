@@ -1,36 +1,51 @@
 
-import fetch from 'node-fetch'
-let limit = 320
-let handler = async (m, { conn, args, isPrems, isOwner, usedPrefix, command }) => {
-	if (!args || !args[0]) throw `✳️ ${mssg.example} :\n${usedPrefix + command} https://youtu.be/YzkTFFwxtXI`
-    if (!args[0].match(/youtu/gi)) throw `❎ ${mssg.noLink('YouTube')}`
-	 let chat = global.db.data.chats[m.chat]
-	 m.react(rwait)  
+import fetch from 'node-fetch';
+import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
 
-try {
-	    let res = await fetch(global.API('fgmods', '/api/downloader/ytmp4', { url: args[0] }, 'apikey'))
-		let data = await res.json()
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+    if (!args[0]) {
+        return conn.reply(m.chat, `*[❗𝐈𝐍𝐅𝐎❗] 𝙄𝙉𝙂𝙍𝙀𝙎𝙀 𝙐𝙉 𝙀𝙉𝙇𝘼𝘾𝙀 𝘿𝙀 𝙔𝙊𝙐𝙏𝙐𝘽𝙀 𝙋𝘼𝙍𝘼 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼𝙍 𝙀𝙇 𝙑𝙄𝘿𝙀𝙊*`, m, );
+    }
 
-	let { title, dl_url, thumb, size, sizeB, duration } = data.result
-	let isLimit = limit * 1024 < sizeB 
+    let youtubeLink = args[0];
+    
+    // Verificación del enlace de YouTube
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+    if (!youtubeRegex.test(youtubeLink)) {
+        return conn.reply(m.chat, `*[❗𝐈𝐍𝐅𝐎❗] Asegúrese de que sea un enlace de YouTube.*`, m, );
+    }
 
- await conn.loadingMsg(m.chat, '📥 Descargando', ` ${isLimit ? `≡  *FG YTDL*\n\n▢ *⚖️${mssg.size}*: ${size}\n\n▢ _${mssg.limitdl}_ *+${limit} MB*` : '✅ Descarga Completada' }`, ["▬▭▭▭▭▭", "▬▬▭▭▭▭", "▬▬▬▭▭▭", "▬▬▬▬▭▭", "▬▬▬▬▬▭", "▬▬▬▬▬▬"], m)
- 
-  if(!isLimit) conn.sendFile(m.chat, dl_url, title + '.mp4', `
-≡  *FG YTDL*
+try { 
+    await m.react('🕛'); // Indicar que está procesando
 
-*📌${mssg.title}:* ${title}
-*⚖️${mssg.size}:* ${size}
-`.trim(), m, false, { asDocument: chat.useDocument })
-	m.react(done) 
-		
-	} catch {
-		await m.reply(`❎ ${mssg.error}`)
-		} 
+
+    let apiResponse = await fetch(`https://api.agungny.my.id/api/youtube-videov2?url=${encodeURIComponent(youtubeLink)}`);
+    let data = await apiResponse.json();
+
+    if (data.status && data.result && data.result.url) {
+        const videoTitle = data.result.title;
+        const videoUrl = data.result.url;
+
+        await conn.sendMessage(m.chat, {
+            video: { url: videoUrl },
+            fileName: `${videoTitle}.mp4`,
+            mimetype: 'video/mp4',
+            caption: `😎 Su video by *_KanBot_*:\n\n*🎬 Título:* ${videoTitle}`,
+        }, { quoted: m });
+
+        return await m.react('✅'); // Confirmar éxito
+    }
+
+    throw new Error("La API no devolvió datos válidos");
+
+} catch (error) { 
+    console.warn("Error en la descarga del video:", error.message); 
 }
-handler.help = ['ytmp4 <link yt>']
-handler.tags = ['dl'] 
-handler.command = ['ytmp4', 'fgmp4']
-handler.diamond = false
+};
 
-export default handler
+handler.tags = ['dl'];
+handler.help = ['ytv']
+handler.command = ['ytmp4', 'ytvideo', 'ytv'];
+handler.group = true;
+
+export default handler;

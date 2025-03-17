@@ -209,9 +209,9 @@ creloadHandler(false)
 bbts()
 
 }
-handler.help = ['botclone']
+handler.help = ['code', 'serbot']
 handler.tags = ['bebot']
-handler.command = ['bebot', 'serbot', 'jadibot', 'botclone', 'clonebot']
+handler.command = ['code', 'serbot']
 handler.rowner = false
 
 export default handler

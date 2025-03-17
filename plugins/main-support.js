@@ -8,25 +8,16 @@ m.reply(`
 ▢ Canal
 ${fgcanal}
 
-▢ Grupo *1*
+▢ Grupo OFC
 ${bgp}
 
-▢ Grupo *2*
-${bgp2}
-
-▢ Grupo *NSFW* 🔞
-${bgp3}
-
 ◈ ━━━━━━━━━━━━━━━━━━━━ ◈
-▢ Todos los Grupos
- https://instabio.cc/fg98ff
 
-▢ *Telegram*
-• https://t.me/fgawgp
  ▢ *PayPal*
-• https://paypal.me/fg98f
-▢ *YouTube*
-• https://www.youtube.com/fg98f`)
+• 
+
+▢ *Dudas*
+• wa.me/526645011701`)
 
 }
 handler.help = ['support']

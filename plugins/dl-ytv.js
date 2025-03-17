@@ -1,6 +1,5 @@
 
 import fetch from 'node-fetch';
-import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!args[0]) {

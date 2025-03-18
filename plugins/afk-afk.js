@@ -14,7 +14,7 @@ _${mssg.afkmsg}_
   `, null, {mentions: conn.parseMention(text)})
 }
 handler.help = ['afk']
-handler.tags = ['fun']
+handler.tags = ['game']
 handler.command = ['afk']
 handler.group = true
 

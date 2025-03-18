@@ -567,13 +567,14 @@ case 'demote':
     let pp = 'https://qu.ax/OcWvv.jpg'; // Imagen predeterminada
 
     try {
-        pp = await this.profilePictureUrl(user, 'image');
+        let profilePic = await this.profilePictureUrl(user, 'image');
+        if (profilePic) pp = profilePic; // Si se obtiene la imagen, reemplazar la predeterminada
     } catch (error) {
         console.error('Error obteniendo la foto de perfil del usuario:', error);
     }
 
     // Determinar el mensaje según la acción
-    let text = action === 'promote' 
+    let text = (action === 'promote') 
         ? (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador') 
         : (chat.sDemote || this.sdemote || conn.sdemote || '@user ya no es administrador');
 

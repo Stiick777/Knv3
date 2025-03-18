@@ -1,6 +1,6 @@
 const handler = async (m, { conn, args }) => { 
   if (!args[0]) { 
-    return conn.reply(m.chat, '🎈 *Ingresa un link de Facebook*', m);
+    return conn.reply(m.chat, '✳️ *Ingresa un link de Facebook*', m);
   }
 
   // Verificación válida del enlace de Facebook

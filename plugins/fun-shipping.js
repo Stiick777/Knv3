@@ -18,7 +18,7 @@ ${toM(f)}
 global.db.data.users[m.sender].shipping = new Date * 1
 }
 handler.help = ['shipping']
-handler.tags = ['fun']
+handler.tags = ['game']
 handler.command = ['shipping']
 handler.group = true
 

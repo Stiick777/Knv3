@@ -1,42 +1,63 @@
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) return conn.reply(m.chat, `*💡 Uso Correcto: ${usedPrefix + command} gatos*`, m);
+const handler = async (m, { conn, text, usedPrefix, command }) => {  
+    if (!text) return conn.reply(m.chat, `*💡 Uso Correcto: ${usedPrefix + command} gatos*`, m);  
 
-    // Lista de palabras prohibidas
-    const prohibited = ['hentai', 'porno', 'xxx', 'nopor', 'rule34', 'sex']; // Puedes seguir tu lista
+    // Lista de palabras prohibidas  
+    const prohibited = [  
+        'se men', 'hen tai', 'se xo', 'te tas', 'cu lo', 'c ulo', 'cul o',  
+        'ntr', 'rule34', 'rule', 'caca', 'polla', 'femjoy', 'porno',  
+        'porn', 'gore', 'onlyfans', 'sofiaramirez01', 'kareli', 'karely',  
+        'cum', 'semen', 'nopor', 'puta', 'puto', 'culo', 'putita', 'putito',  
+        'pussy', 'hentai', 'pene', 'coño', 'asesinato', 'zoofilia',  
+        'mia khalifa', 'desnudo', 'desnuda', 'cuca', 'chocha', 'muertos',  
+        'pornhub', 'xnxx', 'xvideos', 'teta', 'vagina', 'marsha may',  
+        'misha cross', 'sexmex', 'furry', 'furro', 'furra', 'xxx',  
+        'rule34', 'panocha', 'pedofilia', 'necrofilia', 'pinga',  
+        'horny', 'ass', 'nude', 'popo', 'nsfw', 'femdom', 'futanari',  
+        'erofeet', 'sexo', 'sex', 'yuri', 'ero', 'ecchi', 'blowjob',  
+        'anal', 'ahegao', 'pija', 'verga', 'trasero', 'violation',  
+        'violacion', 'bdsm', 'cachonda', '+18', 'cp', 'mia marin',  
+        'lana rhoades', 'porn', 'cepesito', 'hot', 'buceta', 'xxx', 'nalga',  
+        'nalgas'  
+    ];  
 
-    if (prohibited.some(word => text.toLowerCase().includes(word))) {
-        return conn.reply(m.chat, `⚠️ *No puedo buscar eso.*`, m);
-    }
+    // Verificación de palabras prohibidas  
+    const foundProhibitedWord = prohibited.find(word => text.toLowerCase().includes(word));  
+    if (foundProhibitedWord) {  
+        return conn.reply(m.chat, `⚠️ *No daré resultado a tu solicitud por pajin* - Palabra prohibida: ${foundProhibitedWord}`, m);  
+    }  
 
-    await m.react('📌');
+    // Respuesta mientras se descarga la imagen  
+    await m.react('📌');  
 
-    try {
-        const res = await fetch(`https://api.siputzx.my.id/api/s/pinterest?query=${encodeURIComponent(text)}`);
-        const json = await res.json();
+    try {  
+        const res = await fetch(`https://api.siputzx.my.id/api/s/pinterest?query=${encodeURIComponent(text)}`);  
+        const json = await res.json();  
 
-        if (!json.status || !json.data.length) {
-            return conn.reply(m.chat, `❌ No encontré resultados para *${text}*`, m);
-        }
+        if (!json.status || !json.data.length) {  
+            return conn.reply(m.chat, `❌ No encontré resultados para *${text}*`, m);  
+        }  
 
-        const images = json.data.slice(0, 6);
-        
-        for (const item of images) {
-            await conn.sendMessage(m.chat, { 
-                image: { url: item.images_url }, 
-                caption: `📍 ${item.grid_title || 'Imagen sin título'}\n💎 *Creado:* ${item.created_at}`
-            });
+        // Tomamos hasta 6 imágenes
+        const images = json.data.slice(0, 6).map(item => ({
+            url: item.images_url,
+            caption: `📍 ${item.grid_title || 'Imagen sin título'}\n💎 *Create:* ${item.created_at}`
+        }));
+
+        // Enviar imágenes juntas como galería (si la plataforma lo permite)
+        for (let img of images) {
+            await conn.sendFile(m.chat, img.url, 'image.jpg', img.caption, m);
         }
 
         await m.react('✅');
 
-    } catch (e) {
-        console.error(e);
-        await conn.reply(m.chat, `❌ Error al buscar imágenes. Inténtalo de nuevo.`, m);
-    }
-};
+    } catch (e) {  
+        console.error(e);  
+        await conn.reply(m.chat, `❌ Error al buscar imágenes. Inténtalo de nuevo.`, m);  
+    }  
+};  
 
-handler.help = ['pinterest <query>'];
-handler.tags = ['dl'];
-handler.command = ['pinterest', 'pin', 'pimg'];
-handler.group = true;
+handler.help = ['pinterest <query>'];  
+handler.tags = ['dl'];  
+handler.command = ['pinterest', 'pin', 'pimg'];  
+handler.group = true;  
 export default handler;

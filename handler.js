@@ -561,17 +561,28 @@ if (chat.welcome) {
 }
 break;
 
-        case 'promote':
-            text = (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador')
-        case 'demote':
-            let pp = await this.profilePictureUrl(participants[0], 'image').catch(_ => 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg') 
-            if (!text)
-                text = (chat.sDemote || this.sdemote || conn.sdemote || '@user ya no es administrador')
-            text = text.replace('@user', '@' + participants[0].split('@')[0])
-            if (chat.detect)    
-            this.sendFile(id, pp, 'pp.jpg', text, null, false, { mentions: this.parseMention(text) })
-            //this.sendMessage(id, { text, mentions: this.parseMention(text) })
-            break
+case 'promote':
+case 'demote':
+    let user = participants[0]; // Obtener el usuario afectado
+    let pp = 'https://qu.ax/OcWvv.jpg'; // Imagen predeterminada
+
+    try {
+        pp = await this.profilePictureUrl(user, 'image');
+    } catch (error) {
+        console.error('Error obteniendo la foto de perfil del usuario:', error);
+    }
+
+    // Determinar el mensaje según la acción
+    let text = action === 'promote' 
+        ? (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador') 
+        : (chat.sDemote || this.sdemote || conn.sdemote || '@user ya no es administrador');
+
+    text = text.replace('@user', '@' + user.split('@')[0]);
+
+    if (chat.detect) {
+        this.sendFile(id, pp, 'pp.jpg', text, null, false, { mentions: [user] });
+    }
+    break;
     }
 }
 

@@ -69,7 +69,7 @@ if (!youtubeRegex.test(youtubeLink)) {
 
 handler.help = ['yta'];
 handler.tags = ['dl'];
-handler.command = /^yta|audio|fgmp3|dlmp3|mp3|getaud|yt(a|mp3|mp3)$/i;
+handler.command = /^yta$/i
 handler.group = true;
 
 export default handler;

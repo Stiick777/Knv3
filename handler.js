@@ -517,48 +517,38 @@ export async function participantsUpdate({ id, participants, action }) {
 switch (action) {
     case 'add':
     case 'remove':
-        if (chat.welcome) {
-            let groupMetadata = null;
-            try {
-                groupMetadata = await this.groupMetadata(id);
-            } catch (error) {
-                console.error('Error obteniendo metadata del grupo:', error);
-            }
-            if (!groupMetadata) return;
+if (chat.welcome) {
+    let groupMetadata = null;
+    try {
+        groupMetadata = await this.groupMetadata(id);
+    } catch (error) {
+        console.error('Error obteniendo metadata del grupo:', error);
+    }
+    if (!groupMetadata) return;
 
-            for (let user of participants) {
-                let pp = 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg';
-                let ppgp = 'https://i.ibb.co/1ZxrXKJ/avatar-contact.jpg';
+    for (let user of participants) {
+        let pp = 'https://qu.ax/OcWvv.jpg'; // Imagen predeterminada
 
-                try {
-                    pp = await this.profilePictureUrl(user, 'image');
-                } catch (error) {
-                    console.error('Error obteniendo la foto de perfil del usuario:', error);
-                }
-
-                try {
-                    ppgp = await this.profilePictureUrl(id, 'image');
-                } catch (error) {
-                    console.error('Error obteniendo la foto de perfil del grupo:', error);
-                }
-
-                // Mensaje de bienvenida o despedida
-                text = (action === 'add' ? 
-                    (chat.sWelcome || this.welcome || conn.welcome || 'Bienvenido, @user') :
-                    (chat.sBye || this.bye || conn.bye || 'Adiós, @user')
-                )
-                .replace('@group', await this.getName(id))
-                .replace('@desc', groupMetadata.desc?.toString() || 'Desconocido')
-                .replace('@user', '@' + user.split('@')[0]);
-
-                // Imagen fija en qu.ax
-                let imageUrl = 'https://qu.ax/OcWvv.jpg';
-
-                // Enviar la imagen con el mensaje
-                this.sendFile(id, imageUrl, 'imagen.jpg', text, null, false, { mentions: [user] });
-            }
+        try {
+            pp = await this.profilePictureUrl(user, 'image');
+        } catch (error) {
+            console.error('Error obteniendo la foto de perfil del usuario:', error);
         }
-        break;
+
+        // Mensaje de bienvenida o despedida
+        let text = (action === 'add' ? 
+            (chat.sWelcome || this.welcome || conn.welcome || 'Bienvenido, @user') :
+            (chat.sBye || this.bye || conn.bye || 'Adiós, @user')
+        )
+        .replace('@group', await this.getName(id))
+        .replace('@desc', groupMetadata.desc?.toString() || 'Desconocido')
+        .replace('@user', '@' + user.split('@')[0]);
+
+        // Enviar la imagen de perfil o la imagen predeterminada si no se pudo obtener
+        this.sendFile(id, pp, 'profile.jpg', text, null, false, { mentions: [user] });
+    }
+}
+break;
 
         case 'promote':
             text = (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador')

@@ -15,7 +15,7 @@ const handler = async (m, { conn, usedPrefix, command }) => {
 };
 
 handler.help = ['delttt <txt>'];
-handler.tags = ['fun'];
+handler.tags = ['game'];
 handler.command = /^(delttt|deltt|delxo|deltictactoe)$/i;
 handler.group = true;
 handler.fail = null;

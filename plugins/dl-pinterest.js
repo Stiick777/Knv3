@@ -13,26 +13,15 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         }  
 
         // Tomamos hasta 6 imágenes  
-        const images = json.data.slice(0, 6).map(item => item.images_url);
+        const images = json.data.slice(0, 6);
 
-        // Enviar todas las imágenes juntas
-        await conn.sendMessage(m.chat, { 
-            image: { url: images[0] }, 
-            caption: `📍 Resultado de: *${text}*`, 
-            contextInfo: { 
-                externalAdReply: { 
-                    mediaUrl: images[1], 
-                    mediaType: 1, 
-                    thumbnailUrl: images[2], 
-                    title: "KanBot V2", 
-                    body: "Aquí están tus imágenes", 
-                    previewType: 0 
-                } 
-            } 
-        });
-
-        // Enviar las demás imágenes
-        await Promise.all(images.slice(1).map(url => conn.sendFile(m.chat, url, 'image.jpg', '', m)));
+        // Enviar todas las imágenes con su respectiva información
+        await Promise.all(
+            images.map(item => {
+                const caption = `📍 *${item.grid_title || 'Imagen sin título'}*\n💎 *Creación:* ${item.created_at}`;
+                return conn.sendFile(m.chat, item.images_url, 'image.jpg', caption, m);
+            })
+        );
 
         await m.react('✅');
 

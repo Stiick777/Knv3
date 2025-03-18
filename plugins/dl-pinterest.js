@@ -1,61 +1,95 @@
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) return conn.reply(m.chat, `*💡 Uso Correcto: ${usedPrefix + command} gatos*`, m);
 
-    // Lista de palabras prohibidas
-    const prohibited = [
-        'se men', 'hen tai', 'se xo', 'te tas', 'cu lo', 'c ulo', 'cul o',
-        'ntr', 'rule34', 'rule', 'caca', 'polla', 'femjoy', 'porno',
-        'porn', 'gore', 'onlyfans', 'sofiaramirez01', 'kareli', 'karely',
-        'cum', 'semen', 'nopor', 'puta', 'puto', 'culo', 'putita', 'putito',
-        'pussy', 'hentai', 'pene', 'coño', 'asesinato', 'zoofilia',
-        'mia khalifa', 'desnudo', 'desnuda', 'cuca', 'chocha', 'muertos',
-        'pornhub', 'xnxx', 'xvideos', 'teta', 'vagina', 'marsha may',
-        'misha cross', 'sexmex', 'furry', 'furro', 'furra', 'xxx',
-        'rule34', 'panocha', 'pedofilia', 'necrofilia', 'pinga',
-        'horny', 'ass', 'nude', 'popo', 'nsfw', 'femdom', 'futanari',
-        'erofeet', 'sexo', 'sex', 'yuri', 'ero', 'ecchi', 'blowjob',
-        'anal', 'ahegao', 'pija', 'verga', 'trasero', 'violation',
-        'violacion', 'bdsm', 'cachonda', '+18', 'cp', 'mia marin',
-        'lana rhoades', 'porn', 'cepesito', 'hot', 'buceta', 'xxx', 'nalga',
-        'nalgas'
-    ];
+import axios from "axios";
+const {
+  proto,
+  generateWAMessageFromContent
+} = (await import("@whiskeysockets/baileys")).default;
 
-    // Verificación de palabras prohibidas
-    const foundProhibitedWord = prohibited.find(word => text.toLowerCase().includes(word));
-    if (foundProhibitedWord) {
-        return conn.reply(m.chat, `⚠️ *No daré resultado a tu solicitud por pajin* - Palabra prohibida: ${foundProhibitedWord}`, m);
+const handler = async (message, { conn, text, usedPrefix, command }) => {
+  if (!text) {
+    return conn.reply(message.chat, `*💡 Uso Correcto:* ${usedPrefix + command} gatos`, message);
+  }
+
+  // Lista de palabras prohibidas
+  const prohibited = [
+    'se men', 'hen tai', 'se xo', 'te tas', 'cu lo', 'c ulo', 'cul o',
+    'ntr', 'rule34', 'rule', 'caca', 'polla', 'femjoy', 'porno',
+    'porn', 'gore', 'onlyfans', 'sofiaramirez01', 'kareli', 'karely',
+    'cum', 'semen', 'nopor', 'puta', 'puto', 'culo', 'putita', 'putito',
+    'pussy', 'hentai', 'pene', 'coño', 'asesinato', 'zoofilia',
+    'mia khalifa', 'desnudo', 'desnuda', 'cuca', 'chocha', 'muertos',
+    'pornhub', 'xnxx', 'xvideos', 'teta', 'vagina', 'marsha may',
+    'misha cross', 'sexmex', 'furry', 'furro', 'furra', 'xxx',
+    'rule34', 'panocha', 'pedofilia', 'necrofilia', 'pinga',
+    'horny', 'ass', 'nude', 'popo', 'nsfw', 'femdom', 'futanari',
+    'erofeet', 'sexo', 'sex', 'yuri', 'ero', 'ecchi', 'blowjob',
+    'anal', 'ahegao', 'pija', 'verga', 'trasero', 'violation',
+    'violacion', 'bdsm', 'cachonda', '+18', 'cp', 'mia marin',
+    'lana rhoades', 'porn', 'cepesito', 'hot', 'buceta', 'xxx', 'nalga',
+    'nalgas'
+  ];
+
+  const foundProhibitedWord = prohibited.find(word => text.toLowerCase().includes(word));
+  if (foundProhibitedWord) {
+    return conn.reply(message.chat, `⚠️ *No daré resultado a tu solicitud por pajin* - Palabra prohibida: ${foundProhibitedWord}`, message);
+  }
+
+  await conn.sendMessage(message.chat, {
+    react: { text: "⌛", key: message.key }
+  });
+
+  try {
+    const { data } = await axios.get(`https://api.siputzx.my.id/api/s/pinterest?query=${encodeURIComponent(text)}`);
+
+    if (!data.status || !data.data.length) {
+      return conn.reply(message.chat, `❌ No encontré resultados para *${text}*`, message);
     }
 
-    // Respuesta mientras se descarga la imagen
-    await m.react('📌');
+    let results = [];
+    let images = data.data.slice(0, 6);
 
-    try {
-        const res = await fetch(`https://api.siputzx.my.id/api/s/pinterest?query=${encodeURIComponent(text)}`);
-        const json = await res.json();
+    for (let img of images) {
+      results.push({
+        body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
+        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: "⚡ 𝙺𝚊𝚗𝙱𝚘𝚝 ⚡" }),
+        header: proto.Message.InteractiveMessage.Header.fromObject({
+          title: img.grid_title || 'Imagen sin título',
+          hasMediaAttachment: true,
+          imageMessage: {
+            url: img.images_url
+          }
+        }),
+        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons: [] })
+      });
+    }
 
-        if (!json.status || !json.data.length) {
-            return conn.reply(m.chat, `❌ No encontré resultados para *${text}*`, m);
+    const messageContent = generateWAMessageFromContent(message.chat, {
+      viewOnceMessage: {
+        message: {
+          messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+            body: proto.Message.InteractiveMessage.Body.create({ text: `🔎 RESULTADOS DE: ${text}` }),
+            footer: proto.Message.InteractiveMessage.Footer.create({ text: "By ✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰" }),
+            header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
+            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({ cards: [...results] })
+          })
         }
+      }
+    }, { quoted: message });
 
-       const messages = json.data.slice(0, 6).map(item => [ 
-    `📍 ${item.grid_title || 'Imagen sin título'}`, // Agregar el emoji aquí
-    `️💎 *Create:* ${item.created_at}`,
-    item.images_url,
-    [[]],
-    [[item.pin]], [[]], [[]]
-]);
+    await conn.relayMessage(message.chat, messageContent.message, { messageId: messageContent.key.id });
+    await conn.sendMessage(message.chat, { react: { text: "✅", key: message.key } });
 
-        await conn.sendCarousel(m.chat, `🔎 Resultados de *${text}*`, '⚡ 𝙺𝚊𝚗𝙱𝚘𝚝 ⚡', null, messages, m);
-        await m.react('✅');
-
-    } catch (e) {
-        console.error(e);
-        await conn.reply(m.chat, `❌ Error al buscar imágenes. Inténtalo de nuevo.`, m);
-    }
+  } catch (error) {
+    await conn.sendMessage(message.chat, { react: { text: "❌", key: message.key } });
+    console.error(error);
+    conn.reply(message.chat, `❌ *Error al buscar imágenes. Inténtalo de nuevo.*`, message);
+  }
 };
 
-handler.help = ['pinterest <query>'];
-handler.tags = ['dl'];
-handler.command = ['pinterest', 'pin', 'pimg'];
+handler.help = ["pinterest <query>"];
 handler.group = true;
+handler.tags = ["dl"];
+handler.command = ["pinterest", "pin", "pimg"];
+
 export default handler;

@@ -567,15 +567,15 @@ case 'demote':
     let pp = 'https://qu.ax/OcWvv.jpg'; // Imagen predeterminada
 
     try {
-        let profilePic = await this.profilePictureUrl(user, 'image');
-        if (profilePic) pp = profilePic; // Si se obtiene la imagen, reemplazar la predeterminada
+        let profilePic = await this.profilePictureUrl(user, 'image').catch(() => null);
+        if (profilePic) pp = profilePic; // Si se obtiene la imagen, usarla
     } catch (error) {
-        console.error('Error obteniendo la foto de perfil del usuario:', error);
+        console.error('Error obteniendo la foto de perfil del usuario:', error.message);
     }
 
     // Determinar el mensaje según la acción
-    let text = (action === 'promote') 
-        ? (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador') 
+    let text = action === 'promote'
+        ? (chat.sPromote || this.spromote || conn.spromote || '@user ahora es administrador')
         : (chat.sDemote || this.sdemote || conn.sdemote || '@user ya no es administrador');
 
     text = text.replace('@user', '@' + user.split('@')[0]);

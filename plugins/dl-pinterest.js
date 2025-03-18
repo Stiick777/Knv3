@@ -1,3 +1,7 @@
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+
 const handler = async (m, { conn, text, usedPrefix, command }) => {  
     if (!text) return conn.reply(m.chat, `*💡 Uso Correcto: ${usedPrefix + command} gatos*`, m);  
 
@@ -26,7 +30,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         return conn.reply(m.chat, `⚠️ *No daré resultado a tu solicitud por pajin* - Palabra prohibida: ${foundProhibitedWord}`, m);  
     }  
 
-    // Respuesta mientras se descarga la imagen  
+    // Respuesta mientras se descargan las imágenes  
     await m.react('📌');  
 
     try {  
@@ -37,18 +41,37 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
             return conn.reply(m.chat, `❌ No encontré resultados para *${text}*`, m);  
         }  
 
-        // Tomamos hasta 6 imágenes
-        const images = json.data.slice(0, 6).map(item => ({
-            url: item.images_url,
-            caption: `📍 ${item.grid_title || 'Imagen sin título'}\n💎 *Create:* ${item.created_at}`
-        }));
+        const images = json.data.slice(0, 6); // Tomamos hasta 6 imágenes  
+        const tempFolder = './temp_pinterest';  
 
-        // Enviar imágenes juntas como galería (si la plataforma lo permite)
-        for (let img of images) {
-            await conn.sendFile(m.chat, img.url, 'image.jpg', img.caption, m);
-        }
+        // Crear carpeta temporal si no existe  
+        if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true });
 
-        await m.react('✅');
+        let mediaFiles = [];  
+        let captions = [];
+
+        for (let i = 0; i < images.length; i++) {  
+            const imageUrl = images[i].images_url;  
+            const imagePath = path.join(tempFolder, `image_${i}.jpg`);  
+
+            // Descargar imagen  
+            const response = await axios({ url: imageUrl, responseType: 'arraybuffer' });  
+            fs.writeFileSync(imagePath, response.data);  
+
+            mediaFiles.push(imagePath);  
+            captions.push(`📍 ${images[i].grid_title || 'Imagen sin título'}\n💎 *Create:* ${images[i].created_at}`);  
+        }  
+
+        // Enviar todas las imágenes en un solo mensaje  
+        await conn.sendMediaGroup(m.chat, mediaFiles.map((file, index) => ({  
+            url: file,  
+            caption: captions[index]  
+        })), m);  
+
+        // Eliminar imágenes temporales después de enviarlas  
+        mediaFiles.forEach(file => fs.unlinkSync(file));  
+
+        await m.react('✅');  
 
     } catch (e) {  
         console.error(e);  

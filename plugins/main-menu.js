@@ -12,8 +12,6 @@ let tags = {
   'rg': 'REGISTRO',
   'sticker': 'STICKER',
   'img': 'IMAGEN',
-  'maker': 'MAKER',
-  'prem': 'PREMIUM',
   'group': 'GRUPO',
   'nable': 'EN/DISABLE OPCIONES', 
   'nime': 'ANIME',
@@ -22,8 +20,6 @@ let tags = {
   'tools': 'TOOLS',
   'fun': 'FUN',
   'cmd': 'DATABASE',
-  'nsfw': 'NSFW +18',
-  'ansfw': 'NSFW ANIME', 
   'owner': 'OWNER', 
   'advanced': 'AVANZADO',
 }

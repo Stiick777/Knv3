@@ -11,7 +11,7 @@ return conn.reply(m.chat, '🔰 *Utiliza este comando directamente en el número
 await conn.reply(m.chat, '💡 *Iniciando proceso de eliminación de todos los archivos de sesión, excepto el archivo creds.json...*', m,  )
 m.react(rwait)
 
-let sessionPath = './blackSession/'
+let sessionPath = './sessions/'
 
 try {
 
@@ -41,7 +41,7 @@ await conn.reply(m.chat, '❌ *Ocurrió un fallo*',  m, )
 
 }
 handler.help = ['dsowner']
-handler.tags = ['fix', 'owner']
+handler.tags = [ 'owner']
 handler.command = ['delai', 'delyaemori', 'dsowner', 'clearallsession']
 
 handler.rowner = true

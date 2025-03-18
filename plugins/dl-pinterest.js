@@ -1,7 +1,6 @@
 const handler = async (m, { conn, text, usedPrefix, command }) => {  
     if (!text) return conn.reply(m.chat, `*💡 Uso Correcto: ${usedPrefix + command} gatos*`, m);  
 
-    // Respuesta mientras se descarga la imagen  
     await m.react('📌');  
 
     try {  
@@ -12,18 +11,16 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
             return conn.reply(m.chat, `❌ No encontré resultados para *${text}*`, m);  
         }  
 
-        // Tomamos hasta 6 imágenes  
-        const images = json.data.slice(0, 6);
+        // Tomamos hasta 6 imágenes con su info  
+        const images = json.data.slice(0, 6);  
 
-        // Enviar todas las imágenes con su respectiva información
-        await Promise.all(
-            images.map(item => {
-                const caption = `📍 *${item.grid_title || 'Imagen sin título'}*\n💎 *Creación:* ${item.created_at}`;
-                return conn.sendFile(m.chat, item.images_url, 'image.jpg', caption, m);
-            })
-        );
+        // Enviar todas las imágenes con su respectiva información  
+        await Promise.all(images.map(item => {  
+            let caption = `📍 ${item.grid_title || 'Imagen sin título'}\n💎 *Creado:* ${item.created_at}`;  
+            return conn.sendFile(m.chat, item.images_url, 'image.jpg', caption, m);  
+        }));  
 
-        await m.react('✅');
+        await m.react('✅');  
 
     } catch (e) {  
         console.error(e);  

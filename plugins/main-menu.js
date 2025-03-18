@@ -142,10 +142,9 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     
     let pp = './src/fg_logo.jpg'
 
-    conn.sendButton(m.chat, text.trim(), `▢ DyLux  ┃ ᴮᴼᵀ\n${mssg.ig}`, pp, [
-      ['ꨄ︎ Apoyar', `${_p}donate`],
+    conn.sendButton(m.chat, text.trim(), `▢ 𝙺𝚊𝚗𝙱𝚘𝚝 ┃ ⱽ²\nʙʏ ꜱᴛɪɪᴠᴇɴ`, pp, [,
       ['⏍ Info', `${_p}botinfo`],
-      ['⌬ Grupos', `${_p}gpdylux`]
+      ['⌬ Grupos', `${_p}grupos`]
     ], m, rpl)
     //conn.sendFile(m.chat, pp, 'menu.jpg', text.trim(), m, null, fwc)
   

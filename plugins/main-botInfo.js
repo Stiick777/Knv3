@@ -11,25 +11,18 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true)
 
     let message = `
- ≡ *ESTADO*
+ *≡ ESTADO - KAN-BOT*
 - *Ping:* ${latency} _ms_
 - *Uptime:* ${uptime}
 - *Comandos:* ${cmds} 
 
-*≡ USUARIOS DEL BOT*
+*≡ USUARIOS*
 - *Total:* ${totalreg.length.toLocaleString()}
-- *Registrados:* ${rtotalreg.length.toLocaleString()} 
 
 *≡ OWNER*
-  *FG98*
-▢ *Instagram :*
-- ${fgig}
-▢ *Telegram :*
-- t.me/fgsupp_bot (FG) 
-- t.me/fg98ff (canal)
-- t.me/fgawgp (grupo)
-▢ *YouTube :*
-- https://youtube.com/fg98f`
+  *Stiiven*
+▢ *CHANNEL:*
+- ${fgcanal}`
 
     m.reply(message, null, fwc)
 }

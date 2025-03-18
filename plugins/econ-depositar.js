@@ -1,4 +1,4 @@
-import db from '../database.json' assert { type: 'json' };
+import db from '../database.json' 
 
 let handler = async (m, { args }) => {
   let user = global.db.data.users[m.sender];

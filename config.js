@@ -9,7 +9,7 @@ global.owner = [
 ] //Numeros de owner 
 
 global.mods = [''] 
-global.prems = ['50489079501', '573143917092']
+global.prems = ['']
 global.botNumber = [''] 
 global.APIs = { // API Prefix
   // name: 'https://website' 
@@ -22,23 +22,23 @@ global.APIKeys = { // APIKey Here
 }
 
 // Sticker WM
-global.packname = 'DyLux┃ᴮᴼᵀ' 
-global.author = '@fg98' 
+global.packname = '' 
+global.author = '《 𝙺𝚊𝚗𝙱𝚘𝚝 》\n【 By Stiiven 】' 
 
 //--info FG
-global.botName = 'DyLux'
-global.fgig = 'https://instagram.com/fg98_ff' 
-global.fgsc = 'https://github.com/FG98F/dylux-bot' 
-global.fgyt = 'https://youtube.com/fg98f'
-global.fgpyp = 'https://paypal.me/fg98f'
-global.fglog = 'https://i.ibb.co/1zdz2j3/logo.jpgs' 
+global.botName = '✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰'
+global.fgig = '' 
+global.fgsc = '' 
+global.fgyt = ''
+global.fgpyp = ''
+global.fglog = 'https://files.catbox.moe/j6ng7d.jpg' 
 
 //--- Grupos WA
-global.id_canal = '120363177092661333@newsletter' //-ID de canal de WhatsApp
-global.fgcanal = 'https://whatsapp.com/channel/0029VaCeuZd6mYPQiWqxXj1F'
-global.bgp = 'https://chat.whatsapp.com/BESBo5xjvIZE4YVvth6Yzr'
-global.bgp2 = 'https://chat.whatsapp.com/I7bvd8XCAOUHjgkHteqFC7'
-global.bgp3 = 'https://chat.whatsapp.com/F0JTTyZ3hsoL7OlU8TEpuH' //--GP NSFW
+global.id_canal = '120363318891913110@newsletter' //-ID de canal de WhatsApp
+global.fgcanal = 'https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N'
+global.bgp = 'https://chat.whatsapp.com/C5xsN9KcmIs8O1wNeOkcX9'
+global.bgp2 = 'https://chat.whatsapp.com/C5xsN9KcmIs8O1wNeOkcX9'
+global.bgp3 = 'https://chat.whatsapp.com/C5xsN9KcmIs8O1wNeOkcX9' //--GP NSFW
 
 global.wait = '⌛ _Cargando..._\n*▬▬▬▭*'
 global.rwait = '⌛'

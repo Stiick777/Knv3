@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
-import { tmpdir } from 'os';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {  
     if (!text) return conn.reply(m.chat, `*💡 Uso Correcto: ${usedPrefix + command} gatos*`, m);  
@@ -42,32 +41,37 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
             return conn.reply(m.chat, `❌ No encontré resultados para *${text}*`, m);  
         }  
 
-        const images = json.data.slice(0, 6);
-        const downloadedFiles = [];
+        // Tomamos hasta 6 imágenes
+        const images = json.data.slice(0, 6).map(item => ({
+            url: item.images_url,
+            caption: `📍 ${item.grid_title || 'Imagen sin título'}\n💎 *Create:* ${item.created_at}`
+        }));
 
-        for (const [index, item] of images.entries()) {
-            const imageUrl = item.images_url;
-            const filePath = path.join(tmpdir(), `image_${index}.jpg`);
-            const response = await axios({ url: imageUrl, responseType: 'stream' });
+        // Directorio temporal para guardar imágenes
+        const tempDir = path.join(process.cwd(), 'temp');
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
-            const writer = fs.createWriteStream(filePath);
-            response.data.pipe(writer);
-
-            await new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
+        // Descargar y guardar imágenes
+        const savedImages = [];
+        for (let i = 0; i < images.length; i++) {
+            const response = await axios({
+                url: images[i].url,
+                responseType: 'arraybuffer'
             });
 
-            downloadedFiles.push(filePath);
+            const filePath = path.join(tempDir, `image_${i}.jpg`);
+            fs.writeFileSync(filePath, response.data);
+            savedImages.push(filePath);
         }
 
         // Enviar todas las imágenes en un solo mensaje
-        await conn.sendMedia(m.chat, downloadedFiles, `🔎 *Resultados de ${text}*`, m);
+        await conn.sendMessage(m.chat, { 
+            caption: `🔎 *Resultados de ${text}*`,
+            image: savedImages.map(filePath => fs.readFileSync(filePath))
+        }, { quoted: m });
 
-        // Eliminar los archivos temporales después de enviarlos
-        for (const file of downloadedFiles) {
-            fs.unlinkSync(file);
-        }
+        // Eliminar archivos temporales
+        savedImages.forEach(filePath => fs.unlinkSync(filePath));
 
         await m.react('✅');
 

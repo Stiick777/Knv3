@@ -2,7 +2,7 @@
 let handler = async (m, { conn }) => {
 
 m.reply(`
-≡  *${botName}ᴮᴼᵀ ┃ SUPPORT*
+≡  *${botName} ┃ SUPPORT*
 
 ◈ ━━━━━━━━━━━━━━━━━━━━ ◈
 ▢ Canal
@@ -23,5 +23,5 @@ ${bgp}
 handler.help = ['support']
 handler.tags = ['main']
 handler.command = ['grupos', 'groups', 'support'] 
-
+handler.group = true
 export default handler

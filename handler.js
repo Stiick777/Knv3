@@ -536,12 +536,13 @@ if (chat.welcome) {
         }
 
         // Mensaje de bienvenida o despedida
-        let text = (action === 'add' ?   
+       let text = (action === 'add' ?   
     `Hola, @${user.split('@')[0]}\n\n` +  
     `Bienvenido a *${await this.getName(id)}*\n\n` +  
     `*_Por favor, lee la descripción para evitar problemas y disfruta tu estadía_*`  
     :  
-    (chat.sBye || this.bye || conn.bye || 'Adiós, @user')  
+    `Adiós @${user.split('@')[0]}\n\n` +  
+    `*_Esperamos vuelvas pronto_*`  
 )
 .replace('@group', await this.getName(id))  
 .replace('@desc', groupMetadata.desc?.toString() || 'Desconocido')  

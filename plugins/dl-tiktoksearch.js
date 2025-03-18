@@ -42,7 +42,7 @@ await conn.sendMessage(message.chat, {
     for (let result of topResults) {
       results.push({
         body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: titulowm }),
+        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: global.packname }),
         header: proto.Message.InteractiveMessage.Header.fromObject({
           title: '' + result.title,
           hasMediaAttachment: true,
@@ -97,6 +97,6 @@ await conn.sendMessage(message.chat, {
 handler.help = ["tiktoksearch <txt>"];
 handler.group = true;
 handler.tags = ["dl"];
-handler.command = ["tiktoksearch", "tts", "tiktoks"];
+handler.command = ["tiktoksearch",  "tiktoks"];
 
 export default handler;

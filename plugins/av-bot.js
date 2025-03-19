@@ -5,7 +5,7 @@ let name = conn.getName(m.sender)
 
 conn.sendButton(m.chat, `${mssg.hi} *${name}*\n`, mssg.ig, null, [
       ['⦙☰ Menu', '/help'],
-      ['⦙✯ Estado', '/status'],
+      ['⧳ Estado', '/status'],
       [`⌬ ${mssg.gp}s`, '/grupos']
     ], m) 
 } 

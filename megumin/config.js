@@ -56,6 +56,10 @@ global.logo = 'https://files.catbox.moe/magmik.jpg'
 
 //• ↳ ◜𝑭𝑨𝑲𝑬 𝑬𝑺𝑻𝑰𝑳𝑶◞ • 🪩
 global.estilo = { key: {  fromMe: false, participant: `0@s.whatsapp.net`, ...(false ? { remoteJid: "5219992095479-1625305606@g.us" } : {}) }, message: { orderMessage: { itemCount : -999999, status: 1, surface : 1, message: '⏤͟͞ू⃪ ፝͜⁞M͢ᴇɢ፝֟ᴜᴍ⃨ɪɴ⃜✰⃔࿐', orderTitle: 'Bang', thumbnailUrl: logo, sellerJid: '0@s.whatsapp.net'}}}
+global.group = 'https://chat.whatsapp.com/C5xsN9KcmIs8O1wNeOkcX9'
+global.group2 = 'https://chat.whatsapp.com/C5xsN9KcmIs8O1wNeOkcX9'
+global.group3 = 'https://chat.whatsapp.com/C5xsN9KcmIs8O1wNeOkcX9'
+global.canal = 'https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N'
 
 //• ↳ ◜𝑳𝑰𝑵𝑲𝑺◞ • 🌿
 global.ofcgp = 'https://chat.whatsapp.com/F4QEFF2Hn4102NdbPJ2ZOi' //Grupo Oficial De Megumin

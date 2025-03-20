@@ -156,7 +156,7 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
     let pp13 = 'https://telegra.ph/file/ba7c4a3eb7bf3d892b0c8.mp4'
     let pp14 = 'https://tinyurl.com/ymlqb6ml'
     let pp15 = 'https://tinyurl.com/ykv7g4zy'
-    let img = `./storage/img/menu.jpg`
+    let img = `https://tinyurl.com/2czt4my6`
     await m.react('⚡')
     conn.sendButton(m.chat, text.trim(), `▢ 𝙺𝚊𝚗𝙱𝚘𝚝 ┃ ⱽ²\nʙʏ ꜱᴛɪɪᴠᴇɴ`, img, [
       ['⏍ Info', `${_p}botinfo`],

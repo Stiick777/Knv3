@@ -171,7 +171,7 @@ return;
 };
 
 handler.help = ['partido', 'delp'];
-handler.tags = ['game'];
+handler.tags = ['fun'];
 handler.command = ['partido', 'voto', 'marcador', 'delp'];
 handler.group = true
 

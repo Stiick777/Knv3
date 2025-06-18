@@ -16,4 +16,5 @@ handler.help = ['transcripyt *<url>*']
 handler.tags = ['tools']
 handler.command = /^(transcripyt)$/i
 handler.group = true
+
 export default handler

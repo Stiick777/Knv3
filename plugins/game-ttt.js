@@ -58,7 +58,7 @@ if (!text) {
 };
 
 handler.help = ['ttt', 'tictactoe'];
-handler.tags = ['game'];
+handler.tags = ['fun'];
 handler.command = /^(tictactoe|ttc|ttt|xo)$/i
 handler.group = true;
 export default handler;

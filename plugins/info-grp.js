@@ -13,7 +13,7 @@ var handler = async (m, { conn }) => {
     conn.reply(m.chat, texto, m);
 }
 
-handler.help = ['grp'];
-handler.tags = ['group'];
+handler.help = ['grupos'];
+handler.tags = ['main'];
 handler.command = ['grp', 'listagrupos'];
 export default handler;

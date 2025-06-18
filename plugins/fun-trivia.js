@@ -4,7 +4,7 @@ const gam = new Map(); // Mapa para almacenar las trivias activas
 
 function cargarPreguntas() {
   try {
-    const data = fs.readFileSync('./storage/game/trivia.json', 'utf-8');
+    const data = fs.readFileSync('./src/game/trivia.json', 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     console.error("Error cargando preguntas de trivia:", error);
@@ -71,7 +71,7 @@ handler.before = async (m, { conn }) => {
 };
 
 handler.command = /^trivia$/i;
-handler.tags = ['game'];
+handler.tags = ['fun'];
 handler.help = ['trivia'];
 handler.group = true;
 

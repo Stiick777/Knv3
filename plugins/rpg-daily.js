@@ -1,32 +1,47 @@
-const free = 50000
-const prem = 100000
-const cooldowns = {}
+const free = 25;
+const prem = 15;
 
-let handler = async (m, { conn, isPrems }) => {
-  let user = global.db.data.users[m.sender]
-  const tiempoEspera = 24 * 60 * 60
-  if (cooldowns[m.sender] && Date.now() - cooldowns[m.sender] < tiempoEspera * 1000) {
-    const tiempoRestante = segundosAHMS(Math.ceil((cooldowns[m.sender] + tiempoEspera * 1000 - Date.now()) / 1000))
-    conn.reply(m.chat, `⚠️ Ya has realizado tu pedido gratis de hoy.\nRecuerda que solo puedes realizarlo 1 vez cada 24 horas.\n\n*Próximo Monto* : +${isPrems ? prem : free} 💫 XP\n*En* : ⏱ ${tiempoRestante}`, m, rcanal)
-    return
-  }
+var handler = async (m, { conn, isPrems }) => {
+  let exp = `${pickRandom([500, 600, 700, 800, 900, 999, 1000, 1300, 1500, 1800, 2000, 2500, 3000])}` * 1;
+  let exppremium = `${pickRandom([3000, 3500, 4000, 4500, 5000, 6000, 7000, 8000, 9000, 10000])}` * 1;
+  let estrellas = Math.floor(Math.random() * 3000) + 100; // Estrellas aleatorias entre 100 y 3000
+  
+  let time = global.db.data.users[m.sender].lastclaim + 86400000; // 24 Horas
+  if (new Date - global.db.data.users[m.sender].lastclaim < 86400000) 
+    return conn.reply(m.chat, `🕚 *Vuelve en ${msToTime(time - new Date())}*`, m, rcanal);
 
-  global.db.data.users[m.sender].exp += isPrems ? prem : free
-  conn.reply(m.chat, `🌥️ Felicidades 🎉, reclamaste *+${isPrems ? prem : free} 💫 XP*.`, m, rcanal)
+  global.db.data.users[m.sender].exp += isPrems ? exppremium : exp;
+  global.db.data.users[m.sender].estrellas += estrellas; // Se suman estrellas
+  
+  conn.reply(m.chat, `🎁 *Recompensa Diaria*
 
-  cooldowns[m.sender] = Date.now()
+📜 Recursos:
+✨ *XP:* +${isPrems ? exppremium : exp} ⚡
+⭐ *Estrellas:* +${estrellas} 🌟`, m, rcanal);
+
+  global.db.data.users[m.sender].lastclaim = new Date * 1;
+};
+
+handler.help = ['daily'];
+handler.tags = ['rpg'];
+handler.command = ['daily', 'claim'];
+handler.group = true;
+
+export default handler;
+
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
 }
 
-handler.help = ['claim']
-handler.tags = ['rpg']
-handler.command = ['daily', 'claim']
-handler.group = true
+function msToTime(duration) {
+  var milliseconds = parseInt((duration % 1000) / 100),
+    seconds = Math.floor((duration / 1000) % 60),
+    minutes = Math.floor((duration / (1000 * 60)) % 60),
+    hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
-export default handler
+  hours = hours < 10 ? '0' + hours : hours;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  seconds = seconds < 10 ? '0' + seconds : seconds;
 
-function segundosAHMS(segundos) {
-  const horas = Math.floor(segundos / 3600)
-  const minutos = Math.floor((segundos % 3600) / 60)
-  const segundosRestantes = segundos % 60
-  return `${horas} horas, ${minutos} minutos y ${segundosRestantes} segundos`;
+  return hours + ' Horas ' + minutes + ' Minutos';
 }

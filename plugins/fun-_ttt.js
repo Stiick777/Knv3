@@ -106,5 +106,4 @@ delete this.game[room.id]}}
 return !0 
 }
 
-
 export default handler

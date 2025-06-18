@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-const charactersFilePath = './storage/databases/characters.json';
+const charactersFilePath = './src/database/characters.json';
 
 const cooldowns = {};
 const timestamps = {}; // Guardará la marca de tiempo de los personajes enviados
@@ -84,7 +84,7 @@ ${randomCharacter.user ? "🔥️ *Este personaje ya ha sido reclamado, intenta 
 };
 
 handler.help = ['pw'];
-handler.tags = ['rnime'];
+handler.tags = ['fun'];
 handler.command = ['pw'];
 handler.group = true;
 

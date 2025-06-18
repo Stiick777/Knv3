@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-const charactersFilePath = './storage/databases/characters.json';
+const charactersFilePath = './src/database/characters.json';
 
 async function loadCharacters() {
     try {
@@ -76,7 +76,7 @@ let sellHandler = async (m, { conn, args }) => {
 };
 
 sellHandler.help = ['sell <name-personaje>'];
-sellHandler.tags = ['rnime'];
+sellHandler.tags = ['fun'];
 sellHandler.command = ['sell', 'vender'];
 sellHandler.group = true
 

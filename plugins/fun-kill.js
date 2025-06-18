@@ -49,7 +49,7 @@ let handler = async (m, { conn }) => {
 };
 
 handler.help = ['kill/matar @tag'];
-handler.tags = ['rnime'];
+handler.tags = ['fun'];
 handler.command = ['kill', 'matar'];
 handler.group = true;
 

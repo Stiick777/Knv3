@@ -10,5 +10,4 @@ handler.help = ['reportar']
 handler.tags = ['main']
 handler.command = ['reporte','report','reportar','bug','error']
 
-
 export default handler

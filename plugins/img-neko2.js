@@ -12,7 +12,7 @@ await m.react('✅')
 await m.react('✖️')
 }}
 handler.command = ['neko2']
-handler.tags = ['img']
+handler.tags = ['anime']
 handler.help = ['neko2']
 //handler.limit = 1
 handler.group = true 

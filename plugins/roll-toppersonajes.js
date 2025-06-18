@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-const charactersFilePath = './storage/databases/characters.json';
+const charactersFilePath = './src/database/characters.json';
 
 async function loadCharacters() {
     try {
@@ -53,7 +53,7 @@ message += `\n━━━━━━━━━━━━━━━━━━━━━`;
 };
 
 topCharactersHandler.help = ['toppersonajes'];
-topCharactersHandler.tags = ['rnime'];
+topCharactersHandler.tags = ['fun'];
 topCharactersHandler.command = ['toppersonajes', 'topp'];
 topCharactersHandler.group = true
 

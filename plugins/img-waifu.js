@@ -13,7 +13,7 @@ await m.react('✅')
 await m.react('✖️')
 }}
 handler.help = ['waifu']
-handler.tags = ['img']
+handler.tags = ['anime']
 handler.command = ['waifu']
 //handler.limit = 1
 handler.group = true 

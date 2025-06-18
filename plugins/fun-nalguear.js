@@ -42,7 +42,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 };
 
 handler.help = ['violar @tag'];
-handler.tags = ['rnime'];
+handler.tags = ['fun'];
 handler.command = ['nalguear'];
 handler.group = true;
 

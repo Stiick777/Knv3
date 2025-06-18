@@ -1,1 +1,324 @@
-[]
+{
+  "users": {},
+  "chats": {},
+  "stats": {
+    "sticker-sticker.js": {
+      "total": 11,
+      "success": 11,
+      "last": 1735929724706,
+      "lastSuccess": 1735929724706
+    },
+    "rg-register.js": {
+      "total": 38,
+      "success": 35,
+      "last": 1735937929669,
+      "lastSuccess": 1735936060364
+    },
+    "main-menu (1).js": {
+      "total": 25,
+      "success": 25,
+      "last": 1735934584741,
+      "lastSuccess": 1735934584741
+    },
+    "Config•nable.js": {
+      "total": 31,
+      "success": 30,
+      "last": 1735928373644,
+      "lastSuccess": 1735928373644
+    },
+    "Grupo•mute.js": {
+      "total": 11,
+      "success": 10,
+      "last": 1735880327746,
+      "lastSuccess": 1735880327746
+    },
+    "jadibot.js": {
+      "total": 5,
+      "success": 5,
+      "last": 1735937315368,
+      "lastSuccess": 1735937315368
+    },
+    "jadibot-serbot.js": {
+      "total": 9,
+      "success": 9,
+      "last": 1735929094416,
+      "lastSuccess": 1735929094416
+    },
+    "Descargas•pinterest.js": {
+      "total": 10,
+      "success": 10,
+      "last": 1735931286336,
+      "lastSuccess": 1735931286336
+    },
+    "Descargas-mediafire.js": {
+      "total": 7,
+      "success": 7,
+      "last": 1735929531346,
+      "lastSuccess": 1735929531346
+    },
+    "Descargas•play.js": {
+      "total": 49,
+      "success": 47,
+      "last": 1735937602298,
+      "lastSuccess": 1735937602298
+    },
+    "Descargas•modapk.js": {
+      "total": 38,
+      "success": 38,
+      "last": 1735934605337,
+      "lastSuccess": 1735934605337
+    },
+    "dl-descargasplay.js": {
+      "total": 13,
+      "success": 13,
+      "last": 1735936045489,
+      "lastSuccess": 1735936045489
+    },
+    "Game•fuck.js": {
+      "total": 5,
+      "success": 5,
+      "last": 1735932818578,
+      "lastSuccess": 1735932818578
+    },
+    "Game•doxeo.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735879078242,
+      "lastSuccess": 1735879078242
+    },
+    "Grupo•hidetag.js": {
+      "total": 6,
+      "success": 6,
+      "last": 1735879974177,
+      "lastSuccess": 1735879974177
+    },
+    "Descargas•facebook.js": {
+      "total": 9,
+      "success": 9,
+      "last": 1735935426973,
+      "lastSuccess": 1735935426973
+    },
+    "gc-kick.js": {
+      "total": 6,
+      "success": 6,
+      "last": 1735932928943,
+      "lastSuccess": 1735932928943
+    },
+    "Game•reto.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1735881195906,
+      "lastSuccess": 1735881195906
+    },
+    "Game•consejo.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1735881275281,
+      "lastSuccess": 1735881275281
+    },
+    "Grupo•tagall.js": {
+      "total": 5,
+      "success": 5,
+      "last": 1735923412086,
+      "lastSuccess": 1735923412086
+    },
+    "Game•acertijo.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735881458146,
+      "lastSuccess": 1735881458146
+    },
+    "Rpg•trabajar.js": {
+      "total": 10,
+      "success": 10,
+      "last": 1735935254966,
+      "lastSuccess": 1735935254966
+    },
+    "Rpg•robxp.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735929287594,
+      "lastSuccess": 1735929287594
+    },
+    "Rpg•transferir.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735882002837,
+      "lastSuccess": 1735882002837
+    },
+    "Rpg•levelup.js": {
+      "total": 4,
+      "success": 4,
+      "last": 1735930315604,
+      "lastSuccess": 1735930315604
+    },
+    "Rpg•minar.js": {
+      "total": 7,
+      "success": 7,
+      "last": 1735930296730,
+      "lastSuccess": 1735930296730
+    },
+    "Rpg•crimen.js": {
+      "total": 6,
+      "success": 6,
+      "last": 1735931160331,
+      "lastSuccess": 1735931160331
+    },
+    "Rpg•daily.js": {
+      "total": 9,
+      "success": 9,
+      "last": 1735931155068,
+      "lastSuccess": 1735931155068
+    },
+    "herramientas-tiktoksearch.js": {
+      "total": 14,
+      "success": 14,
+      "last": 1735931141959,
+      "lastSuccess": 1735931141959
+    },
+    "Descargas•tiktok.js": {
+      "total": 11,
+      "success": 11,
+      "last": 1735929997597,
+      "lastSuccess": 1735929997597
+    },
+    "buscador-yts.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735931347960,
+      "lastSuccess": 1735931347960
+    },
+    "Owner•exec.js": {
+      "total": 5,
+      "success": 5,
+      "last": 1735921123564,
+      "lastSuccess": 1735921123564
+    },
+    "Buscador•tiktoksearch.js": {
+      "total": 11,
+      "success": 11,
+      "last": 1735930724056,
+      "lastSuccess": 1735930724056
+    },
+    "dl-ytmp3.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1735896430120,
+      "lastSuccess": 1735896430120
+    },
+    "dl-ytmp4.js": {
+      "total": 8,
+      "success": 8,
+      "last": 1735931418015,
+      "lastSuccess": 1735931418015
+    },
+    "Descargas•instagram.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1735912982986,
+      "lastSuccess": 1735912982986
+    },
+    "Rg•perfil.js": {
+      "total": 5,
+      "success": 5,
+      "last": 1735929931171,
+      "lastSuccess": 1735929931171
+    },
+    "Grupo•delete.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1735920088292,
+      "lastSuccess": 1735920088292
+    },
+    "Rpg•depositar.js": {
+      "total": 11,
+      "success": 11,
+      "last": 1735929346969,
+      "lastSuccess": 1735929346969
+    },
+    "Rpg•cartera.js": {
+      "total": 4,
+      "success": 4,
+      "last": 1735931167091,
+      "lastSuccess": 1735931167091
+    },
+    "Game•formarpareja5.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735920721835,
+      "lastSuccess": 1735920721835
+    },
+    "Descargas•imagen.js": {
+      "total": 7,
+      "success": 7,
+      "last": 1735928594369,
+      "lastSuccess": 1735928594369
+    },
+    "Game•top.js": {
+      "total": 8,
+      "success": 8,
+      "last": 1735933557499,
+      "lastSuccess": 1735933557499
+    },
+    "Rpg•shop.js": {
+      "total": 7,
+      "success": 7,
+      "last": 1735931131918,
+      "lastSuccess": 1735931131918
+    },
+    "Rpg•retirar.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735929130832,
+      "lastSuccess": 1735929130832
+    },
+    "Rpg•slut.js": {
+      "total": 4,
+      "success": 4,
+      "last": 1735935267824,
+      "lastSuccess": 1735935267824
+    },
+    "Rpg•banco.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1735929676257,
+      "lastSuccess": 1735929676257
+    },
+    "Descargas•playdoc.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1735938244778,
+      "lastSuccess": 1735938244778
+    }
+  },
+  "msgs": {},
+  "sticker": {},
+  "settings": {
+    "5217971006556@s.whatsapp.net": {
+      "self": false,
+      "autoread": false,
+      "autoread2": false,
+      "restrict": false,
+      "frases": false,
+      "antiPrivate": false,
+      "antiCall": true,
+      "antiSpam": true,
+      "modoia": false,
+      "jadibotmd": true,
+      "autobio": false
+    },
+    "5217355081534@s.whatsapp.net": {
+      "self": false,
+      "autoread": false,
+      "autoread2": false,
+      "restrict": false,
+      "frases": false,
+      "antiPrivate": false,
+      "antiCall": true,
+      "antiSpam": true,
+      "modoia": false,
+      "jadibotmd": true,
+      "autobio": false
+    }
+  }
+}

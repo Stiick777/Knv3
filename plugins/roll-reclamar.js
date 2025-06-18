@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-const charactersFilePath = './storage/databases/characters.json';
+const charactersFilePath = './src/database/characters.json';
 const cooldowns = {};
 
 // 🔹 Usar `global.timestamps` para compartir entre archivos
@@ -106,7 +106,7 @@ let claimHandler = async (m, { conn }) => {
 };
 
 claimHandler.help = ['rc'];
-claimHandler.tags = ['rnime'];
+claimHandler.tags = ['fun'];
 claimHandler.command = ['rc'];
 claimHandler.group = true;
 

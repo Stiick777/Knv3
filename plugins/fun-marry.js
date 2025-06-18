@@ -121,7 +121,7 @@ if (global.db.data.marry[who]?.status === 'married') {
     let nameRecipient = await conn.getName(who); // Nombre del destinatario
 
     // Enviar imagen con la propuesta
-    const imageUrl = 'https://qu.ax/PUKkD.jpg';
+    const imageUrl = 'https://i.ibb.co/xtPJLdRD/images.jpg';
     await conn.sendFile(
         m.chat, 
         imageUrl, 
@@ -145,7 +145,7 @@ if (global.db.data.marry[who]?.status === 'married') {
 };
 
 handler.help = ['marry @usuario'];
-handler.tags = ['game'];
+handler.tags = ['fun'];
 handler.command = ['marry', 'propose'];
 handler.group = true;
 

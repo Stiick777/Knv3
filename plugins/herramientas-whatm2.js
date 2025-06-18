@@ -2,7 +2,7 @@ import fs from 'fs'
 import fetch from 'node-fetch'
 import FormData from 'form-data'
 
-const API_TOKEN = '3d5031b9dd66d0dd172a9b35f19854cd' // Tu API Key de Audd.io
+const API_TOKEN = '3bf9ff3cbd8c0bdcb0573f476a9828a0' // Tu API Key de Audd.io
 
 let handler = async (m, { conn }) => {
     try {
@@ -11,10 +11,10 @@ let handler = async (m, { conn }) => {
 
         if (/audio|video/.test(mime)) {
             if ((q.msg || q).seconds > 20) {
-                return m.reply('⚠️ El archivo es demasiado grande. Envíe un clip de 10 a 20 segundos para obtener resultados.')
+                return m.reply('⚠️ El archivo es demasiado grande. Envíe un clip de 10 a 20 segundos para obtener resultados.', m, rcanal)
             }
 
-            await conn.reply(m.chat, '⏳ Procesando el audio/video, por favor espera...', m)
+            await conn.reply(m.chat, '⏳ Procesando el audio/video, por favor espera...', m, rcanal)
 
             let media = await q.download()
             let filePath = `./tmp/${m.sender}.mp3`
@@ -53,7 +53,7 @@ let handler = async (m, { conn }) => {
 
             m.reply(txt)
         } else {
-            m.reply('⚠️ Responde a un audio o video para identificar la canción.')
+            m.reply('⚠️ Responde a un audio o video para identificar la canción.', m, rcanal)
         }
     } catch (e) {
         m.reply(`⚠️ Error inesperado: ${e.message}`)
@@ -64,6 +64,5 @@ handler.tags = ['tools']
 handler.help = ['whatm2']
 handler.command = ['whatm2']
 handler.group = true
-
 
 export default handler

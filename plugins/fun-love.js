@@ -40,7 +40,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 }
 
 handler.help = ['enamorada @tag'];
-handler.tags = ['rnime'];
+handler.tags = ['fun'];
 handler.command = /^(love2|enamorado_de|enamorada_de)$/i;
 handler.group = true;
 

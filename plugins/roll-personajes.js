@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-const charactersFilePath = './storage/databases/characters.json';
+const charactersFilePath = './src/database/characters.json';
 
 async function loadCharacters() {
     try {
@@ -35,7 +35,7 @@ userCharacters.forEach((char, index) => {
 };
 
 myCharactersHandler.help = ['mispersonajes'];
-myCharactersHandler.tags = ['rnime'];
+myCharactersHandler.tags = ['fun'];
 myCharactersHandler.command = ['mp', 'mispersonajes'];
 myCharactersHandler.group = true
 

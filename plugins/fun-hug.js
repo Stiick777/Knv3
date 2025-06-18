@@ -43,7 +43,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 };
 
 handler.help = ['abrazar @tag'];
-handler.tags = ['rnime'];
+handler.tags = ['fun'];
 handler.command = ['hug', 'abrazar'];
 handler.group = true;
 

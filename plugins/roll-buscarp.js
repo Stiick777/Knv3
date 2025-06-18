@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-const charactersFilePath = './storage/databases/characters.json';
+const charactersFilePath = './src/database/characters.json';
 
 async function loadCharacters() {
     try {
@@ -64,7 +64,7 @@ let buscarHandler = async (m, { conn, text }) => {
 };
 
 buscarHandler.help = ['buscarp <nombre|ID>'];
-buscarHandler.tags = ['rnime'];
+buscarHandler.tags = ['fun'];
 buscarHandler.command = ['buscarp'];
 buscarHandler.group = true;
 

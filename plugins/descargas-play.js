@@ -10,8 +10,8 @@ const LimitAud = 725 * 1024 * 1024; //700MB
 const LimitVid = 425 * 1024 * 1024; //425MB
 const handler = async (m, {conn, command, args, text, usedPrefix}) => {
 
-/*
-if (command === 'play') {
+
+if (command === 'playp') {
         if (!text) return conn.reply(m.chat, `*𝙸𝚗𝚐𝚛𝚎𝚜𝚊 𝚎𝚕 𝚗𝚘𝚖𝚋𝚛𝚎 𝚍𝚎 𝚕𝚘 𝚚𝚞𝚎 𝚚𝚞𝚒𝚎𝚛𝚎𝚜 𝚋𝚞𝚜𝚌𝚊𝚛*`, m, rcanal);
 
         await m.react('🕓');
@@ -98,7 +98,7 @@ try {
 }
 //
     }
-*/
+
 if (command == 'play2') {
     if (!text) return conn.reply(m.chat, `*𝙸𝚗𝚐𝚛𝚎𝚜𝚊 𝚎𝚕 𝚗𝚘𝚖𝚋𝚛𝚎 𝚍𝚎 𝚕𝚘 𝚚𝚞𝚎 𝚚𝚞𝚒𝚎𝚛𝚎𝚜 𝚋𝚞𝚜𝚌𝚊𝚛*`, m, rcanal);
     
@@ -314,9 +314,9 @@ m.reply('❌ No se pudo obtener el video con ninguna de las APIs. Intenta con ot
 
 
 }
-handler.help = ['play', 'play2'];
+handler.help = ['playp', 'play2'];
 handler.tags = ['descargas'];
-handler.command = ['play2']
+handler.command = ['play2', 'playp']
 handler.group = true;
 export default handler;
 

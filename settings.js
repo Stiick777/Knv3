@@ -24,14 +24,14 @@ global.owner = [
   [''],
   
 // <-- Número @lid -->
-  ['117094280605916', 'Destroy', true],
-  ['258892692984006', 'DevAlexJs', true]
+  ['35090453283048', 'Destroy', true],
+  []
 ];
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
 global.mods = []
-global.suittag = ['5212202410659'] 
+global.suittag = [] 
 global.prems = []
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
@@ -39,7 +39,7 @@ global.prems = []
 global.libreria = 'Baileys'
 global.baileys = 'V 6.7.17' 
 global.vs = '2.2.5'
-global.nameqr = 'YukiBot-MD'
+global.nameqr = 'KanBot 
 global.namebot = `✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰`
 global.sessions = 'Sessions'
 global.jadi = 'JadiBots' 

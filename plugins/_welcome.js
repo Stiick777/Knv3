@@ -7,8 +7,8 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => 'https://i.ibb.co/whpcLpM7/Screenshot-20250421-195814-2.png')
   let img = await (await fetch(`${pp}`)).buffer()
   let chat = global.db.data.chats[m.chat]
-  let txt = 'ゲ◜៹ Hola Member ៹◞ゲ'
-  let txt1 = 'ゲ◜៹ Bye Member ៹◞ゲ'
+  let txt = 'HOLA! 🪐'
+  let txt1 = 'ADIÓS🌙'
   let groupSize = participants.length
   if (m.messageStubType == 27) {
     groupSize++;
@@ -18,7 +18,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
   if (chat.welcome && m.messageStubType == 27) {
     let bienvenida = `╭══•🔥ೋ•๑♡๑•ೋ🔥•══╮\n` +
-          `¡Bienvenido/a, ${groupMetadata.subject}\n✰ @${m.messageStubParameters[0].split`@`[0]}\n╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯\n`
+          `¡Bienvenido/a, ✰ @${m.messageStubParameters[0].split`@`[0]}\n A ${groupMetadata.subject}\n╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯\n`
           `\n` + // Espacio adicional aquí
           `Esperamos que disfrutes tu estancia en el grupo.\n` +
           `*_Recuerda leer la descripción_*\n` +
@@ -28,7 +28,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
   
   if (chat.welcome && (m.messageStubType == 28 || m.messageStubType == 32)) {
     let bye = `╭══•🔥ೋ•๑♡๑•ೋ🔥•══╮\n` +
-          `¡Adiós, ${groupMetadata.subject}\n✰ @${m.messageStubParameters[0].split`@`[0]}\n`+ `╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯\n` +
+          `¡Adiós,✰ @${m.messageStubParameters[0].split`@`[0]}\n DE ${groupMetadata.subject}\n`+ `╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯\n` +
           `\n` + // Espacio adicional aquí
           `Gracias por haber estado con nosotros.\n` +
           `🥀*ੈ✩‧₊˚༺☆༻*ੈ✩˚🍁`;

@@ -18,7 +18,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
   if (chat.welcome && m.messageStubType == 27) {
     let bienvenida = `╭══•🔥ೋ•๑♡๑•ೋ🔥•══╮\n` +
-          `¡Bienvenido/a, ✰ @${m.messageStubParameters[0].split`@`[0]}\n A ${groupMetadata.subject}\n╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯\n`
+          `¡Bienvenido/a, ✰ @${m.messageStubParameters[0].split`@`[0]}\n A ${groupMetadata.subject}\n`+ `╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯\n` +
           `\n` + // Espacio adicional aquí
           `Esperamos que disfrutes tu estancia en el grupo.\n` +
           `*_Recuerda leer la descripción_*\n` +

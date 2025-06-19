@@ -1,6 +1,6 @@
 {
-"name": "YukiBot-MD",
-"version": "2.2.0",
+"name": "KanBot",
+"version": "1.2.0",
 "description": "WhatsApp Bot Multi Device",
 "main": "index.js",
 "type": "module",
@@ -18,16 +18,16 @@
 "eslint": "eslint .",
 "eslintfix": "eslint --fix ."
 },
-"homepage": "https://github.com/The-King-Destroy/Yuki_Suou-Bot",
+"homepage": "https://github.com/Stiick777/Knv3",
 "author": {
-"name": "The-King-Destroy"
+"name": "Stiiven"
 },
 "repository": {
 "type": "git",
-"url": "git+https://github.com/The-King-Destroy/Yuki_Suou-Bot.git"
+"url": "git+https://github.com/Stiick777/Knv3.git"
 },
 "bugs": {
-"url": "https://github.com/The-King-Destroy/Yuki_Suou-Bot/issues"
+"url": "https://github.com/Stiick777/Knv3/issues"
 },
 "license": "MIT-License",
 "dependencies": {

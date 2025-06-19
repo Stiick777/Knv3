@@ -39,15 +39,15 @@ const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
 
 let { say } = cfonts
 
-console.log(chalk.bold.redBright(`\n✰ Iniciando Yuki-Suou-Bot ✰\n`))
+console.log(chalk.bold.redBright(`\n✰ Iniciando... ✰\n`))
 
-say('YukiBot-MD', {
+say('KanBot', {
 font: 'block',
 align: 'center',
 colors: ['magentaBright']
 })
 
-say(`Developed By • The-King-Destroy`, {
+say(`Created By ● Stiiven`, {
 font: 'console',
 align: 'center',
 colors: ['blueBright']

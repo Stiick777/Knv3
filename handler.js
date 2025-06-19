@@ -355,18 +355,17 @@ let user = global.db.data.users[m.sender]
 if (!['grupo-unbanchat.js'].includes(name) && chat && chat.isBanned && !isROwner) return
 if (name != 'grupo-unbanchat.js' && name != 'owner-exec.js' && name != 'owner-exec2.js' && name != 'grupo-delete.js' && chat?.isBanned && !isROwner) return
 if (m.text && user.banned && !isROwner) {
-    m.reply(`🚫 Está baneado(a), no puede usar los comandos de este bot!\n\n${user.bannedReason ? `\n💌 *Motivo:* 
-        ${user.bannedReason}` : '💌 *Motivo:* Spam'}\n\n⚠️ *Si cree que fue por error y tiene evidencia que respalde que este mensaje es un error o fue sin querer, puede exponer su caso en:*\n\n🤍 wa.me/526645011701\n\ny pedir que lo desbaneen`)
-        return
-        }
+m.reply(`《✦》Estas baneado/a, no puedes usar comandos en este bot!\n\n${user.bannedReason ? `✰ *Motivo:* ${user.bannedReason}` : '✰ *Motivo:* Sin Especificar'}\n\n> ✧ Si este Bot es cuenta oficial y tiene evidencia que respalde que este mensaje es un error, puedes exponer tu caso con un moderador.`)
+return
+}
 
 if (m.chat in global.db.data.chats || m.sender in global.db.data.users) {
 let chat = global.db.data.chats[m.chat]
 let user = global.db.data.users[m.sender]
 let setting = global.db.data.settings[this.user.jid]
-if (name != 'mods-unbanchat.js' && chat?.isBanned)
+if (name != 'grupo-unbanchat.js' && chat?.isBanned)
 return 
-if (name != 'mods-unbanuser.js' && user?.banned)
+if (name != 'owner-unbanuser.js' && user?.banned)
 return
 }}
 
@@ -539,17 +538,17 @@ let user2 = m.pushName || 'Anónimo'
 let verifyaleatorio = ['registrar', 'reg', 'verificar', 'verify', 'register'].getRandom()
 
 const msg = {
-    rowner: '「⚡」 *Esta función solo puede ser usada por mi creador*\n\n> Stiiven.', 
-    owner: '「🔰」 *Esta función solo puede ser usada por mi desarrollador.', 
-    mods: '「🌥️」 *Esta función solo puede ser usada por mis desarrolladores.*', 
-    premium: '「💡」 *Esta función solo es para usuarios Premium.', 
-    group: '「🔥」 *Esta funcion solo puede ser ejecutada en el grupo ofical del bot.*\nhttps://chat.whatsapp.com/HDoyT3SlpYzBlpawlWNpKw', 
-    private: '「💝」 *Esta función solo puede ser usada en chat privado.*', 
-    admin: '「⚠️」 *Este comando solo puede ser usado por admins.*', 
-    botAdmin: '「✴️」 *Para usar esta función debo ser admin.*', 
-    unreg: '「🔷」 *¡Hey! no estas registrado, registrese para usar esta función*\n\n*/reg nombre.edad*\n\n*_❕ Ejemplo_* : */reg Kan.23*',
-    restrict: '「❌」 *Esta característica esta desactivada.*'
-    }[type];
+rowner: `『✦』El comando *${comando}* solo puede ser usado por los creadores del bot.`, 
+owner: `『✦』El comando *${comando}* solo puede ser usado por los desarrolladores del bot.`, 
+mods: `『✦』El comando *${comando}* solo puede ser usado por los moderadores del bot.`, 
+premium: `『✦』El comando *${comando}* solo puede ser usado por los usuarios premium.`, 
+group: `『✦』El comando *${comando}* solo puede ser usado en grupos.`,
+private: `『✦』El comando *${comando}* solo puede ser usado al chat privado del bot.`,
+admin: `『✦』El comando *${comando}* solo puede ser usado por los administradores del grupo.`, 
+botAdmin: `『✦』Para ejecutar el comando *${comando}* debo ser administrador del grupo.`,
+unreg: `『✦』El comando *${comando}* solo puede ser usado por los usuarios registrado, registrate usando:\n> » #${verifyaleatorio} ${user2}.${edadaleatoria}`,
+restrict: `『✦』Esta caracteristica está desactivada.`
+}[type];
 if (msg) return m.reply(msg).then(_ => m.react('✖️'))}
 
 let file = global.__filename(import.meta.url, true)

@@ -214,9 +214,8 @@ const participants = m.isGroup ? groupMetadata?.participants || [] : []
 
 // Obtener ID del sender (quien manda el mensaje)
 const senderId = cleanId(m.sender)
-const botId = cleanId(conn.user?.jid || conn.user?.lid || '')
-
 const user = participants.find(u => cleanId(u.id) === senderId) || {}
+const botId = cleanId(conn.user.jid || conn.user.lid || '')
 const bot = participants.find(u => cleanId(u.id) === botId) || {}
 // Obtener ID del bot
 const rawBotId = conn.user?.jid || conn.user?.lid || ''
@@ -227,14 +226,9 @@ const isAdmin = user?.admin === 'admin' || user?.admin === 'superadmin'
 const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
     
 // Debug para confirmar si el bot fue encontrado en participants
-console.log({
-  senderId,
-  botId,
-  botFullJid: rawBotId,
-  botParticipant: bot,
-  isAdmin,
-  isBotAdmin
-})
+console.log('botId:', botId)
+console.log('participants.map:', participants.map(p => ({ id: p.id, admin: p.admin })))
+console.log('foundBot:', bot)
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {

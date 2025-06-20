@@ -201,34 +201,27 @@ await delay(time)
 m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
-
-// Obtener metadata del grupo si es un grupo
+// Obtener metadata del grupo
 const groupMetadata = m.isGroup
-  ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null)) || {}
+  ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null))
   : {}
 
-const participants = m.isGroup ? groupMetadata.participants || [] : []
+const participants = m.isGroup ? groupMetadata?.participants || [] : []
 
-// Obtener información del usuario que envió el mensaje
-const user = m.isGroup
-  ? participants.find(u => conn.decodeJid(u.id) === m.sender)
-  : {}
+// Buscar el bot por su LID exacto
+const bot = participants.find(p => global.lidbot.includes(p.id)) || {}
 
-// Obtener el jid del bot
-const numBot = (conn.user.lid || '').replace(/:.*/, '') || false
-const detectwhat2 = m.sender.includes('@lid') ? `${numBot}@lid` : conn.user.jid
+// Obtener el usuario que envió el mensaje
+const user = participants.find(p => conn.decodeJid(p.id) === m.sender) || {}
 
-// Obtener información del bot en el grupo
-const bot = m.isGroup
-  ? participants.find(u => conn.decodeJid(u.id) === detectwhat2)
-  : {}
-
-// Detectar si el usuario es admin
+// Verificaciones de admin
 const isRAdmin = user?.admin === 'superadmin'
 const isAdmin = isRAdmin || user?.admin === 'admin'
+const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
 
-// Detectar si el bot es admin
-const isBotAdmin = bot?.admin || global.lidbot.includes(conn.user.jid)
+// Debug opcional
+console.log('📍 bot encontrado:', bot)
+console.log('🛡️ isBotAdmin:', isBotAdmin)
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {

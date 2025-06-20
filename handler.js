@@ -215,7 +215,7 @@ const participants = m.isGroup ? groupMetadata?.participants || [] : []
 // Obtener ID del sender (quien manda el mensaje)
 const senderId = cleanId(m.sender)
 const user = participants.find(u => cleanId(u.id) === senderId) || {}
-const botId = cleanId(conn.user.jid || conn.user.lid || '')
+const botId = cleanId(conn.user?.id || '')
 const bot = participants.find(u => cleanId(u.id) === botId) || {}
 // Obtener ID del bot
 const rawBotId = conn.user?.jid || conn.user?.lid || ''

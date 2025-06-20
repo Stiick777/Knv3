@@ -202,16 +202,30 @@ m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
 
+//const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
+//const participants = (m.isGroup ? groupMetadata.participants : []) || []
+//const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === m.sender) : {}) || {}
+//let numBot = (conn.user.lid || '').replace(/:.*/, '') || false
+//const detectwhat2 = m.sender.includes('@lid') ? `${numBot}@lid` : conn.user.jid
+//const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == detectwhat2) : {}) || {}
+//const isRAdmin = user?.admin == 'superadmin' || false
+//const isAdmin = isRAdmin || user?.admin == 'admin' || false
+//const isBotAdmin = bot?.admin || false
+    
 const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
 const participants = (m.isGroup ? groupMetadata.participants : []) || []
 const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === m.sender) : {}) || {}
-let numBot = (conn.user.lid || '').replace(/:.*/, '') || false
-const detectwhat2 = m.sender.includes('@lid') ? `${numBot}@lid` : conn.user.jid
-const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == detectwhat2) : {}) || {}
-const isRAdmin = user?.admin == 'superadmin' || false
-const isAdmin = isRAdmin || user?.admin == 'admin' || false
+
+// Normalizar el JID del bot sin importar el sufijo
+const rawBotJid = conn.user?.id || conn.user?.jid || ''
+const botNumber = rawBotJid.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
+const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === botNumber) : {}) || {}
+
+const isRAdmin = user?.admin === 'superadmin'
+const isAdmin = isRAdmin || user?.admin === 'admin'
 const isBotAdmin = bot?.admin || false
 
+    
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {
 let plugin = global.plugins[name]

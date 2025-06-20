@@ -209,13 +209,12 @@ const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === m.send
 
 // Normalizar el JID del bot sin importar el sufijo
 const rawBotJid = conn.user?.id || conn.user?.jid || ''
- const botNumber = rawBotJid.split(':')[0]
-   // DEBUG: imprime los JID y la info del bot en el grupo
-    console.log('[DEBUG BOT JID]')
+const botNumber = rawBotJid.split(':')[0] + '@s.whatsapp.net'
+console.log('[DEBUG BOT JID]')
 console.log('rawBotJid:', rawBotJid)
 console.log('botNumber:', botNumber)
-const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === botNumber) : {}) || {}
 
+const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === botNumber) : {}) || {}
 const isRAdmin = user?.admin === 'superadmin'
 const isAdmin = isRAdmin || user?.admin === 'admin'
 const isBotAdmin = bot?.admin || false

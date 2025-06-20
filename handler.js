@@ -203,7 +203,7 @@ m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 
     // Función auxiliar para obtener ID limpio (sin @...)
-const normalizeJid = jid => (conn.decodeJid(jid) || '').split('@')[0]
+const cleanId = jid => (jid || '').replace(/[@:].*/, '')
 
 // Obtener metadata del grupo
 const groupMetadata = m.isGroup
@@ -213,19 +213,19 @@ const groupMetadata = m.isGroup
 const participants = m.isGroup ? groupMetadata?.participants || [] : []
 
 // Obtener ID del sender (quien manda el mensaje)
-const senderId = normalizeJid(m.sender)
-const user = participants.find(u => normalizeJid(u.id) === senderId) || {}
+const senderId = cleanId(m.sender)
+const botId = cleanId(conn.user?.jid || conn.user?.lid || '')
 
+const user = participants.find(u => cleanId(u.id) === senderId) || {}
+const bot = participants.find(u => cleanId(u.id) === botId) || {}
 // Obtener ID del bot
 const rawBotId = conn.user?.jid || conn.user?.lid || ''
-const botId = normalizeJid(rawBotId)
-const bot = participants.find(u => normalizeJid(u.id) === botId) || {}
 
 // Verificar admins
 const isRAdmin = user?.admin === 'superadmin'
-const isAdmin = isRAdmin || user?.admin === 'admin'
+const isAdmin = user?.admin === 'admin' || user?.admin === 'superadmin'
 const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
-
+    
 // Debug para confirmar si el bot fue encontrado en participants
 console.log({
   senderId,

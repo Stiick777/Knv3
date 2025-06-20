@@ -27,7 +27,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         const data = await response.json();
 
         if (data.status && data.data) {
-            await conn.reply(m.chat, `*KanBot 🤖 dice:*\n${data.data}`, m);
+            await conn.reply(m.chat, `*KanBot Segun chatgpt:*\n${data.data}`, m);
         } else {
             await m.react('❌');
             await conn.reply(m.chat, '❌ Error: No se obtuvo una respuesta válida.', m, rcanal);

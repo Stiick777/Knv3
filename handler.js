@@ -202,26 +202,40 @@ m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
 
-
-const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
+// Obtener metadata y participantes
+const groupMetadata = (m.isGroup
+  ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null))
+  : {}) || {}
 const participants = (m.isGroup ? groupMetadata.participants : []) || []
-const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === m.sender) : {}) || {}
 
-// Normalizar el JID del bot sin importar el sufijo
+// Obtener el número base (sin @s.whatsapp.net o @lid)
 const rawBotJid = conn.user?.id || conn.user?.jid || ''
-const botNumber = rawBotJid.split(':')[0] + '@s.whatsapp.net'
+const botNumber = rawBotJid.split(':')[0].split('@')[0]
+const senderNumber = m.sender.split('@')[0]
 
-const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === botNumber) : {}) || {}
-    console.log('[DEBUG ADMIN CHECK]')
-console.log('bot.id:', bot?.id)
-console.log('bot.admin:', bot?.admin)
-console.log('Todos los participants:')
-participants.forEach(p => console.log(p.id, '→ admin:', p.admin))
+// Buscar usuario y bot por número
+const user = (m.isGroup
+  ? participants.find(u => conn.decodeJid(u.id).split('@')[0] === senderNumber)
+  : {}) || {}
+
+const bot = (m.isGroup
+  ? participants.find(u => conn.decodeJid(u.id).split('@')[0] === botNumber)
+  : {}) || {}
+
+// Verificación de roles
 const isRAdmin = user?.admin === 'superadmin'
 const isAdmin = isRAdmin || user?.admin === 'admin'
-const isBotAdmin = bot?.admin || false
+const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
 
-    
+console.log('[DEBUG ADMIN CHECK]')
+console.log('bot.id:', bot?.id)
+console.log('bot.admin:', bot?.admin)
+console.log('user.id:', user?.id)
+console.log('user.admin:', user?.admin)
+console.log('Todos los participants:')
+participants.forEach(p => console.log(p.id, '→ admin:', p.admin))
+
+
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {
 let plugin = global.plugins[name]

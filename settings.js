@@ -28,7 +28,6 @@ global.owner = [
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
-global.lidbot = ['211600673923272@lid']
 global.mods = []
 global.suittag = [] 
 global.prems = []

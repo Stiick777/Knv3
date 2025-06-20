@@ -201,34 +201,33 @@ await delay(time)
 m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
-    
-const groupMetadata = (m.isGroup
-  ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null))
-  : {}) || {}
 
-const participants = (m.isGroup ? groupMetadata.participants : []) || []
+    // Obtener metadata del grupo
+const groupMetadata = m.isGroup
+  ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null))
+  : {}
 
-// Extraer solo el número del bot y del usuario
-const rawBotJid = conn.user?.id || conn.user?.jid || ''
-const botNumber = rawBotJid.split(':')[0].split('@')[0]
-const senderNumber = m.sender.split('@')[0]
+// Participantes del grupo
+const participants = m.isGroup ? groupMetadata?.participants || [] : []
 
-// Buscar por número, ignorando el sufijo
-const user = participants.find(u => u.id.split('@')[0] === senderNumber) || {}
-const bot = participants.find(u => u.id.split('@')[0] === botNumber) || {}
+// Normalizar JID para comparar sin importar si es @lid o @s.whatsapp.net
+const normalizeJid = jid => conn.decodeJid(jid)?.split('@')[0]
 
-// Verificación de roles
+// Usuario que envió el mensaje
+const senderId = normalizeJid(m.sender)
+const user = participants.find(u => normalizeJid(u.id) === senderId) || {}
+
+// Bot en el grupo
+const botId = normalizeJid(conn.user?.jid || conn.user?.lid || '')
+const bot = participants.find(u => normalizeJid(u.id) === botId) || {}
+
+// Verificaciones de admin
 const isRAdmin = user?.admin === 'superadmin'
 const isAdmin = isRAdmin || user?.admin === 'admin'
 const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
 
-// Logs para depurar
-console.log('[DEBUG ADMIN CHECK]')
-console.log('bot.id:', bot?.id)
-console.log('bot.admin:', bot?.admin)
-console.log('user.id:', user?.id)
-console.log('user.admin:', user?.admin)
-participants.forEach(p => console.log(p.id, '→ admin:', p.admin))
+// Debug
+console.log({ senderId, botId, isAdmin, isBotAdmin })
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {

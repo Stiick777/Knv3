@@ -201,40 +201,34 @@ await delay(time)
 m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
-
-// Obtener metadata y participantes
+    
 const groupMetadata = (m.isGroup
   ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null))
   : {}) || {}
+
 const participants = (m.isGroup ? groupMetadata.participants : []) || []
 
-// Obtener el número base (sin @s.whatsapp.net o @lid)
+// Extraer solo el número del bot y del usuario
 const rawBotJid = conn.user?.id || conn.user?.jid || ''
 const botNumber = rawBotJid.split(':')[0].split('@')[0]
 const senderNumber = m.sender.split('@')[0]
 
-// Buscar usuario y bot por número
-const user = (m.isGroup
-  ? participants.find(u => conn.decodeJid(u.id).split('@')[0] === senderNumber)
-  : {}) || {}
-
-const bot = (m.isGroup
-  ? participants.find(u => conn.decodeJid(u.id).split('@')[0] === botNumber)
-  : {}) || {}
+// Buscar por número, ignorando el sufijo
+const user = participants.find(u => u.id.split('@')[0] === senderNumber) || {}
+const bot = participants.find(u => u.id.split('@')[0] === botNumber) || {}
 
 // Verificación de roles
 const isRAdmin = user?.admin === 'superadmin'
 const isAdmin = isRAdmin || user?.admin === 'admin'
 const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
 
+// Logs para depurar
 console.log('[DEBUG ADMIN CHECK]')
 console.log('bot.id:', bot?.id)
 console.log('bot.admin:', bot?.admin)
 console.log('user.id:', user?.id)
 console.log('user.admin:', user?.admin)
-console.log('Todos los participants:')
 participants.forEach(p => console.log(p.id, '→ admin:', p.admin))
-
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {

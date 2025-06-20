@@ -202,32 +202,33 @@ m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
 
-    // Función auxiliar para obtener ID limpio (sin @...)
-const cleanId = jid => (jid || '').replace(/[@:].*/, '')
-
-// Obtener metadata del grupo
+// Obtener metadata del grupo si es un grupo
 const groupMetadata = m.isGroup
-  ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null))
+  ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null)) || {}
   : {}
 
-const participants = m.isGroup ? groupMetadata?.participants || [] : []
+const participants = m.isGroup ? groupMetadata.participants || [] : []
 
-// Obtener ID del sender (quien manda el mensaje)
-const senderId = cleanId(m.sender)
-const user = participants.find(u => cleanId(u.id) === senderId) || {}
-const botRawId = conn.user?.id || ''
-const bot = participants.find(u => u.id === botRawId) || {}
-const rawBotId = conn.user?.jid || conn.user?.lid || ''
+// Obtener información del usuario que envió el mensaje
+const user = m.isGroup
+  ? participants.find(u => conn.decodeJid(u.id) === m.sender)
+  : {}
 
-// Verificar admins
+// Obtener el jid del bot
+const numBot = (conn.user.lid || '').replace(/:.*/, '') || false
+const detectwhat2 = m.sender.includes('@lid') ? `${numBot}@lid` : conn.user.jid
+
+// Obtener información del bot en el grupo
+const bot = m.isGroup
+  ? participants.find(u => conn.decodeJid(u.id) === detectwhat2)
+  : {}
+
+// Detectar si el usuario es admin
 const isRAdmin = user?.admin === 'superadmin'
-const isAdmin = user?.admin === 'admin' || user?.admin === 'superadmin'
-const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
-    
-// Debug para confirmar si el bot fue encontrado en participants
-console.log('✅ botRawId:', botRawId)
-console.log('✅ foundBot:', bot)
-console.log('✅ isBotAdmin:', isBotAdmin)
+const isAdmin = isRAdmin || user?.admin === 'admin'
+
+// Detectar si el bot es admin
+const isBotAdmin = bot?.admin || global.lidbot.includes(conn.user.jid)
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {

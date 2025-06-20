@@ -202,32 +202,39 @@ m.exp += Math.ceil(Math.random() * 10)
 
 let usedPrefix
 
-    // Obtener metadata del grupo
+    // Función auxiliar para obtener ID limpio (sin @...)
+const normalizeJid = jid => (conn.decodeJid(jid) || '').split('@')[0]
+
+// Obtener metadata del grupo
 const groupMetadata = m.isGroup
   ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null))
   : {}
 
-// Participantes del grupo
 const participants = m.isGroup ? groupMetadata?.participants || [] : []
 
-// Normalizar JID para comparar sin importar si es @lid o @s.whatsapp.net
-const normalizeJid = jid => conn.decodeJid(jid)?.split('@')[0]
-
-// Usuario que envió el mensaje
+// Obtener ID del sender (quien manda el mensaje)
 const senderId = normalizeJid(m.sender)
 const user = participants.find(u => normalizeJid(u.id) === senderId) || {}
 
-// Bot en el grupo
-const botId = normalizeJid(conn.user?.jid || conn.user?.lid || '')
+// Obtener ID del bot
+const rawBotId = conn.user?.jid || conn.user?.lid || ''
+const botId = normalizeJid(rawBotId)
 const bot = participants.find(u => normalizeJid(u.id) === botId) || {}
 
-// Verificaciones de admin
+// Verificar admins
 const isRAdmin = user?.admin === 'superadmin'
 const isAdmin = isRAdmin || user?.admin === 'admin'
 const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin'
 
-// Debug
-console.log({ senderId, botId, isAdmin, isBotAdmin })
+// Debug para confirmar si el bot fue encontrado en participants
+console.log({
+  senderId,
+  botId,
+  botFullJid: rawBotId,
+  botParticipant: bot,
+  isAdmin,
+  isBotAdmin
+})
 
 const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
 for (let name in global.plugins) {

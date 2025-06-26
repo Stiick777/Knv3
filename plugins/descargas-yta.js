@@ -1,138 +1,93 @@
-import crypto from 'crypto';
-import yts from "yt-search";
+import fetch from "node-fetch";
+import axios from "axios";
 
-let handler = async (m, { conn, text, args }) => {
-    const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/(?:v|e(?:mbed)?)\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})|(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/;
+const formatAudio = ['mp3', 'm4a', 'webm', 'acc', 'flac', 'opus', 'ogg', 'wav'];
 
-    if (!text || !youtubeRegex.test(text)) {
-        return conn.reply(m.chat, `🌱 Uso correcto : ytmp3 https://youtube.com/watch?v=DLh9mnfZvc0`, m);
+const ddownr = {
+  download: async (url, format) => {
+    if (!formatAudio.includes(format)) {
+      throw new Error('Formato de audio no soportado.');
     }
+
+    const config = {
+      method: 'GET',
+      url: `https://p.oceansaver.in/ajax/download.php?format=${format}&url=${encodeURIComponent(url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      }
+    };
 
     try {
-        m.react('⏳');
-        const search = await yts(args[0]);
-        const video = search.videos[0];
-
-        if (!video.url) return conn.reply(m.chat, `No se encontró el video.`, m);
-
-        const mp3 = await ytdl(video.url, "mp3");
-
-        await conn.sendFile(
-            m.chat,
-            mp3.result.download,
-            `${video.title}.mp3`,
-            "",
-            m,
-            null,
-            {
-                asDocument: false,
-                mimetype: "audio/mpeg"
-            }
-        );
-
-        m.react('✅');
+      const response = await axios.request(config);
+      if (response.data && response.data.success) {
+        const { id } = response.data;
+        const downloadUrl = await ddownr.cekProgress(id);
+        return { downloadUrl };
+      } else {
+        throw new Error('No se pudo obtener el enlace de descarga.');
+      }
     } catch (error) {
-        console.error(error);
-        return conn.reply(m.chat, `Error al descargar el audio.\n\n` + error, m);
+      console.error('Error:', error);
+      throw error;
     }
+  },
+
+  cekProgress: async (id) => {
+    const config = {
+      method: 'GET',
+      url: `https://p.oceansaver.in/ajax/progress.php?id=${id}`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      }
+    };
+
+    try {
+      while (true) {
+        const response = await axios.request(config);
+        if (response.data && response.data.success && response.data.progress === 1000) {
+          return response.data.download_url;
+        }
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
+  }
 };
 
-handler.command = ["yta", "ytmp3"];
-handler.help = ["ytmp3"];
-handler.tags = ["download"];
+const handler = async (m, { conn, text }) => {
+  try {
+    if (!text || !isValidYouTubeUrl(text)) {
+      return conn.reply(m.chat, '⚠️ Proporciona un *enlace válido de YouTube*.', m);
+    }
+
+    // Reacción inicial de espera ⏳
+    await conn.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+    const { downloadUrl } = await ddownr.download(text, 'mp3');
+
+    // Reacción de éxito ✅
+    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
+
+  } catch (error) {
+    // Reacción de error (opcional)
+    // await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+
+    return m.reply(`⚠️ Error: ${error.message}`);
+  }
+};
+
+handler.command = ['ytmp3', 'yta'];
+handler.help = ['ytmp3 <url>'];
+handler.tags = ['descargas'];
+handler.group = true
 
 export default handler;
 
-async function ytdl(link, format = '720') {
-  const apiBase = "https://media.savetube.me/api";
-  const apiCDN = "/random-cdn";
-  const apiInfo = "/v2/info";
-  const apiDownload = "/download";
-
-  const decryptData = async (enc) => {
-    try {
-      const key = Buffer.from('C5D58EF67A7584E4A29F6C35BBC4EB12', 'hex');
-      const data = Buffer.from(enc, 'base64');
-      const iv = data.slice(0, 16);
-      const content = data.slice(16);
-      
-      const decipher = crypto.createDecipheriv('aes-128-cbc', key, iv);
-      let decrypted = decipher.update(content);
-      decrypted = Buffer.concat([decrypted, decipher.final()]);
-      
-      return JSON.parse(decrypted.toString());
-    } catch (error) {
-      return null;
-    }
-  };
-
-  const request = async (endpoint, data = {}, method = 'post') => {
-    try {
-      const { data: response } = await axios({
-        method,
-        url: `${endpoint.startsWith('http') ? '' : apiBase}${endpoint}`,
-        data: method === 'post' ? data : undefined,
-        params: method === 'get' ? data : undefined,
-        headers: {
-          'accept': '*/*',
-          'content-type': 'application/json',
-          'origin': 'https://yt.savetube.me',
-          'referer': 'https://yt.savetube.me/',
-          'user-agent': 'Postify/1.0.0'
-        }
-      });
-      return { status: true, data: response };
-    } catch (error) {
-      return { status: false, error: error.message };
-    }
-  };
-
-  const youtubeID = link.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/);
-  if (!youtubeID) return { status: false, error: "Gagal mengekstrak ID video dari URL." };
-
-  const qualityOptions = ['1080', '720', '480', '360', '240']; 
-  try {
-    const cdnRes = await request(apiCDN, {}, 'get');
-    if (!cdnRes.status) return cdnRes;
-    const cdn = cdnRes.data.cdn;
-
-    const infoRes = await request(`https://${cdn}${apiInfo}`, { url: `https://www.youtube.com/watch?v=${youtubeID[1]}` });
-    if (!infoRes.status) return infoRes;
-    
-    const decrypted = await decryptData(infoRes.data.data);
-    if (!decrypted) return { status: false, error: "Gagal mendekripsi data video." };
-
-    let downloadUrl = null;
-    for (const quality of qualityOptions) {
-      const downloadRes = await request(`https://${cdn}${apiDownload}`, {
-        id: youtubeID[1],
-        downloadType: format === 'mp3' ? 'audio' : 'video',
-        quality: quality,
-        key: decrypted.key
-      });
-      if (downloadRes.status && downloadRes.data.data.downloadUrl) {
-        downloadUrl = downloadRes.data.data.downloadUrl;
-        break;
-      }
-    }
-
-    if (!downloadUrl) {
-      return { status: false, error: "No se pudo encontrar un enlace de descarga disponible para el video." };
-    }
-    const fileResponse = await axios.head(downloadUrl); 
-    const size = fileResponse.headers['content-length']; 
-
-    return {
-      status: true,
-      result: {
-        title: decrypted.title || "Unknown",
-        type: format === 'mp3' ? 'audio' : 'video',
-        format: format,
-        download: downloadUrl,
-        size: size ? `${(size / 1024 / 1024).toFixed(2)} MB` : 'Unknown'
-      }
-    };
-  } catch (error) {
-    return { status: false, error: error.message };
-  }
+function isValidYouTubeUrl(url) {
+  const regex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}/;
+  return regex.test(url.trim());
 }

@@ -83,6 +83,7 @@ const handler = async (m, { conn, text, command }) => {
 > *Autor:* ${video.author.name}
 > *Duración:* ${video.duration.timestamp}
 > *Vistas:* ${video.views}
+> *Url:* ${video.url}
 
 *🚀 Se está enviando tu audio...*
 ===========================

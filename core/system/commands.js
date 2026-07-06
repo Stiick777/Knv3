@@ -4,7 +4,7 @@ export const bodyMenu = `
 👋🏻 𝑯𝒐𝒍𝒂! *@$sender*
 👥 𝑼𝒔𝒖𝒂𝒓𝒊𝒐𝒔 : *$users*
 ⚡ 𝑶𝒘𝒏𝒆𝒓 : Stiiven
-🟢 𝑻𝒊𝒆𝒎𝒑𝒐 𝑨𝒄𝒕𝒊𝒗𝒐 : *%muptime*
+🟢 𝑻𝒊𝒆𝒎𝒑𝒐 𝑨𝒄𝒕𝒊𝒗𝒐 : *$uptime*
 
 
 ▢ FOLLOW 

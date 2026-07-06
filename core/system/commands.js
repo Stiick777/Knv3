@@ -6,7 +6,6 @@ export const bodyMenu = `
 ⚡ 𝑶𝒘𝒏𝒆𝒓 : Stiiven
 🟢 𝑻𝒊𝒆𝒎𝒑𝒐 𝑨𝒄𝒕𝒊𝒗𝒐 : *$tiempo*
 
-❤️ $namebot
 
 ▢ FOLLOW 
 https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N

@@ -18,11 +18,7 @@ $link
 ┃ 🍁 *𝐑𝐚𝐧𝐠𝐨:* $role
 ╰━━━✦ ❘ ❬ ✰ ❭ ❘ ✦━━━╯
 
-$cat
-`
-
-export const menuObject = {
-`╭━━━✦ ❘ ❬ ⒾⓝⒻⓄ Ⓤⓢⓤⓐⓡⓘⓞ ❭ ❘ ✦━━━╮  
+╭━━━✦ ❘ ❬ ⒾⓝⒻⓄ Ⓤⓢⓤⓐⓡⓘⓞ ❭ ❘ ✦━━━╮  
 ┃ 🍁 *𝐔𝐬𝐮𝐚𝐫𝐢𝐨:* Stiivxn D' Anto  
 ┃ 🍁 *𝐄𝐱𝐩:* 18657  
 ┃ 🍁 *𝐍𝐢𝐯𝐞𝐥:* 1  
@@ -297,5 +293,5 @@ export const menuObject = {
 ╞˚₊·͟͟͞͞➳❥ .lid
 ╰──〔❨✧✧❩〕──╯
 
-> 🍁 Provided by Stiiven`,
-}
+> 🍁 Provided by Stiiven
+`

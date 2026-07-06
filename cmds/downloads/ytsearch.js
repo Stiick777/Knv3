@@ -1,36 +1,52 @@
-import yts from 'yt-search'
-import { getBuffer } from '#serialize'
+import yts from 'yt-search';
 
 export default {
-  command: ['ytsearch', 'search', 'yts'],
-  category: 'downloads',
-  description: 'Buscar videos de YouTube.',
-  run: async ({ msg, sock, args, usedPrefix, command }) => {
-    if (!args || !args[0]) {
-      return msg.reply('《✧》 Por favor, Ingrese el título de un vídeo.')
-    }    
-    const ress = await yts(`${args[0]}`)
-    const armar = ress.all
-    const Ibuff = await getBuffer(armar[0].image)    
-    let teks2 = armar.map((v) => {
-      switch (v.type) {
-        case 'video':
-          return `➩ *Título ›* *${v.title}* 
+  command: ['playlist', 'ytbuscar', 'yts', 'ytsearch'],
+  category: 'search',
+  description: '',
+  run: async ({ msg, sock, text, args, command, usedPrefix }) => {
+    if (!text) {
+      text = args?.join(' ');
+    }
 
-> ⴵ *Duración ›* ${v.timestamp}
-> ❖ *Subido ›* ${v.ago}
-> ✿ *Vistas ›* ${v.views}
-> ❒ *Url ›* ${v.url}`.trim()
-        case 'channel':
-          return `
-> ❖ Canal › *${v.name}*
-> ❒ Url › ${v.url}
-> ❀ Subscriptores › ${v.subCountLabel} (${v.subCount})
-> ✿ Videos totales › ${v.videoCount}`.trim()
-      }
-    }).filter((v) => v).join('\n\n╾۪〬─ ┄۫╌ ׄ┄┈۪ ─〬 ׅ┄╌ ۫┈ ─ׄ─۪〬 ┈ ┄۫╌ ─ׄ〬╼\n\n')    
-    sock.sendMessage(msg.chat, { image: Ibuff, caption: teks2 }, { quoted: msg }).catch((e) => {
-      msg.reply(`> An unexpected error occurred while executing command *${usedPrefix + command}*. Please try again or contact support if the issue persists.\n> [Error: *${e.message}*]`)
-    })
+    if (!text) {
+      return msg.reply(
+        `🏳 *Escriba el título de algún vídeo de YouTube*\n\nEjemplo: ${usedPrefix + command} heyser`
+      );
+    }
+
+    const results = await yts(text);
+    const videos = results.videos.slice(0, 6);
+
+    if (!videos.length) {
+      return msg.reply('⚠️ No se encontraron resultados.');
+    }
+
+    const messages = videos.map(video => [
+      video.title,
+      `🎬 *Título:* ${video.title}
+⏱ *Duración:* ${video.timestamp}
+📅 *Subido:* ${video.ago}
+🎈 para descargar copie y pegue el comando:
+⟨∆⟩ boton 1 mp3
+⟨∆⟩ boton 2 mp4
+
+「✰」 provided by KanBot`,
+      video.thumbnail,
+      [[]],
+      [
+        [`/ytmp3 ${video.url}`],
+        [`/ytmp4 ${video.url}`]
+      ]
+    ]);
+
+    await sock.sendCarousel(
+      msg.chat,
+      `🔎 Resultados para: *${text}*`,
+      '📺 YouTube Search',
+      null,
+      messages,
+      msg
+    );
   },
-}
+};

@@ -1,16 +1,25 @@
-export const bodyMenu = `> 𖧧 ¡Hola! *@$sender*, Soy *$namebot*, Aquí tienes la lista de comandos$cat
+export const bodyMenu = `
+◈ ━━━━━ *ᴋᴀɴʙᴏᴛ ┃ ᴼᶠᶜ* ━━━━━ ◈
 
-╭┈ࠢ͜┅ࠦ͜͜╾݊͜─ؕ͜─ׄ͜─֬͜─֟͜─֫͜─ׄ͜─ؕ͜─݊͜┈ࠦ͜┅ࠡ͜͜┈࠭͜͜۰۰͜۰
-│✿ *ᴅᴇᴠᴇʟᴏᴘᴇʀ ::* $owner
-│ꕥ *ᴛʏᴘᴇ ::* $botType
-│⸙ *ᴠᴇʀsɪᴏɴ ::* ^3.0 - Latest
-│⚘ *sʏsᴛᴇᴍ/ᴏᴘʀ ::* $device
-│○ *ᴛɪᴍᴇ ::* $tiempo, $tempo
-│𓏸 *ᴜsᴇʀs ::* $users
-│○ *ᴜʀʟ ::* $link
-╰ׅ┈ࠢ͜─ׄ͜─ׄ֟፝͜─ׄ͜─ׄ͜╴ ⋱࣭ ᩴ  ⋮֔   ᩴ ⋰╶͜─ׄ͜─ׄ֟፝͜─ׄ͜─ׄ͜┈ࠢ͜╯ׅ
-> Vincula un *Socket* con tu número utilizando *$prefixqr* o *$prefixcode*.
-‧꒷︶꒷꒥꒷‧₊˚꒷︶꒷꒥꒷︶꒷˚₊‧꒷꒥꒷︶꒷‧`
+👋🏻 𝑯𝒐𝒍𝒂! *@$sender*
+👥 𝑼𝒔𝒖𝒂𝒓𝒊𝒐𝒔 : *$users*
+⚡ 𝑶𝒘𝒏𝒆𝒓 : $owner
+🟢 𝑻𝒊𝒆𝒎𝒑𝒐 𝑨𝒄𝒕𝒊𝒗𝒐 : *$tiempo*
+
+❤️ $namebot
+
+▢ FOLLOW ME
+$link
+
+╭━━━✦ ❘ ❬ ⒾⓝⒻⓄ Ⓤⓢⓤⓐⓡⓘⓞ ❭ ❘ ✦━━━╮
+┃ 🍁 *𝐔𝐬𝐮𝐚𝐫𝐢𝐨:* @$sender
+┃ 🍁 *𝐄𝐱𝐩:* $exp
+┃ 🍁 *𝐍𝐢𝐯𝐞𝐥:* $level
+┃ 🍁 *𝐑𝐚𝐧𝐠𝐨:* $role
+╰━━━✦ ❘ ❬ ✰ ❭ ❘ ✦━━━╯
+
+$cat
+`
 
 export const menuObject = {
 economia: `╭┈ࠢ͜─ׄ֟፝͜─ׄ͜─ׄ͜╴𐔌 *ECONOMY* 𐦯╶͜─ׄ͜─ׄ֟፝͜─ׄ͜─ׄ͜

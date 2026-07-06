@@ -226,27 +226,3 @@ export const menuObject = {
 > 🍁 Provided by Stiiven`
 }
 
-let _uptime = process.uptime() * 1000;
-let _muptime = process.uptime() * 1000;
-
-let muptime = clockString(_muptime);
-let uptime = clockString(_uptime);
-function clockString(ms) {
-  if (isNaN(ms)) return '--';
-
-  let d = Math.floor(ms / 86400000); // días
-  let h = Math.floor(ms / 3600000) % 24;
-  let m = Math.floor(ms / 60000) % 60;
-  let s = Math.floor(ms / 1000) % 60;
-
-  let parts = [];
-  if (d > 0) parts.push(`${d}d`);
-  if (h > 0 || d > 0) parts.push(`${h}h`);
-  if (m > 0 || h > 0 || d > 0) parts.push(`${m}m`);
-  parts.push(`${s}s`);
-
-  return parts.join(' ');
-}
-let replace = {
-  muptime
-}

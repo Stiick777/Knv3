@@ -38,7 +38,7 @@ export default {
       const device = getDevice(msg.key.id);
       const userGlobal = db.getUser(msg.sender);
       const sender = userGlobal?.name || msg.pushName || 'Usuario';
-      const time = sock.uptime ? formatearMs(Date.now() - sock.uptime) : "Desconocido";
+      const time = formatearMs(process.uptime() * 1000);
       const alias = {
         anime: ['anime', 'reacciones'],
         downloads: ['downloads', 'descargas'],

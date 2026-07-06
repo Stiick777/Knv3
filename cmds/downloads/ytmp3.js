@@ -1,144 +1,112 @@
-import yts from 'yt-search'
-import fetch from 'node-fetch'
+import fetch from "node-fetch";
 
-const cmd = {
-  command: ['play', 'mp3', 'ytmp3', 'ytaudio', 'playaudio'],
+export default {
+  command: ['ytmp3', 'yta'],
   category: 'downloads',
-  description: 'Descargar una canción de YouTube.',
-
-  run: async ({ msg, sock, args, usedPrefix, command }) => {
+  description: '',
+  run: async ({ msg, sock, text, args }) => {
     try {
-      if (!args[0]) {
-        return msg.reply('《✧》Por favor, menciona el nombre o URL del video que deseas descargar')
+      if (!text) {
+        text = args?.join(" ");
       }
 
-      const input_text = args.join(' ').trim()
-      const video_id = getVideoId(input_text)
-      const query = video_id ? `https://youtu.be/${video_id}` : input_text
+      if (!text || !isValidYouTubeUrl(text)) {
+        return msg.reply(
+          '⚠️ Proporciona un *enlace válido de YouTube*.'
+        );
+      }
 
-      let url = query
-      let title = 'audio'
-      let thumbnail = null
+      await msg.react('⏳');
 
+      // ============================================================
+      // 🔥 API DELIRIUS
+      // ============================================================
+      const apiUrl = `https://api.delirius.store/download/ytmp3?url=${encodeURIComponent(text)}`;
+
+      const res = await fetch(apiUrl);
+      const json = await res.json();
+
+      if (!json.status || !json.data?.download) {
+        throw new Error("La API no devolvió el audio.");
+      }
+
+      const {
+        title = "audio",
+        author = "Desconocido",
+        views = "0",
+        likes = "0",
+        image,
+        download
+      } = json.data;
+
+      // ============================================================
+      // 📦 Obtener tamaño del archivo
+      // ============================================================
+      let sizeMB = 0;
       try {
-        const video_info = await getVideoInfo(query, video_id)
-
-        if (video_info) {
-          url = video_info.url || `https://youtu.be/${video_info.videoId}`
-          title = video_info.title || title
-          thumbnail = video_info.image || video_info.thumbnail || null
-
-          const views = Number(video_info.views || 0).toLocaleString('es-HN')
-          const channel = video_info.author?.name || video_info.author || 'Desconocido'
-
-          const info_message = `➩ Descargando › *${title}*
-
-> ❖ Canal › *${channel}*
-> ⴵ Duración › *${video_info.timestamp || 'Desconocido'}*
-> ❀ Vistas › *${views}*
-> ✩ Publicado › *${video_info.ago || 'Desconocido'}*
-> ❒ Enlace › *${url}*`
-
-          if (thumbnail) {
-            await sock.sendMessage(msg.chat, {
-              image: { url: thumbnail },
-              caption: info_message
-            }, { quoted: msg })
-          } else {
-            await msg.reply(info_message)
-          }
-        }
-      } catch {}
-
-      if (!isYTUrl(url)) {
-        return msg.reply('《✧》No se encontró un video válido de YouTube.')
+        const head = await fetch(download, { method: "HEAD" });
+        const length = head.headers.get("content-length");
+        sizeMB = length ? Number(length) / (1024 * 1024) : 0;
+      } catch {
+        sizeMB = 0;
       }
 
-      const audio = await getAudioFromApi(url)
+      await msg.react('✅');
 
-      if (!audio?.buffer?.length) {
-        return msg.reply('《✧》No se pudo descargar el *audio*, intenta más tarde.')
+      // ============================================================
+      // 📸 Portada
+      // ============================================================
+      if (image) {
+        await sock.sendMessage(
+          msg.chat,
+          {
+            image: { url: image },
+            caption:
+`🎶 *${title}*
+
+👤 Autor: ${author}
+👁️ Vistas: ${Number(views).toLocaleString()}
+❤️ Likes: ${Number(likes).toLocaleString()}
+📦 Tamaño: ${sizeMB.toFixed(2)} MB
+🎧 Formato: MP3`
+          },
+          { quoted: msg }
+        );
       }
 
-      await sock.sendMessage(msg.chat, {
-        audio: audio.buffer,
-        fileName: audio.name || `${title}.mp3`,
-        mimetype: 'audio/mpeg'
-      }, { quoted: msg })
-    } catch (e) {
-      await msg.reply(
-        `> An unexpected error occurred while executing command *${usedPrefix + command}*.\n> [Error: *${e.message}*]`
-      )
+      // ============================================================
+      // 🎧 Audio o documento
+      // ============================================================
+      const isHeavy = sizeMB > 10;
+
+      await sock.sendMessage(
+        msg.chat,
+        {
+          [isHeavy ? "document" : "audio"]: { url: download },
+          mimetype: "audio/mpeg",
+          fileName: `${title}.mp3`,
+          ...(isHeavy && {
+            caption: "📁 Archivo enviado como documento por superar 10 MB."
+          })
+        },
+        { quoted: msg }
+      );
+
+    } catch (error) {
+      console.error("Error YTMP3:", error);
+
+      await msg.react('❌');
+
+      return msg.reply(`⚠️ Error: ${error.message}`);
     }
-  }
-}
+  },
+};
 
-export default cmd
-
-const isYTUrl = (url = '') =>
-  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i.test(url)
-
-const getVideoId = (text = '') => {
-  const raw = String(text || '').trim()
-  if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw
-
-  const patterns = [
-    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/live\/([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-    /[?&]v=([a-zA-Z0-9_-]{11})/
-  ]
-
-  for (const pattern of patterns) {
-    const match = raw.match(pattern)
-    if (match?.[1]) return match[1]
-  }
-  return null
-}
-
-async function getVideoInfo(input, video_id) {
-  if (video_id) {
-    try {
-      const info = await yts({ videoId: video_id })
-      if (info?.videoId) {
-        return {
-          ...info,
-          url: `https://youtu.be/${info.videoId}`,
-          image: info.thumbnail || info.image
-        }
-      }
-    } catch {}
-  }
-
-  const search = await yts(input)
-  return search.videos?.[0] || search.all?.find(v => v.type === 'video') || null
-}
-
-async function getAudioFromApi(url) {
-  const api_url = `https://fare.ink/dl/yta?url=${encodeURIComponent(url)}`
-  
-  const res = await fetch(api_url, {
-    headers: { 'accept': 'application/json' }
-  })
-
-  if (!res.ok) throw new Error(`API falló: HTTP ${res.status}`)
-
-  const json = await res.json()
-
-  if (!json?.status || !json?.descarga?.url) {
-    throw new Error('No se encontró el enlace de descarga en la API.')
-  }
-
-  const audio_res = await fetch(json.descarga.url)
-  if (!audio_res.ok) throw new Error(`No se pudo descargar el audio: HTTP ${audio_res.status}`)
-
-  const buffer = await audio_res.buffer()
-
-  return {
-    buffer,
-    name: json.descarga.archivo || 'audio.mp3'
-  }
+// ============================================================
+// 🔍 Validación de enlace YouTube
+// ============================================================
+function isValidYouTubeUrl(url) {
+  const regex =
+    /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}/;
+  return regex.test(url.trim());
 }

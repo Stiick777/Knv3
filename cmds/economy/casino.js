@@ -1,84 +1,92 @@
-import { delay } from 'baileys';
-import db from '#db';
+let cooldowns = {}
 
-let buatall = 1;
 export default {
-  command: ['apostar', 'casino'],
-  category: 'economy',
-  description: 'Apostar coins en el casino.',
-  run: async ({ msg, sock, args, usedPrefix, command, text }) => {
-    const chatData = db.getChat(msg.chat)
-    if (chatData.adminonly || !chatData.economy) {
-      return msg.reply(`ꕥ Los comandos de *Economía* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}economy on*`);
-    }        
-    const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
-    const bot = db.getSettings(botId);
-    const currency = bot.currency;
-    const botname = bot.botname;    
-    db.setCreate('chat_users', [msg.chat, msg.sender], 'lastApuesta', 0);
-    const user = db.getChatUser(msg.chat, msg.sender);    
-    let Aku = Math.floor(Math.random() * 101);
-    let Kamu = Math.floor(Math.random() * 55);
-    let count = args[0];
-    const users = db.getUser(msg.sender);
-    const userName = users?.name || msg.sender.split('@')[0];
-    const tiempoEspera = 30 * 1000;
-    const ahora = Date.now();        
-    if (user.lastApuesta && ahora - user.lastApuesta < tiempoEspera) {
-      const restante = user.lastApuesta + tiempoEspera - ahora;
-      const tiempoRestante = formatTime(restante);
-      return sock.reply(msg.chat, `ꕥ Debes esperar *${tiempoRestante}* para usar *${usedPrefix + command}* nuevamente.`, msg);
-    }        
-    db.setChatUser(msg.chat, msg.sender, 'lastApuesta', ahora);
-    if (count && /all/i.test(count)) {
-      count = Math.floor(users.limit / buatall);
-    } else if (args[0]) {
-      count = parseInt(args[0]);
-    } else {
-      count = 1;
-    }        
-    count = Math.max(1, count);
-    if (args.length < 1) {
-      return sock.reply(msg.chat, `❀ Ingresa la cantidad de *${currency}* que deseas aportar contra *${botname}*\n> Ejemplo: *${usedPrefix + command} 100*`, msg);
+  command: ['w', 'work', 'chambear', 'chamba', 'trabajar'],
+  category: 'rpg',
+  description: '',
+  run: async ({ msg }) => {
+    let user = global.db.data.users[msg.sender]
+    let tiempo = 5 * 60
+
+    if (cooldowns[msg.sender] && Date.now() - cooldowns[msg.sender] < tiempo * 1000) {
+      const tiempo2 = segundosAHMS(
+        Math.ceil((cooldowns[msg.sender] + tiempo * 1000 - Date.now()) / 1000)
+      )
+
+      return msg.reply(
+        `Espera ⏱️ *${tiempo2}* para volver a Trabajar.`
+      )
     }
-    if (user.coins >= count) {
-      db.setChatUser(msg.chat, msg.sender, 'coins', user.coins - count);
-      let resultado = '';
-      let ganancia = 0;
-      if (Aku > Kamu) {
-        resultado = `> ${userName}, *Perdiste ¥${formatNumber(count)} ${currency}*.`;
-      } else if (Aku < Kamu) {
-        ganancia = count * 2;
-        db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins - count) + ganancia);
-        resultado = `> ${userName}, *Ganaste ¥${formatNumber(ganancia)} ${currency}*.`;
-      } else {
-        ganancia = count;
-        db.setChatUser(msg.chat, msg.sender, 'coins', (user.coins - count) + ganancia);
-        resultado = `> ${userName}, *Ganaste ¥${formatNumber(ganancia)} ${currency}*.`;
-      }
-      let { key } = await sock.sendMessage(msg.chat, { text: "🎲 El crupier lanza los dados... ¡Las apuestas están cerradas!" }, { quoted: msg });
-      await delay(2000);
-      await sock.sendMessage(msg.chat, { text: "❀ Los números están girando... ¡Prepárate para el resultado!", edit: key }, { quoted: msg });
-      await delay(2000);
-      const replyMsg = `❀ \`Veamos qué números tienen!\`\n\n➠ *${botname}* : ${Aku}\n➠ *${userName}* : ${Kamu}\n\n${resultado}`;
-      await sock.sendMessage(msg.chat, { text: replyMsg.trim(), edit: key }, { quoted: msg });
-    } else {
-      sock.reply(msg.chat, `ꕥ No tienes *¥${formatNumber(count)} ${currency}* para apostar!`, msg);
-    }
+
+    let rsl = Math.floor(Math.random() * 5000)
+
+    cooldowns[msg.sender] = Date.now()
+
+    await msg.reply(
+      `⚡ ${pickRandom(trabajo)} *${toNum(rsl)}* ( *${rsl}* ) XP 🍭.`
+    )
+
+    user.exp += rsl
+  },
+}
+
+function toNum(number) {
+  if (number >= 1000 && number < 1000000) {
+    return (number / 1000).toFixed(1) + 'k'
+  } else if (number >= 1000000) {
+    return (number / 1000000).toFixed(1) + 'M'
+  } else if (number <= -1000 && number > -1000000) {
+    return (number / 1000).toFixed(1) + 'k'
+  } else if (number <= -1000000) {
+    return (number / 1000000).toFixed(1) + 'M'
+  } else {
+    return number.toString()
   }
-};
-
-function formatNumber(number) {
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function formatTime(ms) {
-  if (ms <= 0 || isNaN(ms)) return 'Ahora';
-  const totalSec = Math.ceil(ms / 1000);
-  const min = Math.floor(totalSec / 60);
-  const sec = totalSec % 60;
-  const partes = [];
-  if (min) partes.push(`${min} minuto${min !== 1 ? 's' : ''}`);
-  partes.push(`${sec} segundo${sec !== 1 ? 's' : ''}`);
-  return partes.join(' ');
+function segundosAHMS(segundos) {
+  let minutos = Math.floor((segundos % 3600) / 60)
+  let segundosRestantes = segundos % 60
+  return `${minutos} minutos y ${segundosRestantes} segundos`
 }
+
+function pickRandom(list) {
+  return list[Math.floor(list.length * Math.random())]
+}
+
+// Thanks to FG98
+const trabajo = [
+  "Trabajas como cortador de galletas y ganas",
+  "Trabaja para una empresa militar privada, ganando",
+  "Organiza un evento de cata de vinos y obtienes",
+  "Limpias la chimenea y encuentras",
+  "Desarrollas juegos para ganarte la vida y ganas",
+  "Trabajaste en la oficina horas extras por",
+  "Trabajas como secuestrador de novias y ganas",
+  "Alguien vino y representó una obra de teatro. Por mirar te dieron",
+  "Compraste y vendiste artículos y ganaste",
+  "Trabajas en el restaurante de la abuela como cocinera y ganas",
+  "Trabajas 10 minutos en un Pizza Hut local. Ganaste",
+  "Trabajas como escritor(a) de galletas de la fortuna y ganas",
+  "Revisas tu bolso y decides vender algunos artículos inútiles que no necesitas. Resulta que toda esa basura valía",
+  "Desarrollas juegos para ganarte la vida y ganas",
+  "Trabajas todo el día en la empresa por",
+  "Diseñaste un logo para una empresa por",
+  "¡Trabajó lo mejor que pudo en una imprenta que estaba contratando y ganó su bien merecido!",
+  "Trabajas como podador de arbustos y ganas",
+  "Trabajas como actor de voz para Bob Esponja y te las arreglaste para ganar",
+  "Estabas cultivando y Ganaste",
+  "Trabajas como constructor de castillos de arena y ganas",
+  "Trabajas como artista callejera y ganas",
+  "¡Hiciste trabajo social por una buena causa! por tu buena causa Recibiste",
+  "Reparaste un tanque T-60 averiado en Afganistán. La tripulación te pagó",
+  "Trabajas como ecologista de anguilas y ganas",
+  "Trabajas en Disneyland como un panda disfrazado y ganas",
+  "Reparas las máquinas recreativas y recibes",
+  "Hiciste algunos trabajos ocasionales en la ciudad y ganaste",
+  "Limpias un poco de moho tóxico de la ventilación y ganas",
+  "Resolviste el misterio del brote de cólera y el gobierno te recompensó con una suma de",
+  "Trabajas como zoólogo y ganas",
+  "Vendiste sándwiches de pescado y obtuviste",
+  "Reparas las máquinas recreativas y recibes",
+]

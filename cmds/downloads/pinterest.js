@@ -1,6 +1,6 @@
 import axios from "axios";
 import fetch from "node-fetch";
-import { fileTypeFromBuffer } from "file-type";
+import fileType from "file-type";
 
 const MAX_IMAGES = 6;
 
@@ -47,7 +47,7 @@ export default {
         });
 
         const buffer = Buffer.from(data);
-        const type = await fileTypeFromBuffer(buffer);
+        const type = await fileType.fromBuffer(buffer);
 
         return {
           buffer,

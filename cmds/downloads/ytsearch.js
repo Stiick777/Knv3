@@ -22,31 +22,98 @@ export default {
       return msg.reply('⚠️ No se encontraron resultados.');
     }
 
-    const messages = videos.map(video => [
-      video.title,
-      `🎬 *Título:* ${video.title}
-⏱ *Duración:* ${video.timestamp}
-📅 *Subido:* ${video.ago}
-🎈 para descargar copie y pegue el comando:
-⟨∆⟩ boton 1 mp3
-⟨∆⟩ boton 2 mp4
+    const cards = [];
 
-「✰」 provided by KanBot`,
-      video.thumbnail,
-      [[]],
-      [
-        [`/ytmp3 ${video.url}`],
-        [`/ytmp4 ${video.url}`]
-      ]
-    ]);
+for (const video of videos) {
+  const { imageMessage } = await generateWAMessageContent(
+    {
+      image: { url: video.thumbnail }
+    },
+    {
+      upload: sock.waUploadToServer
+    }
+  );
 
-    await sock.sendCarousel(
-      msg.chat,
-      `🔎 Resultados para: *${text}*`,
-      '📺 YouTube Search',
-      null,
-      messages,
-      msg
-    );
+  cards.push({
+    body: proto.Message.InteractiveMessage.Body.fromObject({
+      text:
+        `🎬 ${video.title}\n\n` +
+        `⏱ ${video.timestamp}\n` +
+        `📅 ${video.ago}\n` +
+        `👀 ${Number(video.views || 0).toLocaleString()} vistas`
+    }),
+
+    footer: proto.Message.InteractiveMessage.Footer.fromObject({
+      text: "☆ KanBot ☆"
+    }),
+
+    header: proto.Message.InteractiveMessage.Header.fromObject({
+      title: video.author?.name || "YouTube",
+      hasMediaAttachment: true,
+      imageMessage
+    }),
+
+    nativeFlowMessage:
+      proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+        buttons: [
+          {
+            name: "quick_reply",
+            buttonParamsJson: JSON.stringify({
+              display_text: "🎵 MP3",
+              id: `/ytmp3 ${video.url}`
+            })
+          },
+          {
+            name: "quick_reply",
+            buttonParamsJson: JSON.stringify({
+              display_text: "🎥 MP4",
+              id: `/ytmp4 ${video.url}`
+            })
+          }
+        ]
+      })
+  });
+}
+
+const waMsg = generateWAMessageFromContent(
+  msg.chat,
+  {
+    viewOnceMessage: {
+      message: {
+        messageContextInfo: {
+          deviceListMetadata: {},
+          deviceListMetadataVersion: 2
+        },
+        interactiveMessage:
+          proto.Message.InteractiveMessage.fromObject({
+            body: {
+              text: `🔎 *RESULTADOS PARA:* ${text}`
+            },
+
+            footer: {
+              text: `📺 Se encontraron ${videos.length} resultados\nby ☆KanBot☆`
+            },
+
+            header: {
+              hasMediaAttachment: false
+            },
+
+            carouselMessage: {
+              cards
+            }
+          })
+      }
+    }
   },
-};
+  {
+    quoted: msg
+  }
+);
+
+await sock.relayMessage(
+  msg.chat,
+  waMsg.message,
+  {
+    messageId: waMsg.key.id
+  }
+);

@@ -1,19 +1,19 @@
+import db from '#db';
+
 export default {
   command: ['testbotname'],
   category: 'owner',
-  run: async ({ msg, sock, db }) => {
+  run: async ({ msg, sock }) => {
     const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
     const settings = db.getSettings(botId) || {};
 
     await msg.reply(
-`📋 Configuración del bot
-
-🆔 ID: ${botId}
+`🆔 ID: ${botId}
 
 🤖 botname: ${settings.botname}
 🏷️ namebot: ${settings.namebot}
 
-📦 Datos completos:
+📦 Configuración:
 ${JSON.stringify(settings, null, 2)}`
     );
   }

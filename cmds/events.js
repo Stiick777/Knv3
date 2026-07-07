@@ -51,7 +51,14 @@ export default async (sock, msg) => {
           if (chat.sWelcome && chat.sWelcome.trim() !== '') {
             caption = chat.sWelcome.replace(/@user/g, `@${phone}`).replace(/@group/g, metadata.subject).replace(/@desc/g, metadata.desc || 'Sin descripción').replace(/@members/g, memberCount).replace(/@time/g, `${tiempo} ${tiempo2}`);
           } else {
-            caption = `╭┈──̇─̇─̇────̇─̇─̇──◯◝\n┊「 *Bienvenido (⁠ ⁠ꈍ⁠ᴗ⁠ꈍ⁠)* 」\n┊︶︶︶︶︶︶︶︶︶︶︶\n┊  *Nombre ›* @${phone}\n┊  *Grupo ›* ${metadata.subject}\n┊┈─────̇─̇─̇─────◯◝\n┊➤ *Usa /menu para ver los comandos.*\n┊➤ *Ahora somos ${memberCount} miembros.*\n┊ ︿︿︿︿︿︿︿︿︿︿︿\n╰─────────────────╯`;
+            caption = `╭══•🔥ೋ•๑♡๑•ೋ🔥•══╮
+¡Bienvenido, ✰ @${phone}!
+A ${metadata.subject}
+● ${tiempo}
+╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯
+
+Nos alegra tenerte aquí.
+🌸*ੈ✩‧₊˚༺☆༻*ੈ✩˚🌸`;
           }
           await sock.sendMessage(anu.id, { image: { url: pp }, caption, mentions: [jid] });
         }
@@ -61,7 +68,11 @@ export default async (sock, msg) => {
           if (chat.sGoodbye && chat.sGoodbye.trim() !== '') {
             caption = chat.sGoodbye.replace(/@user/g, `@${phone}`).replace(/@group/g, metadata.subject).replace(/@desc/g, metadata.desc || 'Sin descripción').replace(/@members/g, memberCount).replace(/@time/g, `${tiempo} ${tiempo2}`);
           } else {
-            caption = `╭┈──̇─̇─̇────̇─̇─̇──◯◝\n┊「 *Hasta pronto (⁠╥⁠﹏⁠╥⁠)* 」\n┊︶︶︶︶︶︶︶︶︶︶︶\n┊  *Nombre ›* @${phone}\n┊  *Grupo ›* ${metadata.subject}\n┊┈─────̇─̇─̇─────◯◝\n┊➤ *Ojalá que vuelva pronto.*\n┊➤ *Ahora somos ${memberCount} miembros.*\n┊ ︿︿︿︿︿︿︿︿︿︿︿\n╰─────────────────╯`;
+            caption = `╭══•🔥ೋ•๑♡๑•ೋ🔥•══╮
+¡Adiós, ✰ @${phone}!
+DE ${metadata.subject}
+● ${tiempo}
+╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯`;
           }
           await sock.sendMessage(anu.id, { image: { url: pp }, caption, mentions: [jid] });
         }

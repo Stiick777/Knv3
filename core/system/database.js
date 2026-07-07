@@ -115,7 +115,7 @@ export const defSets = {
   self: 0,
   prefix: '[\"/\",\"!\",\".\",\"#\"]',
   commandsejecut: 0,
-  newsletter_id: '120363401404146384@newsletter',
+  newsletter_id: '120363318891913110@newsletter',
   nameid: '✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰',
   type: 'Owner',
   link: '',

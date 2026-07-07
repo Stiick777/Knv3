@@ -116,14 +116,14 @@ export const defSets = {
   prefix: '[\"/\",\"!\",\".\",\"#\"]',
   commandsejecut: 0,
   newsletter_id: '120363401404146384@newsletter',
-  nameid: 'ೃ࿔ ყµҡเ ωαɓσƭร - σƒƒเ૮เαℓ ૮ɦαɳɳεℓ .ೃ࿐',
+  nameid: '✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰',
   type: 'Owner',
-  link: 'https://api.yuki-wabot.my.id',
-  banner: 'https://cdn.yuki-wabot.my.id/files/tCVD.jpeg',
-  icon: 'https://cdn.yuki-wabot.my.id/files/4U5V.jpeg',
+  link: '',
+  banner: '',
+  icon: '',
   currency: 'Yenes',
-  namebot: 'Yuki',
-  botname: 'Yuki Suou',
+  namebot: 'Kan',
+  botname: 'KanBot',
   owner: ''
 };
 

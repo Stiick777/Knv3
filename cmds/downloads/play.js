@@ -1,7 +1,7 @@
 
 import fetch from 'node-fetch';
 import yts from 'yt-search';
-import axios from 'axios';
+
 
 
 export default {
@@ -172,7 +172,7 @@ export default {
     }
 
     // ====== CONTINÚA EN LA PARTE 2 (play2) ======
-  },   // =========================================================
+    // =========================================================
     // PLAY2 (VIDEO)
     // =========================================================
     if (command === 'play2') {
@@ -358,9 +358,14 @@ export default {
         await msg.reply(
           '⚠️ No se pudo descargar el video desde ningún servidor.'
         );
-      }
+            }
 
-              };
+    }
+
+  },
+};
+
+            
 async function search(query, options = {}) {
   const search = await yts.search({
     query,

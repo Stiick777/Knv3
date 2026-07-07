@@ -55,7 +55,7 @@ async function uploadToUguu(buffer, mimetype) {
 }
 
 export default {
-  command: ['ia', 'chatgpt'],
+  command: ['ia2', 'chatgpt2'],
   category: 'utils',
   description: 'Realizar peticiones a ChatGPT.',
   run: async ({ msg, sock, args, usedPrefix, command }) => {

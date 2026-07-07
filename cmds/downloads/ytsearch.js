@@ -1,4 +1,11 @@
 import yts from 'yt-search';
+const baileys = await import("baileys");
+
+const {
+  proto,
+  generateWAMessageFromContent,
+  generateWAMessageContent
+} = baileys;
 
 export default {
   command: ['playlist', 'ytbuscar', 'yts', 'ytsearch'],

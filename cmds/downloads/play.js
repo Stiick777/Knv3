@@ -172,8 +172,7 @@ export default {
     }
 
     // ====== CONTINÚA EN LA PARTE 2 (play2) ======
-  },
-};    // =========================================================
+  },   // =========================================================
     // PLAY2 (VIDEO)
     // =========================================================
     if (command === 'play2') {
@@ -361,7 +360,7 @@ export default {
         );
       }
 
-              }
+              };
 async function search(query, options = {}) {
   const search = await yts.search({
     query,

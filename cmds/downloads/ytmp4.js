@@ -1,6 +1,6 @@
 import axios from "axios";
 import fetch from "node-fetch";
-import { fileTypeFromBuffer } from "file-type";
+import fileType from "file-type";
 
 export default {
   command: ["ytmp4", "ytvideo", "ytv"],
@@ -94,7 +94,7 @@ export default {
       });
 
       const buffer = Buffer.from(videoRes.data);
-      const type = await fileTypeFromBuffer(buffer);
+      const type = await fileType.fromBuffer(buffer);
 
       await msg.react("✅");
 

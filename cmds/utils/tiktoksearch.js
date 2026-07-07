@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baileys = await import("@whiskeysockets/baileys");
+const baileys = await import("baileys");
 
 const {
   proto,

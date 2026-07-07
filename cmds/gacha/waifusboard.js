@@ -1,55 +1,104 @@
 import { promises as fs } from 'fs';
-import db from '#db';
 
-const charactersFilePath = './core/characters.json';
+const charactersFilePath = './src/database/characters.json';
 
 async function loadCharacters() {
-  const data = await fs.readFile(charactersFilePath, 'utf-8');
-  return JSON.parse(data);
+  try {
+    const data = await fs.readFile(charactersFilePath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    throw new Error('❀ No se pudo cargar el archivo characters.json.');
+  }
 }
 
-function flattenCharacters(structure) {
-  return Object.values(structure).flatMap(s => Array.isArray(s.characters) ? s.characters : []);
+async function saveCharacters(characters) {
+  try {
+    await fs.writeFile(
+      charactersFilePath,
+      JSON.stringify(characters, null, 2),
+      'utf-8'
+    );
+  } catch (error) {
+    throw new Error('❀ No se pudo guardar el archivo characters.json.');
+  }
+}
+
+// Función para normalizar el nombre
+function normalizeText(text) {
+  return text.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 export default {
-  command: ['waifusboard', 'waifustop', 'topwaifus', 'wtop'],
-  category: 'gacha',
-  description: 'Ver el top de personajes con mayor valor.',
-  run: async ({ msg, sock, args, usedPrefix, command, text }) => {
-    const chat = db.getChat(msg.chat);    
-    if (chat.adminonly || !chat.gacha) {
-      return msg.reply(`ꕥ Los comandos de *Gacha* están desactivados en este grupo.\n\nUn *administrador* puede activarlos con el comando:\n» *${usedPrefix}gacha on*`);
-    }    
+  command: ['sell', 'vender'],
+  category: 'fun',
+  description: '',
+  run: async ({ msg, sock, args }) => {
+    const userId = msg.sender;
+
+    if (!args[0]) {
+      return await msg.reply(
+        `⫷✦⫸ Debes escribir el nombre del personaje que deseas vender. ⫷✦⫸  
+✧ Ejemplo: *#sell neko*`
+      );
+    }
+
+    const characterName = normalizeText(args.join(' '));
+
     try {
-      const structure = await loadCharacters();
-      const allCharacters = flattenCharacters(structure);      
-      const enriched = [];
-      for (const c of allCharacters) {
-        const character = db.getCharacter(c.id);
-        const value = character?.value || Number(c.value || 0);
-        enriched.push({ name: c.name, value, id: c.id });
-      }      
-      const page = parseInt(args[0]) || 1;
-      const perPage = 10;
-      const totalPages = Math.ceil(enriched.length / perPage);      
-      if (page < 1 || page > totalPages) {
-        return msg.reply(`ꕥ Página no válida. Hay un total de *${totalPages}* páginas.`);
-      }      
-      const sorted = enriched.sort((a, b) => b.value - a.value);
-      const sliced = sorted.slice((page - 1) * perPage, page * perPage);      
-      let message = '❀ *Personajes con más valor:*\n\n';
-      sliced.forEach((char, i) => {
-        message += `✰ ${((page - 1) * perPage) + i + 1} » *${char.name}*\n`;
-        message += `   → Valor: *${char.value.toLocaleString()}*\n`;
-      });     
-      message += `\n⌦ Página *${page}* de *${totalPages}*`;      
-      if (page < totalPages) {
-        message += `\n> Para ver la siguiente página › *waifusboard ${page + 1}*`;
-      }      
-      await sock.sendMessage(msg.chat, { text: message.trim() }, { quoted: msg });      
-    } catch (e) {
-      await msg.reply(`> An unexpected error occurred while executing command *${usedPrefix + command}*. Please try again or contact support if the issue persists.\n> [Error: *${e.message}*]`);
+      const characters = await loadCharacters();
+
+      const character = characters.find(
+        c => normalizeText(c.name) === characterName
+      );
+
+      if (!character) {
+        return await msg.reply(
+          `⟪✦⟫ No se encontró el personaje ⟪ *${args.join(' ')}* ⟫. ⟪✦⟫`
+        );
+      }
+
+      if (character.user !== userId) {
+        return await msg.reply(
+          `⫷✦⫸ No puedes vender ⟪ *${character.name}* ⟫ porque no te pertenece. ⫷✦⫸`
+        );
+      }
+
+      const characterValue = character.value || 0;
+
+      // Liberar personaje
+      character.user = null;
+      character.status = 'Libre';
+
+      // Dar XP
+      global.db.data.users[userId].exp += characterValue;
+
+      await saveCharacters(characters);
+
+      const message = `╔════════════════════╗  
+      💰 *¡Personaje Vendido!* 💰  
+╚════════════════════╝  
+
+✦ Has vendido a *${character.name}* por *${characterValue}* XP.  
+
+🔄 Ahora el personaje está disponible para que otros lo reclamen.  
+
+━━━━━━━━━━━━━━━━━━`;
+
+      await sock.sendMessage(
+        msg.chat,
+        {
+          image: { url: character.img },
+          caption: message
+        },
+        {
+          quoted: msg
+        }
+      );
+
+    } catch (error) {
+      await msg.reply(
+        `✘ Error al vender el personaje: ${error.message}`
+      );
     }
   },
 };

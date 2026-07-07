@@ -4,12 +4,12 @@ import { fileURLToPath } from "url";
 
 global.owner = ['5493705452891'];
 
-global.dev = "© ⍴᥆ᥕᥱrᥱძ ᑲᥡ ⁱᵃᵐ|𝔇ĕ𝐬†𝓻⊙γ𒆜";
+global.dev = "Provided by Stiiven";
 global.links = {
-  api: 'https://api.yuki-wabot.my.id',
-  channel: "https://whatsapp.com/channel/0029Vb64nWqLo4hb8cuxe23n",
-  github: "https://github.com/iamDestroy/YukiBot-MD",
-  gmail: "thekingdestroy507@gmail.com"
+  api: '',
+  channel: "https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N",
+  github: "",
+  gmail: ""
 }
 global.my = {
   ch1: '120363401404146384@newsletter'

@@ -68,24 +68,24 @@ export default {
           }),
 
           nativeFlowMessage:
-            proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-              buttons: [
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "🎵 MP3",
-                    id: `/ytmp3 ${video.url}`
-                  })
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "🎥 MP4",
-                    id: `/ytmp4 ${video.url}`
-                  })
-                }
-              ]
-            })
+  proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+    buttons: [
+      {
+        name: "cta_copy",
+        buttonParamsJson: JSON.stringify({
+          display_text: "🎵 Copiar MP3",
+          copy_code: `/mp3 ${video.url}`
+        })
+      },
+      {
+        name: "cta_copy",
+        buttonParamsJson: JSON.stringify({
+          display_text: "🎥 Copiar MP4",
+          copy_code: `/mp4 ${video.url}`
+        })
+      }
+    ]
+  })
         });
 
       }

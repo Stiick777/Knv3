@@ -48,23 +48,23 @@ export default {
         servidor = "Delirius";
 
       } catch (e) {
-        console.log("Delirius falló, usando ZennzXD...");
+  console.log("Delirius falló, usando StellarWA...");
 
-        // ==============================
-        // API RESPALDO: ZENNZXD
-        // ==============================
-        const { data } = await axios.get(
-          `https://api.zenzxz.my.id/download/youtube?url=${encodeURIComponent(youtubeLink)}&format=360`
-        );
+  // ==============================
+  // API RESPALDO: STELLARWA
+  // ==============================
+  const { data } = await axios.get(
+    `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(youtubeLink)}&key=proyectsV2`
+  );
 
-        if (!data?.status || !data?.result?.download) {
-          throw new Error("Respuesta inválida de ZennzXD");
-        }
+  if (!data?.status || !data?.result?.downloadUrl) {
+    throw new Error("Respuesta inválida de StellarWA");
+  }
 
-        title = data.result.title || "Video";
-        quality = `${data.result.format}p`;
-        downloadUrl = data.result.download;
-        servidor = "ZennzXD";
+  title = data.result.title || "Video";
+  quality = data.result.format || "360p";
+  downloadUrl = data.result.downloadUrl;
+  servidor = "StellarWA";
       }
 
       // ==============================

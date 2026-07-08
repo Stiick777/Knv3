@@ -1,5 +1,4 @@
 import axios from "axios";
-import fetch from "node-fetch";
 import fileType from "file-type";
 
 const MAX_IMAGES = 6;
@@ -9,9 +8,7 @@ export default {
   category: "search",
   description: "",
   run: async ({ msg, sock, args, text, usedPrefix, command }) => {
-    if (!text) {
-      text = args?.join(" ");
-    }
+    if (!text) text = args?.join(" ");
 
     if (!text) {
       return msg.reply(
@@ -22,20 +19,17 @@ export default {
     await msg.react("📌");
 
     try {
-      const apiUrl = `https://api.siputzx.my.id/api/s/pinterest?query=${encodeURIComponent(text)}&type=image`;
+      const apiUrl = `https://api.delirius.store/search/pinterest?text=${encodeURIComponent(text)}`;
 
-      const res = await fetch(apiUrl);
-      const json = await res.json();
+      const { data: json } = await axios.get(apiUrl);
 
-      if (!json.status || !json.data || !json.data.length) {
+      if (!json.status || !json.results?.length) {
         return msg.reply(
           `❌ No encontré resultados para *${text}*`
         );
       }
 
-      const images = json.data
-        .filter(v => v.image_url)
-        .slice(0, MAX_IMAGES);
+      const images = json.results.slice(0, MAX_IMAGES);
 
       const loadImage = async (url) => {
         const { data } = await axios.get(url, {
@@ -56,7 +50,7 @@ export default {
       };
 
       // Imagen principal
-      const firstImg = await loadImage(images[0].image_url);
+      const firstImg = await loadImage(images[0]);
 
       await sock.sendMessage(
         msg.chat,
@@ -67,10 +61,10 @@ export default {
           contextInfo: {
             externalAdReply: {
               title: "KanBot",
-              body: "Pinterest Search • Siputzx API",
+              body: "Pinterest Search • Delirius API",
               mediaType: 1,
-              mediaUrl: images[0].pin,
-              thumbnailUrl: images[0].image_url,
+              mediaUrl: "https://www.pinterest.com/",
+              thumbnailUrl: images[0],
               previewType: 0
             }
           }
@@ -81,7 +75,7 @@ export default {
       // Enviar el resto de imágenes
       for (let i = 1; i < images.length; i++) {
         try {
-          const img = await loadImage(images[i].image_url);
+          const img = await loadImage(images[i]);
 
           await sock.sendMessage(
             msg.chat,
@@ -92,7 +86,7 @@ export default {
             { quoted: msg }
           );
         } catch (e) {
-          console.log(`❌ Error descargando: ${images[i].image_url}`);
+          console.log(`❌ Error descargando: ${images[i]}`);
         }
       }
 

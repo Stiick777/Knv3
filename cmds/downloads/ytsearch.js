@@ -74,14 +74,14 @@ export default {
         name: "cta_copy",
         buttonParamsJson: JSON.stringify({
           display_text: "🎵 Copiar MP3",
-          copy_code: `/mp3 ${video.url}`
+          copy_code: `/yta ${video.url}`
         })
       },
       {
         name: "cta_copy",
         buttonParamsJson: JSON.stringify({
           display_text: "🎥 Copiar MP4",
-          copy_code: `/mp4 ${video.url}`
+          copy_code: `/ytv ${video.url}`
         })
       }
     ]

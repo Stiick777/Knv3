@@ -31,24 +31,29 @@ export default {
       let servidor;
 
       // ==============================
-      // API PRINCIPAL: DELIRIUS
-      // ==============================
-      try {
-        const { data } = await axios.get(
-          `https://api.delirius.store/download/ytmp4?url=${encodeURIComponent(youtubeLink)}&format=360p`
-        );
+// API PRINCIPAL: FARE.INK
+// ==============================
+try {
+  const { data } = await axios.get(
+    `https://fare.ink/dl/ytv?url=${encodeURIComponent(youtubeLink)}`,
+    {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
 
-        if (!data?.status || !data?.data?.download) {
-          throw new Error("Respuesta inválida de Delirius");
-        }
+  if (!data?.status || !data?.descarga?.url) {
+    throw new Error("Respuesta inválida de Fare");
+  }
 
-        title = data.data.title || "Video";
-        quality = data.data.format || "360p";
-        downloadUrl = data.data.download;
-        servidor = "Delirius";
+  title = data.titulo || "Video";
+  quality = data.descarga.calidad || "360p";
+  downloadUrl = data.descarga.url;
+  servidor = "Fare";
 
-      } catch (e) {
-  console.log("Delirius falló, usando StellarWA...");
+} catch (e) {
+  console.log("Fare falló, usando StellarWA...");
 
   // ==============================
   // API RESPALDO: STELLARWA
@@ -65,8 +70,7 @@ export default {
   quality = data.result.format || "360p";
   downloadUrl = data.result.downloadUrl;
   servidor = "StellarWA";
-      }
-
+}
       // ==============================
       // Obtener tamaño real
       // ==============================

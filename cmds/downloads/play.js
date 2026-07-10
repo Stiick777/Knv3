@@ -278,76 +278,80 @@ export default {
         }
 
         // ======================================================
-        // ⭐ API PRINCIPAL: DELIRIUS
-        // ======================================================
-        try {
+// ⭐ API PRINCIPAL: FARE.INK
+// ======================================================
+try {
 
-          const apiDelirius =
-            `https://api.delirius.store/download/ytmp4?url=${encodeURIComponent(url)}&format=360p`;
+  const apiFare =
+    `https://fare.ink/dl/ytv?url=${encodeURIComponent(url)}`;
 
-          const resD = await fetch(apiDelirius);
-          const jsonD = await resD.json();
+  const resF = await fetch(apiFare, {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
 
-          if (!jsonD.status || !jsonD.data?.download) {
-            throw new Error('Delirius inválida');
-          }
+  const jsonF = await resF.json();
 
-          const thumb = jsonD.data.image
-            ? await (await fetch(jsonD.data.image)).buffer()
-            : null;
+  if (!jsonF.status || !jsonF.descarga?.url) {
+    throw new Error('Fare inválida');
+  }
 
-          await enviarVideo(
-            msg.chat,
-            jsonD.data.download,
-            `🎬 *${jsonD.data.title}*
+  const thumb = jsonF.miniatura
+    ? await (await fetch(jsonF.miniatura)).buffer()
+    : null;
 
-👤 Autor: ${jsonD.data.author}
-👁️ Vistas: ${jsonD.data.views}
-👍 Likes: ${jsonD.data.likes}
-🎞️ Calidad: ${jsonD.data.format}
-🌐 Servidor: Delirius`,
-            thumb,
-            msg
-          );
+  await enviarVideo(
+    msg.chat,
+    jsonF.descarga.url,
+    `🎬 *${jsonF.titulo}*
 
-          await msg.react('✅');
-          return;
+👤 Canal: ${jsonF.canal}
+⏱️ Duración: ${jsonF.duracion}
+👁️ Vistas: ${jsonF.vistas}
+🎞️ Calidad: ${jsonF.descarga.calidad}
+🌐 Servidor: Fare`,
+    thumb,
+    msg
+  );
 
-        } catch (e1) {
-          console.warn('❌ Delirius falló, usando respaldo ZennzXD...');
-        }
+  await msg.react('✅');
+  return;
 
-        // ======================================================
-        // 🔁 RESPALDO: ZENNZXD
-        // ======================================================
+} catch (e1) {
+  console.warn('❌ Fare falló, usando respaldo StellarWA...');
+}
 
-        const apiZen =
-          `https://api.zenzxz.my.id/download/youtube?url=${encodeURIComponent(url)}&format=360`;
+// ======================================================
+// 🔁 RESPALDO: STELLARWA
+// ======================================================
 
-        const resZ = await fetch(apiZen);
-        const jsonZ = await resZ.json();
+const apiStellar =
+  `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(url)}&key=proyectsV2`;
 
-        if (!jsonZ.status || !jsonZ.result?.download) {
-          throw new Error('ZennzXD inválida');
-        }
+const resS = await fetch(apiStellar);
+const jsonS = await resS.json();
 
-        const thumb = jsonZ.result.thumbnail
-          ? await (await fetch(jsonZ.result.thumbnail)).buffer()
-          : null;
+if (!jsonS.status || !jsonS.result?.downloadUrl) {
+  throw new Error('StellarWA inválida');
+}
 
-        await enviarVideo(
-          msg.chat,
-          jsonZ.result.download,
-          `🎬 *${jsonZ.result.title}*
+const thumb = jsonS.result.thumbnail
+  ? await (await fetch(jsonS.result.thumbnail)).buffer()
+  : null;
 
-⏱️ Duración: ${jsonZ.result.duration}s
-🎞️ Calidad: ${jsonZ.result.format}p
-🌐 Servidor: ZennzXD`,
-          thumb,
-          msg
-        );
+await enviarVideo(
+  msg.chat,
+  jsonS.result.downloadUrl,
+  `🎬 *${jsonS.result.title}*
 
-        await msg.react('✅');
+🎞️ Calidad: ${jsonS.result.format || "360p"}
+🌐 Servidor: StellarWA`,
+  thumb,
+  msg
+);
+
+await msg.react('✅');
 
       } catch (e) {
 

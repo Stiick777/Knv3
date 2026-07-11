@@ -41,100 +41,159 @@ export default {
       null
     );
 
-    try {
-      await msg.react('🕓');
-      const url = yt_play[0].url;
-
-      // Función para enviar video según tamaño
-      async function enviarVideo(chat, url, caption, thumbnail, quoted) {
+    
         try {
-          const head = await fetch(url, { method: 'HEAD' });
-          const size = head.headers.get('content-length');
-          const isLarge = size && Number(size) > 10 * 1024 * 1024;
+  await msg.react('🕓');
+  const url = yt_play[0].url;
 
-          if (isLarge) {
-            return sock.sendMessage(chat, {
-              document: { url },
-              mimetype: 'video/mp4',
-              fileName: 'video.mp4',
-              caption,
-              jpegThumbnail: thumbnail
-            }, { quoted });
-          }
+  // Función para enviar video según tamaño
+  async function enviarVideo(chat, url, caption, thumbnail, quoted) {
+    try {
+      const head = await fetch(url, { method: 'HEAD' });
+      const size = head.headers.get('content-length');
+      const isLarge = size && Number(size) > 10 * 1024 * 1024;
 
-          return sock.sendMessage(chat, {
-            video: { url },
-            caption,
-            jpegThumbnail: thumbnail
-          }, { quoted });
-        } catch {
-          return sock.sendMessage(chat, {
-            video: { url },
-            caption,
-            jpegThumbnail: thumbnail
-          }, { quoted });
-        }
+      if (isLarge) {
+        return sock.sendMessage(chat, {
+          document: { url },
+          mimetype: 'video/mp4',
+          fileName: 'video.mp4',
+          caption,
+          jpegThumbnail: thumbnail
+        }, { quoted });
       }
 
-      // ⭐ API FARE.INK
-      try {
-        const apiFare = `https://fare.ink/dl/ytv?url=${encodeURIComponent(url)}`;
-        const resF = await fetch(apiFare, { headers: { "Content-Type": "application/json" } });
-        const jsonF = await resF.json();
+      return sock.sendMessage(chat, {
+        video: { url },
+        caption,
+        jpegThumbnail: thumbnail
+      }, { quoted });
+    } catch {
+      return sock.sendMessage(chat, {
+        video: { url },
+        caption,
+        jpegThumbnail: thumbnail
+      }, { quoted });
+    }
+  }
 
-        if (!jsonF.status || !jsonF.descarga?.url) {
-          throw new Error('Fare inválida');
-        }
+  // ======================================================
+  // ⭐ API PRINCIPAL: APICAUSAS
+  // ======================================================
+  try {
 
-        const thumb = jsonF.miniatura ? await (await fetch(jsonF.miniatura)).buffer() : null;
+    const apiCausas =
+      `https://rest.apicausas.xyz/api/v1/descargas/youtube?apikey=causa-ee5ee31dcfc79da4&url=${encodeURIComponent(url)}&type=video&quality=420`;
 
-        await enviarVideo(
-          msg.chat,
-          jsonF.descarga.url,
-          `🎬 ${jsonF.titulo}
+    const resC = await fetch(apiCausas);
+    const jsonC = await resC.json();
+
+    if (!jsonC.status || !jsonC.data?.download?.url) {
+      throw new Error('ApiCausas inválida');
+    }
+
+    const thumb = jsonC.data.thumbnail
+      ? await (await fetch(jsonC.data.thumbnail)).buffer()
+      : null;
+
+    await enviarVideo(
+      msg.chat,
+      jsonC.data.download.url,
+      `🎬 ${jsonC.data.title}
+👤 Canal: ${jsonC.data.uploader}
+⏱️ Duración: ${secondString(jsonC.data.duration)}
+🎞️ Calidad: ${jsonC.data.quality_tag}
+🌐 Servidor: ApiCausas`,
+      thumb,
+      msg
+    );
+
+    await msg.react('✅');
+    return;
+
+  } catch (e1) {
+    console.warn('❌ ApiCausas falló, usando StellarWA...');
+  }
+
+  // ======================================================
+  // ⭐ RESPALDO 1: STELLARWA
+  // ======================================================
+  try {
+
+    const apiStellar =
+      `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(url)}&key=proyectsV2`;
+
+    const resS = await fetch(apiStellar);
+    const jsonS = await resS.json();
+
+    if (!jsonS.status || !jsonS.result?.downloadUrl) {
+      throw new Error('StellarWA inválida');
+    }
+
+    const thumb = jsonS.result.thumbnail
+      ? await (await fetch(jsonS.result.thumbnail)).buffer()
+      : null;
+
+    await enviarVideo(
+      msg.chat,
+      jsonS.result.downloadUrl,
+      `🎬 ${jsonS.result.title}
+🎞️ Calidad: ${jsonS.result.format || "360p"}
+🌐 Servidor: StellarWA`,
+      thumb,
+      msg
+    );
+
+    await msg.react('✅');
+    return;
+
+  } catch (e2) {
+    console.warn('❌ StellarWA falló, usando Fare...');
+  }
+
+  // ======================================================
+  // ⭐ RESPALDO 2: FARE.INK
+  // ======================================================
+
+  const apiFare =
+    `https://fare.ink/dl/ytv?url=${encodeURIComponent(url)}&apikey=kanbot`;
+
+  const resF = await fetch(apiFare, {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  const jsonF = await resF.json();
+
+  if (!jsonF.status || !jsonF.descarga?.url) {
+    throw new Error('Fare inválida');
+  }
+
+  const thumb = jsonF.miniatura
+    ? await (await fetch(jsonF.miniatura)).buffer()
+    : null;
+
+  await enviarVideo(
+    msg.chat,
+    jsonF.descarga.url,
+    `🎬 ${jsonF.titulo}
 👤 Canal: ${jsonF.canal}
 ⏱️ Duración: ${jsonF.duracion}
 👁️ Vistas: ${jsonF.vistas}
 🎞️ Calidad: ${jsonF.descarga.calidad}
 🌐 Servidor: Fare`,
-          thumb,
-          msg
-        );
+    thumb,
+    msg
+  );
 
-        await msg.react('✅');
-        return;
-      } catch (e1) {
-        console.warn('❌ Fare falló, usando respaldo StellarWA...');
-      }
+  await msg.react('✅');
 
-      // 🔁 API STELLARWA
-      const apiStellar = `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(url)}&key=proyectsV2`;
-      const resS = await fetch(apiStellar);
-      const jsonS = await resS.json();
-
-      if (!jsonS.status || !jsonS.result?.downloadUrl) {
-        throw new Error('StellarWA inválida');
-      }
-
-      const thumb = jsonS.result.thumbnail ? await (await fetch(jsonS.result.thumbnail)).buffer() : null;
-
-      await enviarVideo(
-        msg.chat,
-        jsonS.result.downloadUrl,
-        `🎬 ${jsonS.result.title}
-🎞️ Calidad: ${jsonS.result.format || "360p"}
-🌐 Servidor: StellarWA`,
-        thumb,
-        msg
-      );
-
-      await msg.react('✅');
-
-    } catch (e) {
-      console.error(e);
-      await msg.react('❌');
-      await msg.reply('⚠️ No se pudo descargar el video desde ningún servidor.');
-    }
+} catch (e) {
+  console.error(e);
+  await msg.react('❌');
+  await msg.reply('⚠️ No se pudo descargar el video desde ningún servidor.');
+        }
   }
 };
 

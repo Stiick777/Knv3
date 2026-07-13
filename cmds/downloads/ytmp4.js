@@ -31,45 +31,84 @@ export default {
       let servidor;
 
       // ==============================
-// API PRINCIPAL: FARE.INK
+// ==============================
+// 🥇 API PRINCIPAL: APICAUSAS
 // ==============================
 try {
+
   const { data } = await axios.get(
-    `https://fare.ink/dl/ytv?url=${encodeURIComponent(youtubeLink)}`,
-    {
-      headers: {
-        "Content-Type": "application/json"
-      }
+    `https://rest.apicausas.xyz/api/v1/descargas/youtube?apikey=causa-ee5ee31dcfc79da4&url=${encodeURIComponent(youtubeLink)}&type=video&quality=420`
+  );
+
+  if (
+    !data.status ||
+    !data.data ||
+    !data.data.download ||
+    !data.data.download.url
+  ) {
+    throw new Error("ApiCausas inválida");
+  }
+
+  title = data.data.title || "Video";
+  quality = data.data.quality_tag || "420p";
+  downloadUrl = data.data.download.url;
+  servidor = "ApiCausas";
+
+} catch (e1) {
+
+  console.log("ApiCausas falló, usando StellarWA...");
+
+  // ==============================
+  // 🥈 RESPALDO: STELLARWA
+  // ==============================
+  try {
+
+    const { data } = await axios.get(
+      `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(youtubeLink)}&key=proyectsV2`
+    );
+
+    if (
+      !data.status ||
+      !data.result ||
+      !data.result.downloadUrl
+    ) {
+      throw new Error("StellarWA inválida");
     }
-  );
 
-  if (!data?.status || !data?.descarga?.url) {
-    throw new Error("Respuesta inválida de Fare");
+    title = data.result.title || "Video";
+    quality = data.result.format || "360p";
+    downloadUrl = data.result.downloadUrl;
+    servidor = "StellarWA";
+
+  } catch (e2) {
+
+    console.log("StellarWA falló, usando Fare...");
+
+    // ==============================
+    // 🥉 RESPALDO: FARE.INK
+    // ==============================
+    const { data } = await axios.get(
+      `https://fare.ink/dl/ytv?url=${encodeURIComponent(youtubeLink)}&apikey=kanbot`,
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (
+      !data.status ||
+      !data.descarga ||
+      !data.descarga.url
+    ) {
+      throw new Error("Fare inválida");
+    }
+
+    title = data.titulo || "Video";
+    quality = data.descarga.calidad || "360p";
+    downloadUrl = data.descarga.url;
+    servidor = "Fare";
   }
-
-  title = data.titulo || "Video";
-  quality = data.descarga.calidad || "360p";
-  downloadUrl = data.descarga.url;
-  servidor = "Fare";
-
-} catch (e) {
-  console.log("Fare falló, usando StellarWA...");
-
-  // ==============================
-  // API RESPALDO: STELLARWA
-  // ==============================
-  const { data } = await axios.get(
-    `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(youtubeLink)}&key=proyectsV2`
-  );
-
-  if (!data?.status || !data?.result?.downloadUrl) {
-    throw new Error("Respuesta inválida de StellarWA");
-  }
-
-  title = data.result.title || "Video";
-  quality = data.result.format || "360p";
-  downloadUrl = data.result.downloadUrl;
-  servidor = "StellarWA";
 }
       // ==============================
       // Obtener tamaño real

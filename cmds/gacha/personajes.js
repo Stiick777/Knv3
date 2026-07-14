@@ -12,7 +12,7 @@ async function loadCharacters() {
 }
 
 export default {
-  command: /^mp\d*$/i,
+  command: ['mp']
   category: 'fun',
   description: '',
   run: async ({ msg, sock, command }) => {

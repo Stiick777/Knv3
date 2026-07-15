@@ -82,8 +82,8 @@ export const defUser = {
 
 export const defChat = {
   isBanned: 0,
-  welcome: 0,
-  goodbye: 0,
+  welcome: 1,
+  goodbye: 1,
   sWelcome: '',
   sGoodbye: '',
   nsfw: 0,

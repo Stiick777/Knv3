@@ -18,10 +18,27 @@ export async function before({ msg, sock, groupMetadata, participants, isAdmins,
   if (hasAllowedLink || !isGroupLink || !chat?.antilinks || isAdmins || !isBotAdmins || !isPrimary) return;
   await sock.sendMessage(msg.chat, { delete: { remoteJid: msg.chat, fromMe: false, id: msg.key.id, participant: msg.key.participant }});
   if (command !== 'invite') {
-    const isChannelLink = /whatsapp\.com\/channel\//i.test(msg.text);
-    const user = db.getUser(msg.sender);
-    const userName = user?.name || 'Usuario';
-    await sock.reply(msg.chat, `> ꕥ Se ha eliminado a *${userName}* del grupo por \`Anti-Link\`, no permitimos enlaces de *${isChannelLink ? 'canales' : 'otros grupos'}*.`, null);
-    await sock.groupParticipantsUpdate(msg.chat, [msg.sender], 'remove');
+  const isChannelLink = /whatsapp\.com\/channel\//i.test(msg.text);
+  const user = db.getUser(msg.sender);
+  const userName = user?.name || 'Usuario';
+
+  // 1. Expulsar al usuario
+  await sock.groupParticipantsUpdate(msg.chat, [msg.sender], 'remove');
+
+  // 2. Enviar el aviso
+  await sock.reply(
+    msg.chat,
+    `> ꕥ Se ha eliminado a *${userName}* del grupo por \`Anti-Link\`, no permitimos enlaces de *${isChannelLink ? 'canales' : 'otros grupos'}*.`,
+    null
+  );
+
+  // 3. Eliminar el mensaje
+  await sock.sendMessage(msg.chat, {
+    delete: {
+      remoteJid: msg.chat,
+      fromMe: false,
+      id: msg.key.id,
+      participant: msg.key.participant
+    }
+  });
   }
-}

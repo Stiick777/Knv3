@@ -32,31 +32,30 @@ export default {
 
       // ==============================
 // ==============================
-// 🥇 API PRINCIPAL: APICAUSAS
+// 🥇 API PRINCIPAL: LEMPI
 // ==============================
 try {
 
   const { data } = await axios.get(
-    `https://rest.apicausas.xyz/api/v1/descargas/youtube?apikey=causa-ee5ee31dcfc79da4&url=${encodeURIComponent(youtubeLink)}&type=video&quality=420`
+    `https://api.lempi.lat/dl/ytv?url=${encodeURIComponent(youtubeLink)}&apikey=montekey28`
   );
 
   if (
     !data.status ||
-    !data.data ||
-    !data.data.download ||
-    !data.data.download.url
+    !data.descarga ||
+    !data.descarga.url
   ) {
-    throw new Error("ApiCausas inválida");
+    throw new Error("Lempi inválida");
   }
 
-  title = data.data.title || "Video";
-  quality = data.data.quality_tag || "420p";
-  downloadUrl = data.data.download.url;
-  servidor = "ApiCausas";
+  title = data.titulo || "Video";
+  quality = data.descarga.calidad || "360p";
+  downloadUrl = data.descarga.url;
+  servidor = "Lempi";
 
 } catch (e1) {
 
-  console.log("ApiCausas falló, usando StellarWA...");
+  console.log("Lempi falló, usando StellarWA...");
 
   // ==============================
   // 🥈 RESPALDO: STELLARWA

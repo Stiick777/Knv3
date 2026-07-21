@@ -117,44 +117,48 @@ export default {
       // AQUÍ COMIENZA EL BLOQUE DE APIs
       // (ApiCausas -> StellarWA -> Fare)
       // =====================================================
-          // =====================================================
-      // ⭐ API PRINCIPAL: APICAUSAS
-      // =====================================================
-      try {
+          
+// =====================================================
+// ⭐ API PRINCIPAL: APICAUSAS
+// =====================================================
+try {
 
-        const apiCausas =
-          `https://rest.apicausas.xyz/api/v1/descargas/youtube?apikey=causa-ee5ee31dcfc79da4&url=${encodeURIComponent(url)}&type=video&quality=420`;
+  const apiLempi =
+    `https://api.lempi.lat/dl/ytv?url=${encodeURIComponent(url)}&apikey=montekey28`;
 
-        const resC = await fetch(apiCausas);
-        const jsonC = await resC.json();
+  const resL = await fetch(apiLempi);
+  const jsonL = await resL.json();
 
-        if (!jsonC.status || !jsonC.data || !jsonC.data.download || !jsonC.data.download.url) {
-          throw new Error('ApiCausas inválida');
-        }
+  if (
+    !jsonL.status ||
+    !jsonL.descarga ||
+    !jsonL.descarga.url
+  ) {
+    throw new Error('Lempi inválida');
+  }
 
-        const thumb = jsonC.data.thumbnail
-          ? await (await fetch(jsonC.data.thumbnail)).buffer()
-          : null;
+  const thumb = jsonL.miniatura
+    ? await (await fetch(jsonL.miniatura)).buffer()
+    : null;
 
-        await enviarVideo(
-          msg.chat,
-          jsonC.data.download.url,
-          `🎬 ${jsonC.data.title}
-👤 Canal: ${jsonC.data.uploader}
-⏱️ Duración: ${secondString(jsonC.data.duration)}
-🎞️ Calidad: ${jsonC.data.quality_tag}
-🌐 Servidor: ApiCausas`,
-          thumb,
-          msg
-        );
+  await enviarVideo(
+    msg.chat,
+    jsonL.descarga.url,
+    `🎬 ${jsonL.titulo}
+👤 Canal: ${jsonL.canal}
+⏱️ Duración: ${jsonL.duracion}
+🎞️ Calidad: ${jsonL.descarga.calidad}
+🌐 Servidor: Lempi`,
+    thumb,
+    msg
+  );
 
-        await msg.react('✅');
-        return;
+  await msg.react('✅');
+  return;
 
-      } catch (e1) {
-        console.warn('❌ ApiCausas falló, usando StellarWA...');
-      }
-
+} catch (e1) {
+  console.warn('❌ Lempi falló, usando StellarWA...');
+}
       // =====================================================
       // ⭐ RESPALDO 1: STELLARWA
       // =====================================================

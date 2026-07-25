@@ -11,6 +11,15 @@ export default {
         return sock.reply(msg.chat, 'Formato inválido. Usa por ejemplo: 10s, 5m, 2h, 1d', msg);
       }
       const groupMetadata = await sock.groupMetadata(msg.chat);
+      await sock.reply(
+  msg.chat,
+  `📋 *Información del grupo:*
+
+• announce: ${groupMetadata.announce}
+• restrict: ${groupMetadata.restrict}
+• memberAddMode: ${groupMetadata.memberAddMode}`,
+  msg
+);
       const groupAnnouncement = groupMetadata.announce;
       if (groupAnnouncement === false) {
         return sock.reply(msg.chat, `《✧》 El grupo ya está abierto.`, msg);

@@ -4,46 +4,49 @@ export default {
   description: 'Abrir el grupo para que todos puedan enviar mensajes.',
   isAdmin: true,
   botAdmin: true,
+
   run: async ({ msg, sock, args, usedPrefix, command }) => {
     try {
       const timeout = args[0] ? msParser(args[0]) : 0;
+
       if (args[0] && !timeout) {
-        return sock.reply(msg.chat, 'Formato inválido. Usa por ejemplo: 10s, 5m, 2h, 1d', msg);
+        return sock.reply(
+          msg.chat,
+          'Formato inválido. Usa por ejemplo: 10s, 5m, 2h, 1d',
+          msg
+        );
       }
+
       const groups = await sock.groupFetchAllParticipating();
-const group = groups[msg.chat];
+      const group = groups[msg.chat];
 
-await sock.reply(
-  msg.chat,
-  `📋
-
-announce: ${group.announce}
-restrict: ${group.restrict}`,
-  msg
-);
-      const groupAnnouncement = groupMetadata.announce;
-      if (groupAnnouncement === false) {
-        return sock.reply(msg.chat, `《✧》 El grupo ya está abierto.`, msg);
+      if (!group) {
+        return msg.reply('No se pudo obtener la información del grupo.');
       }
+
+      if (!group.announce) {
+        return sock.reply(msg.chat, '《✧》 El grupo ya está abierto.', msg);
+      }
+
       const applyAction = async () => {
         await sock.groupSettingUpdate(msg.chat, 'not_announcement');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-const md = await sock.groupMetadata(msg.chat);
-
-await sock.reply(
-  msg.chat,
-  `announce = ${md.announce}`,
-  msg
-);
-        return sock.reply(msg.chat, `✿ El grupo ha sido abierto correctamente.`, msg);
+        return sock.reply(msg.chat, '✿ El grupo ha sido abierto correctamente.', msg);
       };
+
       if (timeout > 0) {
-        await sock.reply(msg.chat, `❀ El grupo se abrirá en ${clockString(timeout)}.`, msg);
+        await sock.reply(
+          msg.chat,
+          `❀ El grupo se abrirá en ${clockString(timeout)}.`,
+          msg
+        );
+
         setTimeout(async () => {
           try {
-            const md = await sock.groupMetadata(msg.chat);
-            if (md.announce === false) return;
+            const groups = await sock.groupFetchAllParticipating();
+            const group = groups[msg.chat];
+
+            if (!group?.announce) return;
+
             await applyAction();
           } catch {}
         }, timeout);
@@ -51,7 +54,9 @@ await sock.reply(
         await applyAction();
       }
     } catch (e) {
-      return msg.reply(`> An unexpected error occurred while executing command *${usedPrefix + command}*. Please try again or contact support if the issue persists.\n> [Error: *${e.message}*]`);
+      return msg.reply(
+        `> An unexpected error occurred while executing command *${usedPrefix + command}*. Please try again or contact support if the issue persists.\n> [Error: *${e.message}*]`
+      );
     }
   },
 };
@@ -59,8 +64,10 @@ await sock.reply(
 function msParser(str) {
   const match = str.match(/^(\d+)([smhd])$/i);
   if (!match) return null;
+
   const num = parseInt(match[1]);
   const unit = match[2].toLowerCase();
+
   switch (unit) {
     case 's': return num * 1000;
     case 'm': return num * 60 * 1000;
@@ -75,10 +82,12 @@ function clockString(ms) {
   const h = Math.floor(ms / 3600000) % 24;
   const m = Math.floor(ms / 60000) % 60;
   const s = Math.floor(ms / 1000) % 60;
+
   let parts = [];
   if (d > 0) parts.push(`${d} ${d === 1 ? 'día' : 'días'}`);
   if (h > 0) parts.push(`${h} ${h === 1 ? 'hora' : 'horas'}`);
   if (m > 0) parts.push(`${m} ${m === 1 ? 'minuto' : 'minutos'}`);
   if (s > 0) parts.push(`${s} ${s === 1 ? 'segundo' : 'segundos'}`);
+
   return parts.join(' ');
 }

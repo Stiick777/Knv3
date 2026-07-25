@@ -1,57 +1,64 @@
-let cooldowns = {}
+import db from '#db';
+
+let cooldowns = {};
 
 export default {
   command: ['w', 'work', 'chambear', 'chamba', 'trabajar'],
   category: 'rpg',
   description: '',
   run: async ({ msg }) => {
-    let user = global.db.data.users[msg.sender]
-    let tiempo = 5 * 60
+    db.setCreate('users', msg.sender, 'exp', 0);
 
-    if (cooldowns[msg.sender] && Date.now() - cooldowns[msg.sender] < tiempo * 1000) {
+    const user = db.getUser(msg.sender);
+    const tiempo = 5 * 60;
+
+    if (
+      cooldowns[msg.sender] &&
+      Date.now() - cooldowns[msg.sender] < tiempo * 1000
+    ) {
       const tiempo2 = segundosAHMS(
         Math.ceil((cooldowns[msg.sender] + tiempo * 1000 - Date.now()) / 1000)
-      )
+      );
 
       return msg.reply(
         `Espera ⏱️ *${tiempo2}* para volver a Trabajar.`
-      )
+      );
     }
 
-    let rsl = Math.floor(Math.random() * 5000)
+    const rsl = Math.floor(Math.random() * 5000);
 
-    cooldowns[msg.sender] = Date.now()
+    cooldowns[msg.sender] = Date.now();
+
+    db.setUser(msg.sender, 'exp', (user.exp || 0) + rsl);
 
     await msg.reply(
       `⚡ ${pickRandom(trabajo)} *${toNum(rsl)}* ( *${rsl}* ) XP 🍭.`
-    )
-
-    user.exp += rsl
+    );
   },
-}
+};
 
 function toNum(number) {
   if (number >= 1000 && number < 1000000) {
-    return (number / 1000).toFixed(1) + 'k'
+    return (number / 1000).toFixed(1) + 'k';
   } else if (number >= 1000000) {
-    return (number / 1000000).toFixed(1) + 'M'
+    return (number / 1000000).toFixed(1) + 'M';
   } else if (number <= -1000 && number > -1000000) {
-    return (number / 1000).toFixed(1) + 'k'
+    return (number / 1000).toFixed(1) + 'k';
   } else if (number <= -1000000) {
-    return (number / 1000000).toFixed(1) + 'M'
+    return (number / 1000000).toFixed(1) + 'M';
   } else {
-    return number.toString()
+    return number.toString();
   }
 }
 
 function segundosAHMS(segundos) {
-  let minutos = Math.floor((segundos % 3600) / 60)
-  let segundosRestantes = segundos % 60
-  return `${minutos} minutos y ${segundosRestantes} segundos`
+  const minutos = Math.floor((segundos % 3600) / 60);
+  const segundosRestantes = segundos % 60;
+  return `${minutos} minutos y ${segundosRestantes} segundos`;
 }
 
 function pickRandom(list) {
-  return list[Math.floor(list.length * Math.random())]
+  return list[Math.floor(Math.random() * list.length)];
 }
 
 // Thanks to FG98
@@ -89,4 +96,4 @@ const trabajo = [
   "Trabajas como zoólogo y ganas",
   "Vendiste sándwiches de pescado y obtuviste",
   "Reparas las máquinas recreativas y recibes",
-]
+];

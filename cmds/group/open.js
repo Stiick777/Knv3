@@ -26,6 +26,15 @@ export default {
       }
       const applyAction = async () => {
         await sock.groupSettingUpdate(msg.chat, 'not_announcement');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+const md = await sock.groupMetadata(msg.chat);
+
+await sock.reply(
+  msg.chat,
+  `announce = ${md.announce}`,
+  msg
+);
         return sock.reply(msg.chat, `✿ El grupo ha sido abierto correctamente.`, msg);
       };
       if (timeout > 0) {

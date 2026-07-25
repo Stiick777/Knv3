@@ -10,14 +10,15 @@ export default {
       if (args[0] && !timeout) {
         return sock.reply(msg.chat, 'Formato inválido. Usa por ejemplo: 10s, 5m, 2h, 1d', msg);
       }
-      const groupMetadata = await sock.groupMetadata(msg.chat);
-      await sock.reply(
-  msg.chat,
-  `📋 *Información del grupo:*
+      const groups = await sock.groupFetchAllParticipating();
+const group = groups[msg.chat];
 
-• announce: ${groupMetadata.announce}
-• restrict: ${groupMetadata.restrict}
-• memberAddMode: ${groupMetadata.memberAddMode}`,
+await sock.reply(
+  msg.chat,
+  `📋
+
+announce: ${group.announce}
+restrict: ${group.restrict}`,
   msg
 );
       const groupAnnouncement = groupMetadata.announce;

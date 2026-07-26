@@ -43,13 +43,7 @@ export default {
       null
     );
 
-    try {
-      await msg.react('🕓');
-      const url = yt_play[0].url;
-      let title = 'audio';
-      let downloadUrl = '';
-      const mimetype = 'audio/mpeg';
-      const fileExt = 'mp3';
+    
 
  try {
   await msg.react('🕓');

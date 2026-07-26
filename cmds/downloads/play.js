@@ -127,7 +127,7 @@ export default {
     { quoted: msg }
   );
  }
-  
+  }
 };
 
 // 📌 Funciones compartidas

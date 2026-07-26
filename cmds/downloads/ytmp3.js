@@ -19,25 +19,68 @@ export default {
       await msg.react('⏳');
 
       // ============================================================
-      // 🔥 API DELIRIUS
       // ============================================================
-      const apiUrl = `https://api.delirius.store/download/ytmp3?url=${encodeURIComponent(text)}`;
+// 🔥 APIs de descarga
+// ============================================================
+let title = "audio";
+let author = "Desconocido";
+let views = "0";
+let likes = "0";
+let image = "";
+let download = "";
 
-      const res = await fetch(apiUrl);
-      const json = await res.json();
+// 🥇 AlyaCore V2
+try {
+  const res = await fetch(
+    `https://api.alyacore.xyz/dl/ytmp3v2?url=${encodeURIComponent(text)}&key=LUFFY-FIX67`
+  );
+  const json = await res.json();
 
-      if (!json.status || !json.data?.download) {
-        throw new Error("La API no devolvió el audio.");
-      }
+  if (!json.status || !json.data?.dl) {
+    throw new Error("AlyaCore V2 falló");
+  }
 
-      const {
-        title = "audio",
-        author = "Desconocido",
-        views = "0",
-        likes = "0",
-        image,
-        download
-      } = json.data;
+  title = json.data.title || title;
+  image = json.data.thumbnail || "";
+  download = json.data.dl;
+
+} catch {
+
+  // 🔁 AlyaCore V1
+  try {
+    const res = await fetch(
+      `https://api.alyacore.xyz/dl/ytmp3?url=${encodeURIComponent(text)}&key=LUFFY-FIX67`
+    );
+    const json = await res.json();
+
+    if (!json.status || !json.data?.dl) {
+      throw new Error("AlyaCore V1 falló");
+    }
+
+    title = json.data.title || title;
+    author = json.data.author || author;
+    image = json.data.thumbnail || "";
+    download = json.data.dl;
+
+  } catch {
+
+    // 🆘 Yuki Wabot
+    const res = await fetch(
+      `https://api.yuki-wabot.my.id/dl/ytmp3v2?url=${encodeURIComponent(text)}&key=YukiBot-MD`
+    );
+    const json = await res.json();
+
+    if (!json.status || !json.data?.dl) {
+      throw new Error("Todas las APIs fallaron");
+    }
+
+    title = json.data.fileName
+      ? json.data.fileName.replace(/\.mp3$/i, "")
+      : title;
+
+    download = json.data.dl;
+  }
+}
 
       // ============================================================
       // 📦 Obtener tamaño del archivo

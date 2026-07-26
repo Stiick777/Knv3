@@ -51,62 +51,88 @@ export default {
       const mimetype = 'audio/mpeg';
       const fileExt = 'mp3';
 
-      // 🥇 DELIRIUS API
-      try {
-        const resDel = await fetch(`https://api.delirius.store/download/ytmp3?url=${encodeURIComponent(url)}`);
-        const jsonDel = await resDel.json();
-        if (jsonDel.status && jsonDel.data?.download) {
-          title = jsonDel.data.title || title;
-          downloadUrl = jsonDel.data.download;
-        } else {
-          throw new Error('Delirius 1 sin datos');
-        }
-      } catch (e1) {
-        // 🔁 DELIRIUS V2
-        try {
-          const resDel2 = await fetch(`https://api.delirius.store/download/ytmp3v2?url=${encodeURIComponent(url)}`);
-          const jsonDel2 = await resDel2.json();
-          if (jsonDel2.success && jsonDel2.data?.download) {
-            title = jsonDel2.data.title || title;
-            downloadUrl = jsonDel2.data.download;
-          } else {
-            throw new Error('Delirius 2 sin datos');
-          }
-        } catch (e2) {
-          // 🧯 ANABOT
-          try {
-            const resAna = await fetch('https://anabot.my.id/api/download/ytmp3', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ url, apikey: 'freeApikey' })
-            });
-            const jsonAna = await resAna.json();
-            if (jsonAna.success && jsonAna.data?.result?.success && jsonAna.data?.result?.urls) {
-              title = jsonAna.data.result.metadata.title || title;
-              downloadUrl = jsonAna.data.result.urls;
-            } else {
-              throw new Error('Todas las APIs fallaron');
-            }
-          } catch (e3) {
-            throw new Error('Todas las APIs fallaron');
-          }
-        }
+ try {
+  await msg.react('🕓');
+
+  const url = yt_play[0].url;
+  let title = 'audio';
+  let downloadUrl = '';
+
+  // 🥇 AlyaCore V2
+  try {
+    const res = await fetch(
+      `https://api.alyacore.xyz/dl/ytmp3v2?url=${encodeURIComponent(url)}&key=LUFFY-FIX67`
+    );
+    const json = await res.json();
+
+    if (json.status && json.data?.dl) {
+      title = json.data.title || title;
+      downloadUrl = json.data.dl;
+    } else {
+      throw new Error('AlyaCore V2 sin datos');
+    }
+
+  } catch {
+
+    // 🔁 AlyaCore V1
+    try {
+      const res = await fetch(
+        `https://api.alyacore.xyz/dl/ytmp3?url=${encodeURIComponent(url)}&key=LUFFY-FIX67`
+      );
+      const json = await res.json();
+
+      if (json.status && json.data?.dl) {
+        title = json.data.title || title;
+        downloadUrl = json.data.dl;
+      } else {
+        throw new Error('AlyaCore V1 sin datos');
       }
 
-      await sock.sendMessage(msg.chat, {
-        audio: { url: downloadUrl },
-        mimetype,
-        fileName: `${title}.${fileExt}`,
-        ptt: false
-      }, { quoted: msg });
+    } catch {
 
-      await msg.react('✅');
+      // 🆘 Yuki Wabot
+      const res = await fetch(
+        `https://api.yuki-wabot.my.id/dl/ytmp3v2?url=${encodeURIComponent(url)}&key=YukiBot-MD`
+      );
+      const json = await res.json();
 
-    } catch (err) {
-      await msg.react('❌');
-      console.error(err);
-      await sock.sendMessage(msg.chat, { text: '❌ Error al descargar el audio (todas las APIs fallaron)' }, { quoted: msg });
+      if (json.status && json.data?.dl) {
+        title = json.data.fileName
+          ? json.data.fileName.replace(/\.mp3$/i, '')
+          : title;
+
+        downloadUrl = json.data.dl;
+      } else {
+        throw new Error('Todas las APIs fallaron');
+      }
     }
+  }
+
+  await sock.sendMessage(
+    msg.chat,
+    {
+      audio: { url: downloadUrl },
+      mimetype: 'audio/mpeg',
+      fileName: `${title}.mp3`,
+      ptt: false
+    },
+    { quoted: msg }
+  );
+
+  await msg.react('✅');
+
+} catch (err) {
+  console.error(err);
+  await msg.react('❌');
+
+  await sock.sendMessage(
+    msg.chat,
+    {
+      text: '❌ Error al descargar el audio (todas las APIs fallaron).'
+    },
+    { quoted: msg }
+  );
+ }
   }
 };
 

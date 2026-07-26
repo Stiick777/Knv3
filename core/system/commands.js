@@ -18,75 +18,44 @@ https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N
 export const menuObject = {
   economia: `╭──〔 ×𝑹×𝑷×𝑮× 〕─
 ╞˚₊·͟͟͞͞➳❥ .perfil
-╞˚₊·͟͟͞͞➳❥ .bal
-╞˚₊·͟͟͞͞➳❥ .banco
-╞˚₊·͟͟͞͞➳❥ .cofre
-╞˚₊·͟͟͞͞➳❥ .crimen
 ╞˚₊·͟͟͞͞➳❥ .daily
-╞˚₊·͟͟͞͞➳❥ .depositar
-╞˚₊·͟͟͞͞➳❥ .lb
-╞˚₊·͟͟͞͞➳❥ .levelup
-╞˚₊·͟͟͞͞➳❥ .minar
-╞˚₊·͟͟͞͞➳❥ .retirar
-╞˚₊·͟͟͞͞➳❥ .roball
-╞˚₊·͟͟͞͞➳❥ .rob2
-╞˚₊·͟͟͞͞➳❥ .rob
 ╞˚₊·͟͟͞͞➳❥ .trabajar
-╞˚₊·͟͟͞͞➳❥ .transfer [tipo] [cantidad] [@tag]
 ╰──〔❨✧✧❩〕──╯`,
   gacha: `╭──〔 𝑨𝑵𝑰𝑴𝑬𝑺 〕─
-╞˚₊·͟͟͞͞➳❥ .shinobu
-╞˚₊·͟͟͞͞➳❥ .waifu
+╞˚₊·͟͟͞͞➳❥ .pw
+╞˚₊·͟͟͞͞➳❥ .mp
+╞˚₊·͟͟͞͞➳❥ .sell
+╞˚₊·͟͟͞͞➳❥ .topp
+╞˚₊·͟͟͞͞➳❥ .rc
 ╰──〔❨✧✧❩〕──╯`,
   downloads: `╭──〔 𝑫𝑬𝑺𝑪𝑨𝑹𝑮𝑨𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .apk
 ╞˚₊·͟͟͞͞➳❥ .facebook
 ╞˚₊·͟͟͞͞➳❥ .fb
-╞˚₊·͟͟͞͞➳❥ .fb2
-╞˚₊·͟͟͞͞➳❥ .gitclone <url git>
-╞˚₊·͟͟͞͞➳❥ .instagram
 ╞˚₊·͟͟͞͞➳❥ .ig
 ╞˚₊·͟͟͞͞➳❥ .mediafire
-╞˚₊·͟͟͞͞➳❥ .mf2
-╞˚₊·͟͟͞͞➳❥ .apk2
 ╞˚₊·͟͟͞͞➳❥ .pindl <url>
-╞˚₊·͟͟͞͞➳❥ .playp
 ╞˚₊·͟͟͞͞➳❥ .play2
-╞˚₊·͟͟͞͞➳❥ .play8
-╞˚₊·͟͟͞͞➳❥ .play <texto>
-╞˚₊·͟͟͞͞➳❥ .spotify <texto>
+╞˚₊·͟͟͞͞➳❥ .play
 ╞˚₊·͟͟͞͞➳❥ .tiktok
-╞˚₊·͟͟͞͞➳❥ .tiktok2
 ╞˚₊·͟͟͞͞➳❥ .playv2 <texto>
-╞˚₊·͟͟͞͞➳❥ .tw
 ╞˚₊·͟͟͞͞➳❥ .ytmp3 <url>
 ╞˚₊·͟͟͞͞➳❥ .ytmp4doc <link yt>
-╞˚₊·͟͟͞͞➳❥ .ytv
 ╞˚₊·͟͟͞͞➳❥ .ytmp4
-╞˚₊·͟͟͞͞➳❥ .mega
 ╰──〔❨✧✧❩〕──╯`,
   profile: `╭──〔 𝑰𝑵𝑭𝑶×𝑩𝑶𝑻 〕─
-╞˚₊·͟͟͞͞➳❥ .ajustesbot
 ╞˚₊·͟͟͞͞➳❥ .owner
-╞˚₊·͟͟͞͞➳❥ .ofcc
-╞˚₊·͟͟͞͞➳❥ .dash
-╞˚₊·͟͟͞͞➳❥ .user
-╞˚₊·͟͟͞͞➳❥ .grupos
 ╞˚₊·͟͟͞͞➳❥ .ping
-╞˚₊·͟͟͞͞➳❥ .speed
 ╞˚₊·͟͟͞͞➳❥ .status
 ╞˚₊·͟͟͞͞➳❥ .botreglas
 ╞˚₊·͟͟͞͞➳❥ .menu
-╞˚₊·͟͟͞͞➳❥ .runtime
 ╞˚₊·͟͟͞͞➳❥ .reportar
 ╰──〔❨✧✧❩〕──╯`,
   sockets: `╭──〔 𝑺𝑬𝑹𝑩𝑶𝑻 〕─
-╞˚₊·͟͟͞͞➳❥ .delbs
-╞˚₊·͟͟͞͞➳❥ .sockets
-╞˚₊·͟͟͞͞➳❥ .jad
-╞˚₊·͟͟͞͞➳❥ .cou
+╞˚₊·͟͟͞͞➳❥ .setprimary
+╞˚₊·͟͟͞͞➳❥ .QR
+╞˚₊·͟͟͞͞➳❥ .code
 ╞˚₊·͟͟͞͞➳❥ .bots
-╞˚₊·͟͟͞͞➳❥ .serbot
 ╰──〔❨✧✧❩〕──╯`,
   stickers: `╭──〔 𝑺𝑻𝑰𝑪𝑲𝑬𝑹𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .brat <txt>
@@ -97,28 +66,18 @@ export const menuObject = {
 ╰──〔❨✧✧❩〕──╯`,
   utils: `╭──〔 𝑯𝑬𝑹𝑹𝑨𝑴𝑰𝑬𝑵𝑻𝑨𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .hd
-╞˚₊·͟͟͞͞➳❥ .inspect
-╞˚₊·͟͟͞͞➳❥ .inspeccionar
-╞˚₊·͟͟͞͞➳❥ .nowa +52xxxxxx
-╞˚₊·͟͟͞͞➳❥ .readvo
 ╞˚₊·͟͟͞͞➳❥ .translate <idioma+txt>
-╞˚₊·͟͟͞͞➳❥ .whatm2
 ╞˚₊·͟͟͞͞➳❥ .whatmusic
 ╞˚₊·͟͟͞͞➳❥ .pp
-╞˚₊·͟͟͞͞➳❥ .readmore <teks>|<teks>
-╞˚₊·͟͟͞͞➳❥ .document <audio/video>
-╞˚₊·͟͟͞͞➳❥ .transcripyt <url>
 ╰──〔❨✧✧❩〕──╯`,
   grupo: `╭──〔 𝑮𝑹𝑼𝑷𝑶𝑺 〕─
-╞˚₊·͟͟͞͞➳❥ .enable <option>
-╞˚₊·͟͟͞͞➳❥ .disable <option>
-╞˚₊·͟͟͞͞➳❥ .bienvenidos
+╞˚₊·͟͟͞͞➳❥ .welcome
 ╞˚₊·͟͟͞͞➳❥ .abrir
 ╞˚₊·͟͟͞͞➳❥ .cerrar
 ╞˚₊·͟͟͞͞➳❥ .open
 ╞˚₊·͟͟͞͞➳❥ .close
 ╞˚₊·͟͟͞͞➳❥ .delete
-╞˚₊·͟͟͞͞➳❥ .delwarn
+╞˚₊·͟͟͞͞➳❥ .goodbye
 ╞˚₊·͟͟͞͞➳❥ .demote
 ╞˚₊·͟͟͞͞➳❥ .hidetag
 ╞˚₊·͟͟͞͞➳❥ .infogrupo
@@ -128,100 +87,44 @@ export const menuObject = {
 ╞˚₊·͟͟͞͞➳❥ .tagall <mesaje>
 ╞˚₊·͟͟͞͞➳❥ .invocar <mesaje>
 ╞˚₊·͟͟͞͞➳❥ .resetlink
-╞˚₊·͟͟͞͞➳❥ .setppgc
-╞˚₊·͟͟͞͞➳❥ .setprimary
-╞˚₊·͟͟͞͞➳❥ .invite <521>
-╞˚₊·͟͟͞͞➳❥ admins <texto>
-╞˚₊·͟͟͞͞➳❥ .gpbanner
+╞˚₊·͟͟͞͞➳❥ .setgoodbye
+╞˚₊·͟͟͞͞➳❥ .setclear
 ╞˚₊·͟͟͞͞➳❥ .groupdesc <text>
 ╞˚₊·͟͟͞͞➳❥ .gruponame <text>
-╞˚₊·͟͟͞͞➳❥ .setby
 ╞˚₊·͟͟͞͞➳❥ .setwelcome
 ╰──〔❨✧✧❩〕──╯`,
   nsfw: `╭──〔 𝑱𝑼𝑬𝑮𝑶𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .69 @tag
-╞˚₊·͟͟͞͞➳❥ .acertijo
 ╞˚₊·͟͟͞͞➳❥ .sonrojarse @tag
-╞˚₊·͟͟͞͞➳❥ .gay <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .lesbiana <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .pajer@ <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .put@ <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .manc@ <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .rata <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .prostitut@ <@tag> | <nombre>
-╞˚₊·͟͟͞͞➳❥ .apostar <cantidad>
-╞˚₊·͟͟͞͞➳❥ .chupartetas @tag
-╞˚₊·͟͟͞͞➳❥ .color
-╞˚₊·͟͟͞͞➳❥ .consejo
-╞˚₊·͟͟͞͞➳❥ .dado
-╞˚₊·͟͟͞͞➳❥ .dance <@user>
 ╞˚₊·͟͟͞͞➳❥ .divorce
 ╞˚₊·͟͟͞͞➳❥ .embarazar @tag
-╞˚₊·͟͟͞͞➳❥ .formarpareja5
 ╞˚₊·͟͟͞͞➳❥ .abrazar @tag
 ╞˚₊·͟͟͞͞➳❥ .kill/matar @tag
-╞˚₊·͟͟͞͞➳❥ .violar @tag
 ╞˚₊·͟͟͞͞➳❥ .laugh @tag
 ╞˚₊·͟͟͞͞➳❥ .lamber @tag
 ╞˚₊·͟͟͞͞➳❥ .enamorada @tag
-╞˚₊·͟͟͞͞➳❥ .marry @usuario
-╞˚₊·͟͟͞͞➳❥ .meme
+╞˚₊·͟͟͞͞➳❥ .marry @usuauso
 ╞˚₊·͟͟͞͞➳❥ .morder @tag
-╞˚₊·͟͟͞͞➳❥ .imagen
-╞˚₊·͟͟͞͞➳❥ .violar @tag
-╞˚₊·͟͟͞͞➳❥ .partido
-╞˚₊·͟͟͞͞➳❥ .delp
-╞˚₊·͟͟͞͞➳❥ .acariciar @tag
-╞˚₊·͟͟͞͞➳❥ .personalidad
-╞˚₊·͟͟͞͞➳❥ .piropo
+╞˚₊·͟͟͞͞➳❥ .acaracar @tag
 ╞˚₊·͟͟͞͞➳❥ .pucheros @tag
-╞˚₊·͟͟͞͞➳❥ .pregunta
 ╞˚₊·͟͟͞͞➳❥ .golpear @tag
-╞˚₊·͟͟͞͞➳❥ .reto
-╞˚₊·͟͟͞͞➳❥ .ruleta <cantidad> <color>
 ╞˚₊·͟͟͞͞➳❥ .triste @tag
 ╞˚₊·͟͟͞͞➳❥ .scared @tag
 ╞˚₊·͟͟͞͞➳❥ .ship
 ╞˚₊·͟͟͞͞➳❥ .love
 ╞˚₊·͟͟͞͞➳❥ .timida @tag
-╞˚₊·͟͟͞͞➳❥ .bot
 ╞˚₊·͟͟͞͞➳❥ .dormir @tag
-╞˚₊·͟͟͞͞➳❥ .dormir @tag
-╞˚₊·͟͟͞͞➳❥ .top <texto>
-╞˚₊·͟͟͞͞➳❥ .trivia
-╞˚₊·͟͟͞͞➳❥ .ahorcado
-╞˚₊·͟͟͞͞➳❥ .delttt <txt>
-╞˚₊·͟͟͞͞➳❥ .ppt
-╞˚₊·͟͟͞͞➳❥ .slot <apuesta>
-╞˚₊·͟͟͞͞➳❥ .ttt
-╞˚₊·͟͟͞͞➳❥ .tictactoe
-╞˚₊·͟͟͞͞➳❥ .cf
-╞˚₊·͟͟͞͞➳❥ .buscarp <nombre|ID>
-╞˚₊·͟͟͞͞➳❥ .mp
-╞˚₊·͟͟͞͞➳❥ .rc
-╞˚₊·͟͟͞͞➳❥ .toppersonajes
-╞˚₊·͟͟͞͞➳❥ .listpersonajes
-╞˚₊·͟͟͞͞➳❥ .sell <name-personaje>
-╞˚₊·͟͟͞͞➳❥ .pw
 ╰──〔❨✧✧❩〕──╯`,
   anime: `╭──〔 𝑩𝑼𝑺𝑪𝑨𝑫𝑶𝑹𝑬𝑺 〕─
-╞˚₊·͟͟͞͞➳❥ .githubsearch
 ╞˚₊·͟͟͞͞➳❥ .google <búsqueda>
-╞˚₊·͟͟͞͞➳❥ .pinterest2 <búsqueda>
-╞˚₊·͟͟͞͞➳❥ .cxc
 ╞˚₊·͟͟͞͞➳❥ .ytsearch
 ╞˚₊·͟͟͞͞➳❥ .imagen <query>
 ╞˚₊·͟͟͞͞➳❥ .pinterest <query>
 ╞˚₊·͟͟͞͞➳❥ .letra
 ╞˚₊·͟͟͞͞➳❥ .tiktoksearch <txt>
-╞˚₊·͟͟͞͞➳❥ .tiktoksearch2 <txt>
-╞˚₊·͟͟͞͞➳❥ .wikipedia
 ╰──〔❨✧✧❩〕──╯
 ╭──〔 ×𝑨×𝑰× 〕─
-╞˚₊·͟͟͞͞➳❥ .bard
 ╞˚₊·͟͟͞͞➳❥ .ia <texto>
-╞˚₊·͟͟͞͞➳❥ .dalle
-╞˚₊·͟͟͞͞➳❥ .iaq <img + txt>
 ╰──〔❨✧✧❩〕──╯
 > 🍁 Provided by Stiiven`
 }

@@ -10,54 +10,58 @@ export default {
   run: async ({ msg, sock, args, usedPrefix, command }) => {
 
     if (!args.length) {
-      return msg.reply(
+  return msg.reply(
 `*💡 Uso correcto:*
 
-${usedPrefix + command} gatos 5
+${usedPrefix + command} gatos 3
 
 📌 Debes indicar la cantidad de imágenes que deseas enviar.
 
 *Mínimo:* 1
 *Máximo:* ${MAX_IMAGES}`
-      );
-    }
+  );
+}
 
-    const lastArg = args[args.length - 1];
+const lastArg = args[args.length - 1];
+const hasNumber = /^\d+$/.test(lastArg);
 
-    if (!/^\d+$/.test(lastArg)) {
-      return msg.reply(
-`❌ *Proporciona un número para el envío de las imágenes.*
+// Texto que escribió el usuario (sin el número si existe)
+const text = hasNumber
+  ? args.slice(0, -1).join(" ").trim()
+  : args.join(" ").trim();
+
+if (!hasNumber) {
+  return msg.reply(
+`❌ *Proporciona la cantidad de imágenes que deseas enviar.*
 
 *Ejemplo:*
-${usedPrefix + command} gatos 5
+${usedPrefix + command} ${text} 3
 
 *Mínimo:* 1
 *Máximo:* ${MAX_IMAGES}`
-      );
-    }
+  );
+}
 
-    const amount = Number(lastArg);
+const amount = Number(lastArg);
 
-    if (amount < 1) {
-      return msg.reply("❌ La cantidad debe ser mayor a *0*.");
-    }
+if (amount < 1) {
+  return msg.reply("❌ La cantidad debe ser mayor a *0*.");
+}
 
-    if (amount > MAX_IMAGES) {
-      return msg.reply(
-        `❌ Solo puedes solicitar un máximo de *${MAX_IMAGES} imágenes*.`
-      );
-    }
+if (amount > MAX_IMAGES) {
+  return msg.reply(
+    `❌ Solo puedes solicitar un máximo de *${MAX_IMAGES} imágenes*.`
+  );
+}
 
-    const text = args.slice(0, -1).join(" ").trim();
-
-    if (!text) {
-      return msg.reply(
+if (!text) {
+  return msg.reply(
 `❌ Debes escribir una búsqueda.
 
 *Ejemplo:*
-${usedPrefix + command} gatos 5`
-      );
-    }
+${usedPrefix + command} gatos 3`
+  );
+}
 
     await msg.react("📌");
 

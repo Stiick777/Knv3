@@ -118,7 +118,6 @@ export const menuObject = {
   anime: `╭──〔 𝑩𝑼𝑺𝑪𝑨𝑫𝑶𝑹𝑬𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .google <búsqueda>
 ╞˚₊·͟͟͞͞➳❥ .ytsearch
-╞˚₊·͟͟͞͞➳❥ .imagen <query>
 ╞˚₊·͟͟͞͞➳❥ .pinterest <query>
 ╞˚₊·͟͟͞͞➳❥ .letra
 ╞˚₊·͟͟͞͞➳❥ .tiktoksearch <txt>

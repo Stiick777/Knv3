@@ -114,76 +114,75 @@ export default {
       }
 
       // =====================================================
-      // AQUÍ COMIENZA EL BLOQUE DE APIs
-      // (ApiCausas -> StellarWA -> Fare)
-      // =====================================================
-          
-// =====================================================
-// ⭐ API PRINCIPAL: APICAUSAS
-// =====================================================
-try {
-
-  const apiLempi =
-    `https://api.lempi.lat/dl/ytv?url=${encodeURIComponent(url)}&apikey=montekey28`;
-
-  const resL = await fetch(apiLempi);
-  const jsonL = await resL.json();
-
-  if (
-    !jsonL.status ||
-    !jsonL.descarga ||
-    !jsonL.descarga.url
-  ) {
-    throw new Error('Lempi inválida');
-  }
-
-  const thumb = jsonL.miniatura
-    ? await (await fetch(jsonL.miniatura)).buffer()
-    : null;
-
-  await enviarVideo(
-    msg.chat,
-    jsonL.descarga.url,
-    `🎬 ${jsonL.titulo}
-👤 Canal: ${jsonL.canal}
-⏱️ Duración: ${jsonL.duracion}
-🎞️ Calidad: ${jsonL.descarga.calidad}
-🌐 Servidor: Lempi`,
-    thumb,
-    msg
-  );
-
-  await msg.react('✅');
-  return;
-
-} catch (e1) {
-  console.warn('❌ Lempi falló, usando StellarWA...');
-}
-      // =====================================================
-      // ⭐ RESPALDO 1: STELLARWA
+      // ⭐ API PRINCIPAL: FAA
       // =====================================================
       try {
 
-        const apiStellar =
-          `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(url)}&key=proyectsV2`;
+        const api =
+          `https://api-faa.my.id/faa/ytmp4?url=${encodeURIComponent(url)}`;
 
-        const resS = await fetch(apiStellar);
-        const jsonS = await resS.json();
+        const res = await fetch(api);
+        const json = await res.json();
 
-        if (!jsonS.status || !jsonS.result || !jsonS.result.downloadUrl) {
-          throw new Error('StellarWA inválida');
+        if (
+          !json.status ||
+          !json.result ||
+          !json.result.download_url
+        ) {
+          throw new Error('FAA inválida');
         }
 
-        const thumb = jsonS.result.thumbnail
-          ? await (await fetch(jsonS.result.thumbnail)).buffer()
-          : null;
+        const thumb = await (await fetch(yt_play[0].thumbnail)).buffer();
 
         await enviarVideo(
           msg.chat,
-          jsonS.result.downloadUrl,
-          `🎬 ${jsonS.result.title}
-🎞️ Calidad: ${jsonS.result.format || '360p'}
-🌐 Servidor: StellarWA`,
+          json.result.download_url,
+          `🎬 ${yt_play[0].title}
+⏱️ Duración: ${secondString(duracionSegundos)}
+🎞️ Formato: ${json.result.format}
+🌐 Servidor: FAA`,
+          thumb,
+          msg
+        );
+
+        await msg.react('✅');
+        return;
+
+      } catch (e1) {
+        console.warn('❌ FAA falló, usando Yuki...');
+      }
+
+      // =====================================================
+      // ⭐ RESPALDO 1: YUKI-WABOT
+      // =====================================================
+      try {
+
+        const api =
+          `https://api.yuki-wabot.my.id/dl/ytmp4v2?url=${encodeURIComponent(url)}&key=YukiBot-MD`;
+
+        const res = await fetch(api);
+        const json = await res.json();
+
+        if (
+          !json.status ||
+          !json.download ||
+          !json.download.url
+        ) {
+          throw new Error('Yuki inválida');
+        }
+
+        const thumb = json.data?.thumbnail
+          ? await (await fetch(json.data.thumbnail)).buffer()
+          : await (await fetch(yt_play[0].thumbnail)).buffer();
+
+        await enviarVideo(
+          msg.chat,
+          json.download.url,
+          `🎬 ${json.data.title}
+⏱️ Duración: ${json.data.duration}
+👁️ Vistas: ${json.data.views}
+🎞️ Calidad: ${json.download.quality}p
+🌐 Servidor: Yuki`,
           thumb,
           msg
         );
@@ -192,42 +191,37 @@ try {
         return;
 
       } catch (e2) {
-        console.warn('❌ StellarWA falló, usando Fare...');
+        console.warn('❌ Yuki falló, usando AlyaCore...');
       }
 
       // =====================================================
-      // ⭐ RESPALDO 2: FARE.INK
+      // ⭐ RESPALDO 2: ALYACORE
       // =====================================================
       try {
 
-        const apiFare =
-          `https://fare.ink/dl/ytv?url=${encodeURIComponent(url)}&apikey=kanbot`;
+        const api =
+          `https://api.alyacore.xyz/dl/ytmp4?url=${encodeURIComponent(url)}&quality=auto&key=LUFFY-FIX67`;
 
-        const resF = await fetch(apiFare, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        const res = await fetch(api);
+        const json = await res.json();
 
-        const jsonF = await resF.json();
-
-        if (!jsonF.status || !jsonF.descarga || !jsonF.descarga.url) {
-          throw new Error('Fare inválida');
+        if (
+          !json.status ||
+          !json.data ||
+          !json.data.dl
+        ) {
+          throw new Error('AlyaCore inválida');
         }
 
-        const thumb = jsonF.miniatura
-          ? await (await fetch(jsonF.miniatura)).buffer()
-          : null;
+        const thumb = await (await fetch(yt_play[0].thumbnail)).buffer();
 
         await enviarVideo(
           msg.chat,
-          jsonF.descarga.url,
-          `🎬 ${jsonF.titulo}
-👤 Canal: ${jsonF.canal}
-⏱️ Duración: ${jsonF.duracion}
-👁️ Vistas: ${jsonF.vistas}
-🎞️ Calidad: ${jsonF.descarga.calidad}
-🌐 Servidor: Fare`,
+          json.data.dl,
+          `🎬 ${json.data.title}
+⏱️ Duración: ${secondString(duracionSegundos)}
+🎞️ Calidad: ${json.data.quality}
+🌐 Servidor: AlyaCore`,
           thumb,
           msg
         );

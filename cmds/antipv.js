@@ -20,7 +20,7 @@ export async function before({ msg, sock, isOwner, isROwner }) {
     const mention = msg.pushName || jid.split('@')[0];
 
     await msg.reply(
-      `*[ ✰ ] Hola *${mention}*, no está permitido escribir al privado del bot, por lo que serás bloqueado.*`
+      `[ ✰ ] Hola *${mention}*, no está permitido escribir al privado del bot, por lo que serás bloqueado.\n > si quiere usar el bot puede hacerlo en el grupo oficial\n https://chat.whatsapp.com/FhJrUdTpY8AL9jXcmb4ohT`
     );
 
     await sock.updateBlockStatus(jid, 'block');

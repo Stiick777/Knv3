@@ -1,6 +1,6 @@
 import db from '#db';
 export default {
-  command: ['welcome', 'bienvenida', 'goodbye', 'despedida', 'alerts', 'alertas', 'nsfw', 'antilink', 'antienlaces', 'antilinks', 'antistatus', 'antiestados', 'rpg', 'economy', 'economia', 'gacha', 'adminonly', 'onlyadmin'],
+  command: ['welcome', 'bienvenida', 'goodbye', 'despedida', 'alerts', 'alertas', 'nsfw', 'antilink', 'antienlaces', 'antilinks', 'antistatus', 'antiestados', 'rpg', 'economy', 'economia', 'gacha', 'adminonly', 'onlyadmin', 'private', 'antiprivado'],
   category: 'group',
   description: 'Configurar opciones del grupo.',
   isAdmin: true,
@@ -29,7 +29,9 @@ export default {
       onlyadmin: 'adminonly',
       nsfw: 'nsfw',
       rpg: 'gacha',
-      gacha: 'gacha'
+      gacha: 'gacha',
+      antiprivate: 'antiPrivate',
+private: 'antiPrivate',
     };
     const featureNames = {
       antilinks: 'el *AntiEnlace*',
@@ -40,7 +42,8 @@ export default {
       economy: 'los comandos de *Economía*',
       gacha: 'los comandos de *Gacha*',
       adminonly: 'el modo *Solo Admin*',
-      nsfw: 'los comandos *NSFW*'
+      nsfw: 'los comandos *NSFW*',
+      antiPrivate: 'el *AntiPrivado*',
     };
     const featureTitles = {
       antilinks: 'AntiEnlace',
@@ -51,7 +54,8 @@ export default {
       economy: 'Economía',
       gacha: 'Gacha',
       adminonly: 'AdminOnly',
-      nsfw: 'NSFW'
+      nsfw: 'NSFW',
+      antiPrivate: 'AntiPrivado',
     };
     const messages = {
       antilinks: `> Si el *antienlace* está activado, *${botname}* eliminará a todos los usuarios que envíen links de otros grupos.`,
@@ -59,7 +63,8 @@ export default {
       welcome: `> Si el mensaje de bienvenida está activado, *${botname}* enviará un mensaje de bienvenida a los nuevos miembros del grupo.`,
       goodbye: `> Si el mensaje de despedida está activado, *${botname}* enviará un mensaje de despedida en el momento que un usuario abandone el grupo.`,
       alerts: `> Si las alertas están activadas, *${botname}* avisará a los administradores cuando se realicen cambios en admins.`,
-      adminonly: `> Si el modo *Solo Admin* está activado, solo los administradores podrán utilizar los comandos de *${botname}*.`
+      adminonly: `> Si el modo *Solo Admin* está activado, solo los administradores podrán utilizar los comandos de *${botname}*.`,
+      antiPrivate: `> Si el *AntiPrivado* está activado, *${botname}* bloqueará automáticamente a cualquier usuario que le escriba por privado, excepto a los propietarios del bot.`,
     };
     const normalizedKey = mapTerms[command] || command;
     const current = chatData[normalizedKey] === true || chatData[normalizedKey] === 1;

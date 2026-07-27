@@ -1,6 +1,6 @@
 import db from '#db';
 export default {
-  command: ['welcome', 'bienvenida', 'goodbye', 'despedida', 'alerts', 'alertas', 'nsfw', 'antilink', 'antienlaces', 'antilinks', 'antistatus', 'antiestados', 'rpg', 'economy', 'economia', 'gacha', 'adminonly', 'onlyadmin', 'private', 'antiprivado'],
+  command: ['welcome', 'bienvenida', 'goodbye', 'despedida', 'alerts', 'alertas', 'nsfw', 'antilink', 'antienlaces', 'antilinks', 'antistatus', 'antiestados', 'rpg', 'economy', 'economia', 'gacha', 'adminonly', 'onlyadmin', 'private', 'antiprivado', 'antiprivate'],
   category: 'group',
   description: 'Configurar opciones del grupo.',
   isAdmin: true,
@@ -31,7 +31,7 @@ export default {
       rpg: 'gacha',
       gacha: 'gacha',
       antiprivate: 'antiPrivate',
-private: 'antiPrivate',
+      private: 'antiPrivate',
     };
     const featureNames = {
       antilinks: 'el *AntiEnlace*',

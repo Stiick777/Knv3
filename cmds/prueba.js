@@ -1,52 +1,13 @@
 export default {
-  command: ['diagjid', 'diagnosticojid'],
-  category: 'owner',
-  description: 'Diagnóstico de JID y Baileys',
+  command: ['testblock'],
   isOwner: true,
 
   run: async ({ msg, sock }) => {
     try {
-      const onWhatsApp = await sock.onWhatsApp(msg.sender).catch(e => ({
-        error: e.message
-      }));
-
-      const info = `
-📋 *Diagnóstico*
-
-*Sender:*
-${msg.sender}
-
-*Chat:*
-${msg.chat}
-
-*RemoteJid:*
-${msg.key.remoteJid}
-
-*Participant:*
-${msg.key.participant || 'No tiene'}
-
-*PushName:*
-${msg.pushName}
-
-*FromMe:*
-${msg.fromMe}
-
-*isGroup:*
-${msg.isGroup}
-
-*ID del mensaje:*
-${msg.key.id}
-
-*Sock User:*
-${JSON.stringify(sock.user, null, 2)}
-
-*onWhatsApp():*
-${JSON.stringify(onWhatsApp, null, 2)}
-`;
-
-      await msg.reply(info);
+      await sock.updateBlockStatus(msg.sender, 'block')
+      await msg.reply('Bloqueado correctamente')
     } catch (e) {
-      await msg.reply(`Error:\n${e.stack}`);
+      await msg.reply(e.stack || e.message)
     }
   }
-};
+}

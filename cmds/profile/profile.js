@@ -1,6 +1,8 @@
 import moment from 'moment-timezone';
 import db from '#db';
+import { promises as fs } from 'fs';
 
+const charactersFilePath = './core/characters.json';
 const growth = Math.pow(Math.PI / Math.E, 1.618) * Math.E * 0.75;
 
 function xpRange(level, multiplier = global.multiplier || 2) {
@@ -40,16 +42,27 @@ export default {
     const pasatiempo = user2.pasatiempo ? `${user2.pasatiempo}` : 'No definido';
     const exp = user2.exp || 0;
     const nivel = user2.level || 0;
-    const favId = user.favorite;
-    let favLine = '';
-    if (favId) {
-      const character = db.getCharacter(favId);
-      if (character) {
-        favLine = `\n๑ Claim favorito » *${character.name || '???'}*`;
-      }
-    }    
-    const ownedIDs = Array.isArray(user.characters) ? user.characters : [];      
-    const haremCount = ownedIDs.length;
+     
+    let haremCount = 0;
+let favLine = '';
+
+try {
+  const characters = JSON.parse(
+    await fs.readFile(charactersFilePath, 'utf8')
+  );
+
+  const ownedCharacters = characters.filter(c => c.user === userId);
+
+  haremCount = ownedCharacters.length;
+
+  if (user.favorite) {
+    const favorite = ownedCharacters.find(c => c.id === user.favorite);
+
+    if (favorite) {
+      favLine = `\n๑ Claim favorito » *${favorite.name}*`;
+    }
+  }
+} catch {}
     const perfil = await sock.profilePictureUrl(userId, 'image').catch((_) => 'https://cdn.yuki-wabot.my.id/files/2PVh.jpeg');    
     const allUsers = db.getUser() || [];
     const users = Array.isArray(allUsers) ? allUsers.map(u => ({ ...u, jid: u.id })) : [];

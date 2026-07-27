@@ -115,6 +115,7 @@ export const defSets = {
   self: 0,
   prefix: '[\"/\",\"!\",\".\",\"#\"]',
   commandsejecut: 0,
+  antiPrivate: 0,
   newsletter_id: '120363318891913110@newsletter',
   nameid: '✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰',
   type: 'Owner',
@@ -186,6 +187,7 @@ export function initDB() {
     CREATE TABLE IF NOT EXISTS settings (
       id TEXT PRIMARY KEY,
       self BOOLEAN DEFAULT 0,
+      antiPrivate BOOLEAN DEFAULT 0,
       prefix TEXT DEFAULT '[\"/\",\"!\",\".\",\"#\"]',
       commandsejecut INTEGER DEFAULT 0,
       newsletter_id TEXT DEFAULT '120363401404146384@newsletter',
@@ -315,7 +317,7 @@ export function getSettings(id) {
   if (cached !== undefined) return cached;
   let row = stmt('SELECT * FROM settings WHERE id = ?').get(id);
   if (!row) {
-    stmt(`INSERT OR IGNORE INTO settings (id, self, prefix, commandsejecut, newsletter_id, nameid, type, link, banner, icon, currency, namebot, botname, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, defSets.self, defSets.prefix, defSets.commandsejecut, defSets.newsletter_id, defSets.nameid, defSets.type, defSets.link, defSets.banner, defSets.icon, defSets.currency, defSets.namebot, defSets.botname, defSets.owner);
+    stmt(`INSERT OR IGNORE INTO settings (id, self, antiPrivate, prefix, commandsejecut, newsletter_id, nameid, type, link, banner, icon, currency, namebot, botname, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, defSets.self, defSets.antiPrivate, defSets.prefix, defSets.commandsejecut, defSets.newsletter_id, defSets.nameid, defSets.type, defSets.link, defSets.banner, defSets.icon, defSets.currency, defSets.namebot, defSets.botname, defSets.owner);
     row = stmt('SELECT * FROM settings WHERE id = ?').get(id);
   }
   if (row.prefix != null) {

@@ -5,21 +5,26 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   if (isOwner || isROwner) return false;
 
   const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
+
+if (msg.sender === botJid) return false;
+if (msg.fromMe) return false;
   const settings = global.db.getSettings(botJid);
 
   if (!settings.antiPrivate) return false;
 
   const [user] = await sock.onWhatsApp(msg.sender).catch(() => []);
-  const jid = user?.jid || msg.sender;
+  const jid = msg.sender;
 
   try {
-    await msg.reply(
-      `*[ ✰ ] Hola @${jid.split('@')[0]}, no está permitido escribir al privado del bot, por lo que serás bloqueado.*`,
-      false,
-      { mentions: [jid] }
-    );
+    const mention =
+  msg.pushName ||
+  jid.split('@')[0];
 
-    await sock.updateBlockStatus(jid, 'block');
+await msg.reply(
+  `*[ ✰ ] Hola *${mention}*, no está permitido escribir al privado del bot, por lo que serás bloqueado.*`
+);
+
+await sock.updateBlockStatus(jid, 'block');
   } catch (e) {
     console.error('[AntiPrivate]', e);
   }

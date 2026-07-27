@@ -67,7 +67,10 @@ private: 'antiPrivate',
       antiPrivate: `> Si el *AntiPrivado* está activado, *${botname}* bloqueará automáticamente a cualquier usuario que le escriba por privado, excepto a los propietarios del bot.`,
     };
     const normalizedKey = mapTerms[command] || command;
-    const current = chatData[normalizedKey] === true || chatData[normalizedKey] === 1;
+  const current = normalizedKey === 'antiPrivate'
+  ? (botSettings.antiPrivate === true || botSettings.antiPrivate === 1)
+  : (chatData[normalizedKey] === true || chatData[normalizedKey] === 1);
+    // const current = chatData[normalizedKey] === true || chatData[normalizedKey] === 1;
     const estado = current ? '✓ Activado' : '✗ Desactivado';
     const nombreBonito = featureNames[normalizedKey] || `la función *${normalizedKey}*`;
     const titulo = featureTitles[normalizedKey] || normalizedKey;
@@ -80,9 +83,18 @@ private: 'antiPrivate',
     }
     const enabled = ['on', 'enable'].includes(stateArg);
     const newValue = enabled ? 1 : 0;
-    if ((chatData[normalizedKey] === 1 && enabled) || (chatData[normalizedKey] === 0 && !enabled) || (chatData[normalizedKey] === true && enabled) || (chatData[normalizedKey] === false && !enabled)) {
-      return msg.reply(`✎ *${titulo}* ya estaba *${enabled ? 'activado' : 'desactivado'}*.`);
-    }
+    const currentValue = normalizedKey === 'antiPrivate'
+  ? botSettings.antiPrivate
+  : chatData[normalizedKey];
+
+if (
+  (currentValue === 1 && enabled) ||
+  (currentValue === 0 && !enabled) ||
+  (currentValue === true && enabled) ||
+  (currentValue === false && !enabled)
+) {
+  return msg.reply(`✎ *${titulo}* ya estaba *${enabled ? 'activado' : 'desactivado'}*.`);
+}
     if (normalizedKey === 'antiPrivate') {
   db.setSettings(botId, 'antiPrivate', newValue);
 

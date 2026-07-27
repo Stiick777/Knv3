@@ -31,84 +31,86 @@ export default {
       let servidor;
 
       // ==============================
-// ==============================
-// 🥇 API PRINCIPAL: LEMPI
-// ==============================
-try {
 
-  const { data } = await axios.get(
-    `https://api.lempi.lat/dl/ytv?url=${encodeURIComponent(youtubeLink)}&apikey=montekey28`
-  );
+          // ==============================
+      // 🥇 API PRINCIPAL: FAA
+      // ==============================
+      try {
 
-  if (
-    !data.status ||
-    !data.descarga ||
-    !data.descarga.url
-  ) {
-    throw new Error("Lempi inválida");
-  }
+        const { data } = await axios.get(
+          `https://api-faa.my.id/faa/ytmp4?url=${encodeURIComponent(youtubeLink)}`
+        );
 
-  title = data.titulo || "Video";
-  quality = data.descarga.calidad || "360p";
-  downloadUrl = data.descarga.url;
-  servidor = "Lempi";
+        if (
+          !data.status ||
+          !data.result ||
+          !data.result.download_url
+        ) {
+          throw new Error("FAA inválida");
+        }
 
-} catch (e1) {
+        title = "Video";
+        quality = data.result.format || "mp4";
+        downloadUrl = data.result.download_url;
+        servidor = "FAA";
 
-  console.log("Lempi falló, usando StellarWA...");
+      } catch (e1) {
 
-  // ==============================
-  // 🥈 RESPALDO: STELLARWA
-  // ==============================
-  try {
+        console.log("FAA falló, usando Yuki-Wabot...");
 
-    const { data } = await axios.get(
-      `https://api.stellarwa.xyz/dl/ytmp4?url=${encodeURIComponent(youtubeLink)}&key=proyectsV2`
-    );
+        // ==============================
+        // 🥈 RESPALDO: YUKI-WABOT
+        // ==============================
+        try {
 
-    if (
-      !data.status ||
-      !data.result ||
-      !data.result.downloadUrl
-    ) {
-      throw new Error("StellarWA inválida");
-    }
+          const { data } = await axios.get(
+            `https://api.yuki-wabot.my.id/dl/ytmp4v2?url=${encodeURIComponent(youtubeLink)}&key=YukiBot-MD`
+          );
 
-    title = data.result.title || "Video";
-    quality = data.result.format || "360p";
-    downloadUrl = data.result.downloadUrl;
-    servidor = "StellarWA";
+          if (
+            !data.status ||
+            !data.download ||
+            !data.download.url
+          ) {
+            throw new Error("Yuki inválida");
+          }
 
-  } catch (e2) {
+          title = data.data?.title || "Video";
+          quality = `${data.download.quality}p`;
+          downloadUrl = data.download.url;
+          servidor = "Yuki-Wabot";
 
-    console.log("StellarWA falló, usando Fare...");
+        } catch (e2) {
 
-    // ==============================
-    // 🥉 RESPALDO: FARE.INK
-    // ==============================
-    const { data } = await axios.get(
-      `https://fare.ink/dl/ytv?url=${encodeURIComponent(youtubeLink)}&apikey=kanbot`,
-      {
-        headers: {
-          "Content-Type": "application/json"
+          console.log("Yuki-Wabot falló, usando AlyaCore...");
+
+          // ==============================
+          // 🥉 RESPALDO: ALYACORE
+          // ==============================
+          try {
+
+            const { data } = await axios.get(
+              `https://api.alyacore.xyz/dl/ytmp4?url=${encodeURIComponent(youtubeLink)}&quality=auto&key=LUFFY-FIX67`
+            );
+
+            if (
+              !data.status ||
+              !data.data ||
+              !data.data.dl
+            ) {
+              throw new Error("AlyaCore inválida");
+            }
+
+            title = data.data.title || "Video";
+            quality = data.data.quality || "Auto";
+            downloadUrl = data.data.dl;
+            servidor = "AlyaCore";
+
+          } catch (e3) {
+            throw new Error("Todas las APIs fallaron");
+          }
         }
       }
-    );
-
-    if (
-      !data.status ||
-      !data.descarga ||
-      !data.descarga.url
-    ) {
-      throw new Error("Fare inválida");
-    }
-
-    title = data.titulo || "Video";
-    quality = data.descarga.calidad || "360p";
-    downloadUrl = data.descarga.url;
-    servidor = "Fare";
-  }
-}
       // ==============================
       // Obtener tamaño real
       // ==============================

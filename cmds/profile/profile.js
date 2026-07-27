@@ -25,8 +25,7 @@ export default {
     if (!user) {
       return msg.reply('✎ El usuario *mencionado* no está *registrado* en el bot');
     }
-    const idBot = sock.user.id.split(':')[0] + '@s.whatsapp.net' || '';
-    const currency = settings.currency || '';
+    
     const user2 = db.getUser(userId) || {};
     const name = user2.name || '';
     const birth = user2.birth || 'Sin especificar';

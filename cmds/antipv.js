@@ -12,7 +12,6 @@ if (msg.fromMe) return false;
 
   if (!settings.antiPrivate) return false;
 
-  const [user] = await sock.onWhatsApp(msg.sender).catch(() => []);
   const jid = msg.sender;
 
   try {

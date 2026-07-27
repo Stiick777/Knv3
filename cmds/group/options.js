@@ -109,3 +109,5 @@ db.setChat(msg.chat, normalizedKey, newValue);
 return msg.reply(
   `✎ Has *${enabled ? 'activado' : 'desactivado'}* ${nombreBonito}.`
 );
+  }
+};

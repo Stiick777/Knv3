@@ -24,7 +24,6 @@ export default {
       return msg.reply('✎ El usuario *mencionado* no está *registrado* en el bot');
     }
     const idBot = sock.user.id.split(':')[0] + '@s.whatsapp.net' || '';
-    const settings = db.getSettings(idBot) || {};
     const currency = settings.currency || '';
     const user2 = db.getUser(userId) || {};
     const name = user2.name || '';
@@ -41,9 +40,6 @@ export default {
     const pasatiempo = user2.pasatiempo ? `${user2.pasatiempo}` : 'No definido';
     const exp = user2.exp || 0;
     const nivel = user2.level || 0;
-    const chocolates = user.coins || 0;
-    const banco = user.bank || 0;
-    const totalCoins = chocolates + banco;
     const favId = user.favorite;
     let favLine = '';
     if (favId) {
@@ -52,14 +48,7 @@ export default {
         favLine = `\n๑ Claim favorito » *${character.name || '???'}*`;
       }
     }    
-    const ownedIDs = Array.isArray(user.characters) ? user.characters : [];
-    let haremValue = 0;    
-    for (const id of ownedIDs) {
-      const character = db.getCharacter(id);
-      if (character) {
-        haremValue += character.value || 0;
-      }
-    }    
+    const ownedIDs = Array.isArray(user.characters) ? user.characters : [];      
     const haremCount = ownedIDs.length;
     const perfil = await sock.profilePictureUrl(userId, 'image').catch((_) => 'https://cdn.yuki-wabot.my.id/files/2PVh.jpeg');    
     const allUsers = db.getUser() || [];
@@ -83,8 +72,6 @@ export default {
 ☆ Puesto › *#${rank}*
 
 ꕥ Harem › *${haremCount}*
-♤ Valor total › *${haremValue.toLocaleString()}*${favLine}
-⛁ Coins totales › *¥${totalCoins.toLocaleString()} ${currency}*
 ❒ Comandos ejecutados › *${comandos.toLocaleString()}*`;     
       await sock.sendMessage(msg.chat, { image: { url: perfil }, caption: profileText }, { quoted: msg });
     } catch (e) {

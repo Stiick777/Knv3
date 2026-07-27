@@ -83,7 +83,17 @@ private: 'antiPrivate',
     if ((chatData[normalizedKey] === 1 && enabled) || (chatData[normalizedKey] === 0 && !enabled) || (chatData[normalizedKey] === true && enabled) || (chatData[normalizedKey] === false && !enabled)) {
       return msg.reply(`✎ *${titulo}* ya estaba *${enabled ? 'activado' : 'desactivado'}*.`);
     }
-    chatData[normalizedKey] = newValue;
-    db.setChat(msg.chat, normalizedKey, newValue);    return msg.reply(`✎ Has *${enabled ? 'activado' : 'desactivado'}* ${nombreBonito}.`);
-  }
-};
+    if (normalizedKey === 'antiPrivate') {
+  db.setSettings(botId, 'antiPrivate', newValue);
+
+  return msg.reply(
+    `✎ Has *${enabled ? 'activado' : 'desactivado'}* ${nombreBonito}.`
+  );
+}
+
+chatData[normalizedKey] = newValue;
+db.setChat(msg.chat, normalizedKey, newValue);
+
+return msg.reply(
+  `✎ Has *${enabled ? 'activado' : 'desactivado'}* ${nombreBonito}.`
+);

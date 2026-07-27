@@ -31,45 +31,90 @@ export default {
       let servidor;
 
       // ==================================
-      // API PRINCIPAL: DELIRIUS
+            // ==================================
+      // API PRINCIPAL: FAA
       // ==================================
       try {
 
-        const apiUrl = `https://api.delirius.store/download/ytmp4?url=${encodeURIComponent(url)}&format=360p`;
+        const apiUrl =
+          `https://api-faa.my.id/faa/ytmp4?url=${encodeURIComponent(url)}`;
 
         const res = await fetch(apiUrl);
         const json = await res.json();
 
-        if (!json?.status || !json?.data?.download) {
-          throw new Error('Delirius inválida');
+        if (
+          !json?.status ||
+          !json?.result ||
+          !json?.result?.download_url
+        ) {
+          throw new Error('FAA inválida');
         }
 
-        title = json.data.title || 'video';
-        quality = json.data.format || '360p';
-        download_url = json.data.download;
-        servidor = 'Delirius';
+        title = 'video';
+        quality = json.result.format || 'mp4';
+        download_url = json.result.download_url;
+        servidor = 'FAA';
 
-      } catch (e) {
+      } catch (e1) {
 
-        console.log('Delirius falló, usando ZennzXD...');
+        console.log('FAA falló, usando Yuki-Wabot...');
 
         // ==================================
-        // API RESPALDO: ZENNZXD
+        // RESPALDO 1: YUKI-WABOT
         // ==================================
-        const apiUrl = `https://api.zenzxz.my.id/download/youtube?url=${encodeURIComponent(url)}&format=360`;
+        try {
 
-        const res = await fetch(apiUrl);
-        const json = await res.json();
+          const apiUrl =
+            `https://api.yuki-wabot.my.id/dl/ytmp4v2?url=${encodeURIComponent(url)}&key=YukiBot-MD`;
 
-        if (!json?.status || !json?.result?.download) {
-          throw new Error('ZennzXD inválida');
+          const res = await fetch(apiUrl);
+          const json = await res.json();
+
+          if (
+            !json?.status ||
+            !json?.download ||
+            !json?.download?.url
+          ) {
+            throw new Error('Yuki inválida');
+          }
+
+          title = json.data?.title || 'video';
+          quality = `${json.download.quality}p`;
+          download_url = json.download.url;
+          servidor = 'Yuki-Wabot';
+
+        } catch (e2) {
+
+          console.log('Yuki-Wabot falló, usando AlyaCore...');
+
+          // ==================================
+          // RESPALDO 2: ALYACORE
+          // ==================================
+          try {
+
+            const apiUrl =
+              `https://api.alyacore.xyz/dl/ytmp4?url=${encodeURIComponent(url)}&quality=auto&key=LUFFY-FIX67`;
+
+            const res = await fetch(apiUrl);
+            const json = await res.json();
+
+            if (
+              !json?.status ||
+              !json?.data ||
+              !json?.data?.dl
+            ) {
+              throw new Error('AlyaCore inválida');
+            }
+
+            title = json.data.title || 'video';
+            quality = json.data.quality || 'Auto';
+            download_url = json.data.dl;
+            servidor = 'AlyaCore';
+
+          } catch (e3) {
+            throw new Error('Todas las APIs fallaron');
+          }
         }
-
-        title = json.result.title || 'video';
-        quality = `${json.result.format}p`;
-        download_url = json.result.download;
-        servidor = 'ZennzXD';
-
       }
 
       // ==================================

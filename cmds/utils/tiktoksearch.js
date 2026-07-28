@@ -11,7 +11,7 @@ const {
 export default {
   command: ["tiktoksearch", "tts", "tiktoks"],
   category: "search",
-  description: "",
+  description: "Busca videos en TikTok",
   run: async ({ msg, sock, text }) => {
 
     if (!text) {
@@ -57,14 +57,14 @@ export default {
       await msg.react("⌛");
 
       const { data } = await axios.get(
-        `https://neji-api.vercel.app/api/search/tiktok?q=${encodeURIComponent(text)}`
+        `https://api-faa.my.id/faa/tiktok-search?q=${encodeURIComponent(text)}`
       );
 
-      if (!data?.results?.length) {
-        throw new Error("No se encontraron resultados");
+      if (!data?.result?.length) {
+        throw new Error("No se encontraron resultados.");
       }
 
-      let results = data.results;
+      let results = data.result;
       shuffleArray(results);
 
       let cards = [];
@@ -75,21 +75,22 @@ export default {
           cards.push({
             body: proto.Message.InteractiveMessage.Body.fromObject({
               text:
-                `👤 ${result.author?.nickname || "Desconocido"}\n` +
-                `👁 ${Number(result.stats?.play_count || 0).toLocaleString()}\n` +
-                `❤️ ${Number(result.stats?.digg_count || 0).toLocaleString()} | 💬 ${Number(result.stats?.comment_count || 0).toLocaleString()}\n` +
-                `🔁 ${Number(result.stats?.share_count || 0).toLocaleString()}\n` +
-                `⏱ ${result.duration || 0}s`
+                `👤 ${result.author?.nickname || "Desconocido"} (@${result.author?.username || "-"})\n` +
+                `👁 ${result.stats?.views || "0"}\n` +
+                `❤️ ${result.stats?.likes || "0"} | 💬 ${result.stats?.comments || "0"}\n` +
+                `🔁 ${result.stats?.shares || "0"}\n` +
+                `🌎 ${result.region || "-"} • ⏱ ${result.duration || "-"}`
             }),
 
             footer: proto.Message.InteractiveMessage.Footer.fromObject({
-              text: `🎵 Audio disponible`
+              text:
+                `🎵 ${result.music?.title || "Audio desconocido"} • ${result.music?.author || ""}`
             }),
 
             header: proto.Message.InteractiveMessage.Header.fromObject({
               title: result.title?.slice(0, 80) || "TikTok Video",
               hasMediaAttachment: true,
-              videoMessage: await createVideoMessage(result.play)
+              videoMessage: await createVideoMessage(result.url_nowm)
             }),
 
             nativeFlowMessage:
@@ -98,8 +99,8 @@ export default {
                   {
                     name: "cta_url",
                     buttonParamsJson: JSON.stringify({
-                      display_text: "Ver Video",
-                      url: `https://www.tiktok.com/@${result.author?.unique_id}/video/${result.id}`
+                      display_text: "Ver en TikTok",
+                      url: `https://www.tiktok.com/@${result.author?.username}/video/${result.id}`
                     })
                   }
                 ]

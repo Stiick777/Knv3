@@ -57,14 +57,14 @@ export default {
       await msg.react("⌛");
 
       const { data } = await axios.get(
-        `https://api.delirius.store/search/tiktoksearch?query=${encodeURIComponent(text)}`
+        `https://neji-api.vercel.app/api/search/tiktok?q=${encodeURIComponent(text)}`
       );
 
-      if (!data?.meta?.length) {
+      if (!data?.results?.length) {
         throw new Error("No se encontraron resultados");
       }
 
-      let results = data.meta;
+      let results = data.results;
       shuffleArray(results);
 
       let cards = [];
@@ -76,19 +76,20 @@ export default {
             body: proto.Message.InteractiveMessage.Body.fromObject({
               text:
                 `👤 ${result.author?.nickname || "Desconocido"}\n` +
-                `👁 ${Number(result.play || 0).toLocaleString()}\n` +
-                `❤️ ${Number(result.like || 0).toLocaleString()} | 💬 ${Number(result.coment || 0).toLocaleString()}\n` +
-                `🔁 ${Number(result.share || 0).toLocaleString()}`
+                `👁 ${Number(result.stats?.play_count || 0).toLocaleString()}\n` +
+                `❤️ ${Number(result.stats?.digg_count || 0).toLocaleString()} | 💬 ${Number(result.stats?.comment_count || 0).toLocaleString()}\n` +
+                `🔁 ${Number(result.stats?.share_count || 0).toLocaleString()}\n` +
+                `⏱ ${result.duration || 0}s`
             }),
 
             footer: proto.Message.InteractiveMessage.Footer.fromObject({
-              text: `🎵 ${result.music?.title || "Audio no disponible"}`
+              text: `🎵 Audio disponible`
             }),
 
             header: proto.Message.InteractiveMessage.Header.fromObject({
               title: result.title?.slice(0, 80) || "TikTok Video",
               hasMediaAttachment: true,
-              videoMessage: await createVideoMessage(result.hd)
+              videoMessage: await createVideoMessage(result.play)
             }),
 
             nativeFlowMessage:
@@ -97,8 +98,8 @@ export default {
                   {
                     name: "cta_url",
                     buttonParamsJson: JSON.stringify({
-                      display_text: "Ver en TikTok",
-                      url: result.url
+                      display_text: "Ver Video",
+                      url: `https://www.tiktok.com/@${result.author?.unique_id}/video/${result.id}`
                     })
                   }
                 ]

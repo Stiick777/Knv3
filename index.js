@@ -169,13 +169,12 @@ export async function startBot() {
   isRestarting = true;
   bootTime = Date.now();
   const { state, saveCreds: saveCredsDB } = await useMultiFileAuthState('./Sessions/Owner');
-  const { version } = await fetchLatestBaileysVersion();
   let saveCredsTimer = null;
   const saveCreds = () => { clearTimeout(saveCredsTimer); saveCredsTimer = setTimeout(saveCredsDB, 2000); };
   console.info = () => {};
   console.debug = () => {};
   const sock = makeWASocket({
-    version,
+    version: [2, 3000, 1044006379],
     logger: pino({ level: 'silent' }),
     browser: Browsers.macOS('Chrome'),
     printQRInTerminal: false,

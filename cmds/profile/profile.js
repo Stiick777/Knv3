@@ -83,7 +83,7 @@ try {
 ➨ Progreso › *${progreso} => ${xp}* _(${porcentaje}%)_
 ☆ Puesto › *#${rank}*
 
-ꕥ Personajes › *${haremCount}*
+ꕥ Personajes › *${haremCount}* - *${favLine}*
 ❒ Comandos ejecutados › *${comandos.toLocaleString()}*`;     
       await sock.sendMessage(msg.chat, { image: { url: perfil }, caption: profileText }, { quoted: msg });
     } catch (e) {

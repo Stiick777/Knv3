@@ -20,112 +20,70 @@ export default {
     try {
       await msg.react('🕒');
 
-      const api = `https://api.yupra.my.id/api/downloader/tiktok?url=${encodeURIComponent(args[0])}`;
+      const api = `https://neji-api.vercel.app/api/downloader/tiktok?url=${encodeURIComponent(args[0])}`;
       const res = await fetch(api);
 
-      if (!res.ok) throw new Error('API no respondió');
+      if (!res.ok) throw new Error('La API no respondió');
 
       const json = await res.json();
 
-      if (json.status !== 200 || !json.result) {
-        throw new Error('Respuesta inválida');
+      if (!json.status || !json.result) {
+        throw new Error('Respuesta inválida de la API');
       }
 
       const r = json.result;
 
       const caption = `
-*👤 Autor:* ${r.author?.nickname || r.author?.username || 'Desconocido'}
+*👤 Autor:* ${r.author_info?.nickname || 'Desconocido'}
+*🎵 Música:* ${r.music?.title || 'Desconocida'}
 *📝 Título:* ${r.title || 'Sin título'}
-*❤️ Likes:* ${r.like || 0}
-*👁 Views:* ${r.views || 0}
-*🔁 Shares:* ${r.share || 0}
-*💬 Comentarios:* ${r.comment || 0}
+*⏱ Duración:* ${r.cover?.duration || 0}s
 
 📥 *Descargado por KanBot*
 `.trim();
 
       await msg.react('📤');
 
-      //=========================
-      // 🎥 VIDEO
-      //=========================
-      if (r.isVideo && r.download) {
-
-        await sock.sendMessage(
-          msg.chat,
-          {
-            video: { url: r.download },
-            caption
+      // Enviar video sin marca de agua
+      await sock.sendMessage(
+        msg.chat,
+        {
+          video: {
+            url: r.cover?.play
           },
-          { quoted: msg }
-        );
+          caption
+        },
+        { quoted: msg }
+      );
 
-        // 🎵 Audio
-        if (r.music?.url) {
-          try {
-            await sock.sendMessage(
-              msg.chat,
-              {
-                audio: { url: r.music.url },
-                mimetype: 'audio/mpeg',
-                ptt: false
-              },
-              { quoted: msg }
-            );
-          } catch (e) {
-            console.log('Audio no enviado:', e.message);
-          }
-        }
-
-        await msg.react('✅');
-        return;
-      }
-
-      //=========================
-      // 🖼 IMÁGENES / SLIDES
-      //=========================
-      if (!r.isVideo && Array.isArray(r.download)) {
-
-        for (let i = 0; i < r.download.length; i++) {
+      // Enviar audio
+      if (r.cover?.mp3) {
+        try {
           await sock.sendMessage(
             msg.chat,
             {
-              image: { url: r.download[i] },
-              caption: i === 0 ? caption : undefined
+              audio: {
+                url: r.cover.mp3
+              },
+              mimetype: 'audio/mpeg',
+              ptt: false
             },
             { quoted: msg }
           );
+        } catch (e) {
+          console.log('Audio no enviado:', e.message);
         }
-
-        // 🎵 Audio del slideshow
-        if (r.music?.url) {
-          try {
-            await sock.sendMessage(
-              msg.chat,
-              {
-                audio: { url: r.music.url },
-                mimetype: 'audio/mpeg',
-                ptt: false
-              },
-              { quoted: msg }
-            );
-          } catch (e) {
-            console.log('Audio no enviado:', e.message);
-          }
-        }
-
-        await msg.react('✅');
-        return;
       }
 
-      throw new Error('No se encontró contenido');
+      await msg.react('✅');
 
     } catch (err) {
       console.error('❌ TikTok Error:', err);
+
       await msg.react('❌');
 
       return msg.reply(
-        '*🌟 Error al procesar el TikTok, intenta más tarde.*'
+        '*🌟 Error al procesar el TikTok, intenta nuevamente más tarde.*'
       );
     }
   },

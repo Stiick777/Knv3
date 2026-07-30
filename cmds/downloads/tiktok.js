@@ -3,16 +3,16 @@ import fetch from 'node-fetch';
 export default {
   command: ['tiktok', 'tt', 'ttdl', 'tiktokdl'],
   category: 'downloads',
-  description: '',
+  description: 'Descarga videos e imágenes de TikTok',
   run: async ({ msg, sock, args, usedPrefix, command }) => {
     if (!args[0]) {
       await msg.react('❌');
       return msg.reply(
-        `*☁️ Ingrese un enlace de TikTok.*\n\n*💌 Ejemplo:* _${usedPrefix + command} https://vt.tiktok.com/xxxxx/_`
+        `*☁️ Ingresa un enlace de TikTok.*\n\n*💌 Ejemplo:* _${usedPrefix + command} https://vt.tiktok.com/xxxxx/_`
       );
     }
 
-    if (!/(?:https?:\/\/)?(?:www|vm|vt|tiktok)\.com\/[^\s]+/gi.test(args[0])) {
+    if (!/(?:https?:\/\/)?(?:www|vm|vt|tiktok)\.com\/[^\s]+/i.test(args[0])) {
       await msg.react('❌');
       return msg.reply('*☁️ Enlace de TikTok inválido.*');
     }
@@ -20,70 +20,121 @@ export default {
     try {
       await msg.react('🕒');
 
-      const api = `https://neji-api.vercel.app/api/downloader/tiktok?url=${encodeURIComponent(args[0])}`;
+      const api = `https://api.dorratz.com/v1/tiktok?url=${encodeURIComponent(args[0])}`;
       const res = await fetch(api);
 
       if (!res.ok) throw new Error('La API no respondió');
 
       const json = await res.json();
 
-      if (!json.status || !json.result) {
+      if (!json.ok || !json.data?.status || !json.data?.data) {
         throw new Error('Respuesta inválida de la API');
       }
 
-      const r = json.result;
+      const r = json.data.data;
 
       const caption = `
-*👤 Autor:* ${r.author_info?.nickname || 'Desconocido'}
-*🎵 Música:* ${r.music?.title || 'Desconocida'}
+*👤 Autor:* ${r.author?.nickname || 'Desconocido'}
+*📛 Usuario:* ${r.author?.username || '-'}
 *📝 Título:* ${r.title || 'Sin título'}
-*⏱ Duración:* ${r.cover?.duration || 0}s
+
+*❤️ Likes:* ${Number(r.like || 0).toLocaleString()}
+*👁️ Vistas:* ${Number(r.repro || 0).toLocaleString()}
+*💬 Comentarios:* ${Number(r.comment || 0).toLocaleString()}
+*🔁 Compartidos:* ${Number(r.share || 0).toLocaleString()}
 
 📥 *Descargado por KanBot*
 `.trim();
 
       await msg.react('📤');
 
-      // Enviar video sin marca de agua
-      await sock.sendMessage(
-        msg.chat,
-        {
-          video: {
-            url: r.cover?.play
-          },
-          caption
-        },
-        { quoted: msg }
-      );
+      //=========================
+      // 🎥 VIDEO
+      //=========================
+      if (r.media?.type === 'video') {
 
-      // Enviar audio
-      if (r.cover?.mp3) {
-        try {
+        const video =
+          r.media.hd ||
+          r.media.org ||
+          r.media.wm;
+
+        await sock.sendMessage(
+          msg.chat,
+          {
+            video: { url: video },
+            caption
+          },
+          { quoted: msg }
+        );
+
+        if (r.media.music) {
+          try {
+            await sock.sendMessage(
+              msg.chat,
+              {
+                audio: { url: r.media.music },
+                mimetype: 'audio/mpeg',
+                ptt: false
+              },
+              { quoted: msg }
+            );
+          } catch (e) {
+            console.log('Error enviando audio:', e.message);
+          }
+        }
+
+        await msg.react('✅');
+        return;
+      }
+
+      //=========================
+      // 🖼️ SLIDES / IMÁGENES
+      //=========================
+      if (
+        r.media?.type === 'image' &&
+        Array.isArray(r.media.images)
+      ) {
+
+        for (let i = 0; i < r.media.images.length; i++) {
           await sock.sendMessage(
             msg.chat,
             {
-              audio: {
-                url: r.cover.mp3
-              },
-              mimetype: 'audio/mpeg',
-              ptt: false
+              image: { url: r.media.images[i] },
+              caption: i === 0 ? caption : undefined
             },
             { quoted: msg }
           );
-        } catch (e) {
-          console.log('Audio no enviado:', e.message);
         }
+
+        if (r.media.audio) {
+          try {
+            await sock.sendMessage(
+              msg.chat,
+              {
+                audio: { url: r.media.audio },
+                mimetype: 'audio/mpeg',
+                ptt: false
+              },
+              { quoted: msg }
+            );
+          } catch (e) {
+            console.log('Error enviando audio:', e.message);
+          }
+        }
+
+        await msg.react('✅');
+        return;
       }
 
-      await msg.react('✅');
+      throw new Error('Formato de TikTok no soportado.');
 
     } catch (err) {
-      console.error('❌ TikTok Error:', err);
+      console.error('TikTok Error:', err);
 
       await msg.react('❌');
 
       return msg.reply(
-        '*🌟 Error al procesar el TikTok, intenta nuevamente más tarde.*'
+        '*🌟 Ocurrió un error al descargar el TikTok. Intenta nuevamente más tarde.*'
       );
     }
   },

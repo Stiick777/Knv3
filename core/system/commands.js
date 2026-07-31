@@ -18,15 +18,40 @@ https://whatsapp.com/channel/0029VakhAHc5fM5hgaQ8ed2N
 export const menuObject = {
   economia: `╭──〔 ×𝑹×𝑷×𝑮× 〕─
 ╞˚₊·͟͟͞͞➳❥ .perfil
+╞˚₊·͟͟͞͞➳❥ .bal
+╞˚₊·͟͟͞͞➳❥ .cofre
+╞˚₊·͟͟͞͞➳❥ .cf
+╞˚₊·͟͟͞͞➳❥ .crime
+╞˚₊·͟͟͞͞➳❥ .deposit
+╞˚₊·͟͟͞͞➳❥ .eboard
+╞˚₊·͟͟͞͞➳❥ .einfo
+╞˚₊·͟͟͞͞➳❥ .pay
+╞˚₊·͟͟͞͞➳❥ .mine
+╞˚₊·͟͟͞͞➳❥ .menusal
+╞˚₊·͟͟͞͞➳❥ .ppt
+╞˚₊·͟͟͞͞➳❥ .robar
+╞˚₊·͟͟͞͞➳❥ .semanal
+╞˚₊·͟͟͞͞➳❥ .retirar
 ╞˚₊·͟͟͞͞➳❥ .daily
 ╞˚₊·͟͟͞͞➳❥ .trabajar
 ╰──〔❨✧✧❩〕──╯`,
   gacha: `╭──〔 𝑨𝑵𝑰𝑴𝑬𝑺 〕─
-╞˚₊·͟͟͞͞➳❥ .pw
-╞˚₊·͟͟͞͞➳❥ .mp
+╞˚₊·͟͟͞͞➳❥ .buyc
+╞˚₊·͟͟͞͞➳❥ .cimage
+╞˚₊·͟͟͞͞➳❥ .charinfo
+╞˚₊·͟͟͞͞➳❥ .c
+╞˚₊·͟͟͞͞➳❥ .delfav
+╞˚₊·͟͟͞͞➳❥ .favtop
+╞˚₊·͟͟͞͞➳❥ .delchar
+╞˚₊·͟͟͞͞➳❥ .regalar
+╞˚₊·͟͟͞͞➳❥ .waifus
+╞˚₊·͟͟͞͞➳❥ .wshop
+╞˚₊·͟͟͞͞➳❥ .removesale
+╞˚₊·͟͟͞͞➳❥ .robwaifu
+╞˚₊·͟͟͞͞➳❥ .rw
 ╞˚₊·͟͟͞͞➳❥ .sell
-╞˚₊·͟͟͞͞➳❥ .topp
-╞˚₊·͟͟͞͞➳❥ .rc
+╞˚₊·͟͟͞͞➳❥ .setfav
+╞˚₊·͟͟͞͞➳❥ .topwaifus
 ╰──〔❨✧✧❩〕──╯`,
   downloads: `╭──〔 𝑫𝑬𝑺𝑪𝑨𝑹𝑮𝑨𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .apk

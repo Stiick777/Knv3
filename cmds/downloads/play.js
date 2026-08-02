@@ -42,63 +42,41 @@ export default {
       msg,
       null
     );
-
     
-
- try {
+try {
   await msg.react('🕓');
 
   const url = yt_play[0].url;
   let title = 'audio';
   let downloadUrl = '';
 
-  // 🥇 AlyaCore V2
+  // 🥇 Faa API
   try {
     const res = await fetch(
-      `https://api.alyacore.xyz/dl/ytmp3v2?url=${encodeURIComponent(url)}&key=LUFFY-FIX67`
+      `https://api-faa.my.id/faa/ytmp3?url=${encodeURIComponent(url)}`
     );
     const json = await res.json();
 
-    if (json.status && json.data?.dl) {
-      title = json.data.title || title;
-      downloadUrl = json.data.dl;
+    if (json.status && json.result?.mp3) {
+      title = json.result.title || title;
+      downloadUrl = json.result.mp3;
     } else {
-      throw new Error('AlyaCore V2 sin datos');
+      throw new Error('Faa sin datos');
     }
 
   } catch {
 
-    // 🔁 AlyaCore V1
-    try {
-      const res = await fetch(
-        `https://api.alyacore.xyz/dl/ytmp3?url=${encodeURIComponent(url)}&key=LUFFY-FIX67`
-      );
-      const json = await res.json();
+    // 🔁 Neji API
+    const res = await fetch(
+      `https://neji-api.vercel.app/api/downloader/ytmp3?url=${encodeURIComponent(url)}`
+    );
+    const json = await res.json();
 
-      if (json.status && json.data?.dl) {
-        title = json.data.title || title;
-        downloadUrl = json.data.dl;
-      } else {
-        throw new Error('AlyaCore V1 sin datos');
-      }
-
-    } catch {
-
-      // 🆘 Yuki Wabot
-      const res = await fetch(
-        `https://api.yuki-wabot.my.id/dl/ytmp3v2?url=${encodeURIComponent(url)}&key=YukiBot-MD`
-      );
-      const json = await res.json();
-
-      if (json.status && json.data?.dl) {
-        title = json.data.fileName
-          ? json.data.fileName.replace(/\.mp3$/i, '')
-          : title;
-
-        downloadUrl = json.data.dl;
-      } else {
-        throw new Error('Todas las APIs fallaron');
-      }
+    if (json.status && json.result?.url) {
+      title = json.result.title || title;
+      downloadUrl = json.result.url;
+    } else {
+      throw new Error('Todas las APIs fallaron');
     }
   }
 
@@ -126,7 +104,7 @@ export default {
     },
     { quoted: msg }
   );
- }
+}
   }
 };
 

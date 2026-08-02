@@ -8,29 +8,29 @@ export default {
   description: '',
   run: async ({ msg, sock, text, command, args }) => {
 
-    if (command === 'playv2') {
+    if (command !== 'playv2') return;
 
-      if (!text) {
-        return msg.reply(`*Ingresa el nombre de lo que quieres buscar*`);
-      }
+    if (!text) {
+      return msg.reply(`*Ingresa el nombre de lo que quieres buscar*`);
+    }
 
-      await msg.react('🕓');
+    await msg.react('🕓');
 
-      const yt_play = await search(args.join(' '));
+    const yt_play = await search(args.join(' '));
 
-      if (!yt_play || !yt_play[0]) {
-        return msg.reply('❌ No se encontraron resultados.');
-      }
+    if (!yt_play || !yt_play[0]) {
+      return msg.reply('❌ No se encontraron resultados.');
+    }
 
-      const duracionSegundos = yt_play[0].duration.seconds || 0;
+    const duracionSegundos = yt_play[0].duration.seconds || 0;
 
-      if (duracionSegundos > 3600) {
-        return msg.reply(
-          `❌ *El video supera la duración máxima permitida de 1 hora.*\n\n📌 *Duración:* ${secondString(duracionSegundos)}`
-        );
-      }
+    if (duracionSegundos > 3600) {
+      return msg.reply(
+        `❌ *El video supera la duración máxima permitida de 1 hora.*\n\n📌 *Duración:* ${secondString(duracionSegundos)}`
+      );
+    }
 
-      const texto1 = `
+    const texto1 = `
 𝚈𝚘𝚞𝚝𝚞𝚋𝚎 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊
 ===========================
 > *𝚃𝚒𝚝𝚞𝚕𝚘* : ${yt_play[0].title}
@@ -42,88 +42,92 @@ export default {
 > *Provided by Stiiven*
 `.trim();
 
-      await sock.sendMessage(
-        msg.chat,
-        {
-          image: { url: yt_play[0].thumbnail },
-          caption: texto1
-        },
-        {
-          quoted: msg
-        }
-      );
+    await sock.sendMessage(
+      msg.chat,
+      {
+        image: { url: yt_play[0].thumbnail },
+        caption: texto1
+      },
+      {
+        quoted: msg
+      }
+    );
 
-      try {
+    try {
 
-        const api = `https://api.delirius.store/download/ytmp4?url=${encodeURIComponent(yt_play[0].url)}`;
-        const res = await fetch(api);
-        const json = await res.json();
+      const api = `https://api.alyacore.xyz/dl/youtubeplayv2?query=${encodeURIComponent(text)}&type=mp4&quality=auto&key=LUFFY-FIX67`;
 
-        if (!json.status) {
-          throw new Error("API inválida");
-        }
+      const res = await fetch(api);
+      const json = await res.json();
 
-        const video = json.data.download;
+      if (!json.status || !json.data?.dl) {
+        throw new Error("La API no devolvió un enlace válido.");
+      }
 
-        const size = await getSize(video);
+      const video = json.data.dl;
 
-        const MAX_SIZE = 104857600; //100MB
+      let size = await getSize(video);
 
-        const cap = `😎 Su video by *_KanBot_*:
+      if (!size && json.data.size) {
+        size = Number(json.data.size);
+      }
+
+      const MAX_SIZE = 104857600; // 100 MB
+
+      const cap = `😎 Su video by *_KanBot_*:
 
 🎬 *Título:* ${json.data.title}
 👤 *Autor:* ${json.data.author}
-🌐 *URL:* ${json.data.url}
+⏱️ *Duración:* ${json.data.duration}
+🎥 *Calidad:* ${json.data.quality}
 📦 *Peso:* ${await formatSize(size) || "Desconocido"}
 `;
 
-        const buffer = await (await fetch(video)).buffer();
+      const buffer = await (await fetch(video)).buffer();
 
-        if (size > MAX_SIZE) {
+      if (size && size > MAX_SIZE) {
 
-          await sock.sendMessage(
-            msg.chat,
-            {
-              document: buffer,
-              mimetype: 'video/mp4',
-              fileName: `${json.data.title}.mp4`,
-              caption: cap
-            },
-            {
-              quoted: msg
-            }
-          );
+        await sock.sendMessage(
+          msg.chat,
+          {
+            document: buffer,
+            mimetype: 'video/mp4',
+            fileName: json.data.fileName || `${json.data.title}.mp4`,
+            caption: cap
+          },
+          {
+            quoted: msg
+          }
+        );
 
-        } else {
+      } else {
 
-          await sock.sendMessage(
-            msg.chat,
-            {
-              video: buffer,
-              mimetype: 'video/mp4',
-              fileName: `${json.data.title}.mp4`,
-              caption: cap
-            },
-            {
-              quoted: msg
-            }
-          );
-
-        }
-
-        await msg.react('✅');
-
-      } catch (error) {
-
-        console.error(error);
-
-        await msg.react('❌');
-
-        await msg.reply(
-          `❌ *Ocurrió un error al intentar enviar el video.*\n\n📄 *Razón:* ${error.message}`
+        await sock.sendMessage(
+          msg.chat,
+          {
+            video: buffer,
+            mimetype: 'video/mp4',
+            fileName: json.data.fileName || `${json.data.title}.mp4`,
+            caption: cap
+          },
+          {
+            quoted: msg
+          }
         );
 
       }
+
+      await msg.react('✅');
+
+    } catch (error) {
+
+      console.error(error);
+
+      await msg.react('❌');
+
+      await msg.reply(
+        `❌ *Ocurrió un error al intentar enviar el video.*\n\n📄 *Razón:* ${error.message}`
+      );
 
     }
 
@@ -176,6 +180,7 @@ async function formatSize(bytes) {
 async function getSize(url) {
   try {
     const response = await axios.head(url);
+
     const contentLength = response.headers['content-length'];
 
     return contentLength

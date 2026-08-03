@@ -38,7 +38,7 @@ export default {
         let { code, msg: statusMsg } = res.status
 
         if (code !== 0) {
-          return msg.reply(`❌ Error *Use /whatm2*: ${statusMsg}`)
+          return msg.reply(`❌ Error: ${statusMsg}`)
         }
 
         let {
@@ -67,7 +67,7 @@ export default {
       )
 
     } catch (e) {
-      return msg.reply(`⚠️ Error inesperado *use /whatm2*: ${e.message}`)
+      return msg.reply(`⚠️ Error inesperado: ${e.message}`)
     }
   },
 }

@@ -1,17 +1,15 @@
 import { promises as fs } from 'fs'
-import path from 'path'
 import db from '#db'
 
 export default {
   command: ['fixmsgespera', 'ds'],
   category: 'fix',
-  description: 'Elimina los archivos de sesión del chat actual.',
+  description: 'Muestra las sesiones.',
 
   run: async ({ msg, sock }) => {
     const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net'
     const settings = db.getSettings(botJid)
 
-    // Solo permitir en el bot principal
     if (settings.type === 'Sub') {
       return sock.reply(
         msg.chat,
@@ -20,69 +18,28 @@ export default {
       )
     }
 
-    const ids = msg.isGroup
-      ? [msg.chat, msg.sender]
-      : [msg.sender]
-
-    const sessionPath = './Sessions/'
-
     try {
       const subsPath = './Sessions/Subs'
-const folders = await fs.readdir(subsPath)
+      const folders = await fs.readdir(subsPath)
 
-let text = '📂 *Sesiones encontradas:*\n\n'
+      let text = '📂 *Sesiones encontradas:*\n\n'
 
-for (const folder of folders) {
-  const creds = JSON.parse(
-    await fs.readFile(`${subsPath}/${folder}/creds.json`, 'utf8')
-  )
-
-  text += `📁 ${folder}\n`
-  text += `ID: ${creds.me?.id || 'No encontrado'}\n\n`
-}
-
-return sock.reply(msg.chat, text, msg)
-
-
-
-      let filesDeleted = 0
-
-      for (const file of files) {
-        for (const id of ids) {
-          if (file.includes(id.split('@')[0])) {
-            await fs.unlink(path.join(sessionPath, file))
-            filesDeleted++
-            break
-          }
-        }
-      }
-
-      if (!filesDeleted) {
-        return sock.reply(
-          msg.chat,
-          '❌ *No se encontró ningún archivo que incluya la ID del chat.*',
-          msg
+      for (const folder of folders) {
+        const creds = JSON.parse(
+          await fs.readFile(`${subsPath}/${folder}/creds.json`, 'utf8')
         )
+
+        text += `📁 Carpeta: ${folder}\n`
+        text += `🆔 ID: ${creds.me?.id || 'No encontrado'}\n\n`
       }
 
-      await sock.reply(
-        msg.chat,
-        `🔰 *Se eliminaron ${filesDeleted} archivo(s) de sesión.*`,
-        msg
-      )
-
-      await sock.reply(
-        msg.chat,
-        '⚡ *¡Hola! ¿Logras verme?*',
-        msg
-      )
+      return sock.reply(msg.chat, text, msg)
 
     } catch (err) {
       console.error(err)
-
-      await sock.reply(
+      return sock.reply(
         msg.chat,
-        '❌ *Ocurrió un fallo al leer o eliminar los archivos de sesión.*',
+        `❌ Error:\n${err}`,
         msg
       )
     }

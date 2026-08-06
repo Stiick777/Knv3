@@ -28,14 +28,21 @@ export default {
 
     try {
       const subsPath = './Sessions/Subs'
-
 const folders = await fs.readdir(subsPath)
 
-return sock.reply(
-  msg.chat,
-  `📂 *Contenido de Sessions/Subs:*\n\n${folders.length ? folders.join('\n') : '(vacío)'}`,
-  msg
-)
+let text = '📂 *Sesiones encontradas:*\n\n'
+
+for (const folder of folders) {
+  const creds = JSON.parse(
+    await fs.readFile(`${subsPath}/${folder}/creds.json`, 'utf8')
+  )
+
+  text += `📁 ${folder}\n`
+  text += `ID: ${creds.me?.id || 'No encontrado'}\n\n`
+}
+
+return sock.reply(msg.chat, text, msg)
+
 
 
       let filesDeleted = 0

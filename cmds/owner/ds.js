@@ -20,21 +20,19 @@ export default {
 
     try {
       const subsPath = './Sessions/Subs'
-      const folders = await fs.readdir(subsPath)
+const folders = await fs.readdir(subsPath)
 
-      let text = '📂 *Sesiones encontradas:*\n\n'
+let text = '📂 *Contenido de las carpetas:*\n\n'
 
-      for (const folder of folders) {
-        const creds = JSON.parse(
-          await fs.readFile(`${subsPath}/${folder}/creds.json`, 'utf8')
-        )
+for (const folder of folders) {
+  const items = await fs.readdir(path.join(subsPath, folder))
 
-        text += `📁 Carpeta: ${folder}\n`
-        text += `🆔 ID: ${creds.me?.id || 'No encontrado'}\n\n`
-      }
+  text += `📁 ${folder}\n`
+  text += items.length ? items.join('\n') : '(vacía)'
+  text += '\n\n'
+}
 
-      return sock.reply(msg.chat, text, msg)
-
+return sock.reply(msg.chat, text, msg)
     } catch (err) {
       console.error(err)
       return sock.reply(

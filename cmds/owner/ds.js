@@ -1,13 +1,18 @@
 import { promises as fs } from 'fs'
 import path from 'path'
+import db from '#db'
 
 export default {
   command: ['fixmsgespera', 'ds'],
   category: 'fix',
-  description: 'Elimina archivos de sesión del chat actual.',
+  description: 'Elimina los archivos de sesión del chat actual.',
 
   run: async ({ msg, sock }) => {
-    if (global.conn.user.jid !== sock.user.jid) {
+    const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net'
+    const settings = db.getSettings(botJid)
+
+    // Solo permitir en el bot principal
+    if (settings.type === 'Sub') {
       return sock.reply(
         msg.chat,
         '💡 *Utiliza este comando directamente en el número principal del Bot*',
@@ -15,7 +20,10 @@ export default {
       )
     }
 
-    const chatId = msg.isGroup ? [msg.chat, msg.sender] : [msg.sender]
+    const ids = msg.isGroup
+      ? [msg.chat, msg.sender]
+      : [msg.sender]
+
     const sessionPath = './Sessions/'
 
     try {
@@ -23,7 +31,7 @@ export default {
       let filesDeleted = 0
 
       for (const file of files) {
-        for (const id of chatId) {
+        for (const id of ids) {
           if (file.includes(id.split('@')[0])) {
             await fs.unlink(path.join(sessionPath, file))
             filesDeleted++
@@ -32,17 +40,17 @@ export default {
         }
       }
 
-      if (filesDeleted === 0) {
+      if (!filesDeleted) {
         return sock.reply(
           msg.chat,
-          '❌ *No se encontró ningún archivo que incluya la ID del chat*',
+          '❌ *No se encontró ningún archivo que incluya la ID del chat.*',
           msg
         )
       }
 
       await sock.reply(
         msg.chat,
-        `🔰 *Se eliminaron ${filesDeleted} archivos de sesión*`,
+        `🔰 *Se eliminaron ${filesDeleted} archivo(s) de sesión.*`,
         msg
       )
 
@@ -53,10 +61,11 @@ export default {
       )
 
     } catch (err) {
-      console.error('Error al leer la carpeta o los archivos de sesión:', err)
+      console.error(err)
+
       await sock.reply(
         msg.chat,
-        '❌ *Ocurrió un fallo*',
+        '❌ *Ocurrió un fallo al leer o eliminar los archivos de sesión.*',
         msg
       )
     }

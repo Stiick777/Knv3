@@ -27,13 +27,17 @@ export default {
     const sessionPath = './Sessions/'
 
     try {
-      const files = await fs.readdir(sessionPath)
+      const subsPath = './Sessions/Subs'
 
-await sock.reply(
+const folders = await fs.readdir(subsPath)
+
+return sock.reply(
   msg.chat,
-  `📂 *Contenido de Sessions:*\n\n${files.length ? files.join('\n') : '(vacío)'}`,
+  `📂 *Contenido de Sessions/Subs:*\n\n${folders.length ? folders.join('\n') : '(vacío)'}`,
   msg
 )
+
+
       let filesDeleted = 0
 
       for (const file of files) {

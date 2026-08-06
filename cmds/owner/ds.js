@@ -28,6 +28,12 @@ export default {
 
     try {
       const files = await fs.readdir(sessionPath)
+
+await sock.reply(
+  msg.chat,
+  `📂 *Contenido de Sessions:*\n\n${files.length ? files.join('\n') : '(vacío)'}`,
+  msg
+)
       let filesDeleted = 0
 
       for (const file of files) {

@@ -317,7 +317,7 @@ export function getSettings(id) {
   if (cached !== undefined) return cached;
   let row = stmt('SELECT * FROM settings WHERE id = ?').get(id);
   if (!row) {
-    stmt(`INSERT OR IGNORE INTO settings (id, self, antiPrivate, prefix, commandsejecut, newsletter_id, nameid, type, link, banner, icon, currency, namebot, botname, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, defSets.self, defSets.antiPrivate, defSets.prefix, defSets.commandsejecut, defSets.newsletter_id, defSets.nameid, defSets.type, defSets.link, defSets.banner, defSets.icon, defSets.currency, defSets.namebot, defSets.botname, defSets.owner);
+    stmt(`INSERT OR IGNORE INTO settings (id, self, antiPrivate, prefix, commandsejecut, newsletter_id, nameid, type, link, banner, icon, currency, namebot, botname, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, defSets.self, defSets.antiPrivate, defSets.prefix, defSets.commandsejecut, defSets.newsletter_id, defSets.nameid, defSets.type, defSets.link, defSets.banner, defSets.icon, defSets.currency, defSets.namebot, defSets.botname, defSets.owner);
     row = stmt('SELECT * FROM settings WHERE id = ?').get(id);
   }
   if (row.prefix != null) {

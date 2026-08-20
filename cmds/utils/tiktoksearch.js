@@ -151,19 +151,8 @@ ${usedPrefix + command} gatos 3`
 🔎 *Búsqueda:* ${text}
 
 📹 *Videos enviados:* ${videos.length}
-👤 *Autor:* ${first.autor?.nombre || "Desconocido"}
-🔹 *@${first.autor?.usuario || "-"}*
 
-👁️ *Vistas:* ${first.estadisticas?.vistas || 0}
-❤️ *Likes:* ${first.estadisticas?.likes || 0}
-💬 *Comentarios:* ${first.estadisticas?.comentarios || 0}
-🔁 *Compartidos:* ${first.estadisticas?.compartidos || 0}
-
-⏱️ *Duración:* ${first.duracion || 0}s
 📺 *Calidad:* ${first.calidad || "SD"}
-
-🎵 *${first.musica?.titulo || "Audio desconocido"}*
-🎤 ${first.musica?.autor || "Desconocido"}
 
 ━━━━━━━━━━━━━━━━━━
 ✨ *KanBot • TikTok Search*`,

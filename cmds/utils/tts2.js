@@ -6,7 +6,7 @@ const MAX_VIDEOS = 7;
 const REQUEST_TIMEOUT_MS = 15000;
 
 export default {
-  command: ["tiktoksearch", "tts", "tiktoks"],
+  command: ["tts2"],
   category: "search",
   description: "Busca videos en TikTok",
 

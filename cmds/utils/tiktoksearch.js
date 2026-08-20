@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const MAX_VIDEOS = 10;
+const MAX_VIDEOS = 7;
 
 export default {
   command: ["tiktoksearch", "tts", "tiktoks"],

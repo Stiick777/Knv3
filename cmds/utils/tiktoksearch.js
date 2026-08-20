@@ -1,244 +1,266 @@
 import axios from "axios";
 
-const baileys = await import("baileys");
-
-const {
-  proto,
-  generateWAMessageFromContent,
-  generateWAMessageContent
-} = baileys;
+const MAX_VIDEOS = 10;
 
 export default {
   command: ["tiktoksearch", "tts", "tiktoks"],
   category: "search",
   description: "Busca videos en TikTok",
 
-  run: async ({ msg, sock, text }) => {
+  run: async ({ msg, sock, args, usedPrefix, command }) => {
+
+    // ==========================================
+    // VALIDAR ARGUMENTOS
+    // ==========================================
+
+    if (!args.length) {
+      return msg.reply(
+`*💡 Uso correcto:*
+
+${usedPrefix + command} gatos 3
+
+🎬 Debes indicar la cantidad de videos que deseas enviar.
+
+*Mínimo:* 1
+*Máximo:* ${MAX_VIDEOS}`
+      );
+    }
+
+    const lastArg = args[args.length - 1];
+
+    const hasNumber = /^\d+$/.test(lastArg);
+
+    // Texto de búsqueda sin la cantidad
+    const text = hasNumber
+      ? args.slice(0, -1).join(" ").trim()
+      : args.join(" ").trim();
+
+    // ==========================================
+    // VALIDAR CANTIDAD
+    // ==========================================
+
+    if (!hasNumber) {
+      return msg.reply(
+`❌ *Proporciona la cantidad de videos que deseas enviar.*
+
+*Ejemplo:*
+${usedPrefix + command} ${text} 3
+
+*Mínimo:* 1
+*Máximo:* ${MAX_VIDEOS}`
+      );
+    }
+
+    const amount = Number(lastArg);
+
+    if (amount < 1) {
+      return msg.reply(
+        "❌ La cantidad debe ser mayor a *0*."
+      );
+    }
+
+    if (amount > MAX_VIDEOS) {
+      return msg.reply(
+        `❌ Solo puedes solicitar un máximo de *${MAX_VIDEOS} videos*.`
+      );
+    }
 
     if (!text) {
       return msg.reply(
-        "❕ ¿QUÉ BÚSQUEDA DESEA REALIZAR EN TIKTOK?"
+`❌ Debes escribir una búsqueda.
+
+*Ejemplo:*
+${usedPrefix + command} gatos 3`
       );
     }
 
-    // Descargar video y convertirlo en mensaje de WhatsApp
-    async function createVideoMessage(url) {
-      const { data } = await axios.get(url, {
-        responseType: "arraybuffer",
-        headers: {
-          Referer: "https://www.tiktok.com/",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        }
-      });
+    // ==========================================
+    // REACCIÓN
+    // ==========================================
 
-      const buffer = Buffer.from(data);
-
-      const { videoMessage } = await generateWAMessageContent(
-        {
-          video: buffer,
-          mimetype: "video/mp4"
-        },
-        {
-          upload: sock.waUploadToServer
-        }
-      );
-
-      return videoMessage;
-    }
-
-    function shuffleArray(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-    }
+    await msg.react("⌛");
 
     try {
 
-      await msg.react("⌛");
-
       // ==========================================
-      // API TIKTOK
+      // API LEMPI
       // ==========================================
 
       const apiUrl =
-        `https://api.lempi.lat/s/tiktok?q=${encodeURIComponent(text)}` +
-        `&count=7&apikey=montekey28`;
+        `https://api.lempi.lat/s/tiktok` +
+        `?q=${encodeURIComponent(text)}` +
+        `&count=${amount}` +
+        `&apikey=montekey28`;
 
       const { data } = await axios.get(apiUrl, {
         timeout: 30000
       });
 
-      if (!data?.status) {
-        throw new Error(
-          "La API de TikTok no respondió correctamente."
+      if (
+        !data?.status ||
+        !Array.isArray(data.resultados) ||
+        !data.resultados.length
+      ) {
+        await msg.react("❌");
+
+        return msg.reply(
+          `❌ No encontré resultados para *${text}*.`
         );
       }
 
-      if (!Array.isArray(data.resultados) || !data.resultados.length) {
-        throw new Error(
-          "No se encontraron resultados para esa búsqueda."
+      const videos = data.resultados.slice(0, amount);
+
+      // ==========================================
+      // FUNCIÓN PARA DESCARGAR VIDEO
+      // ==========================================
+
+      const loadVideo = async (url) => {
+
+        const response = await axios.get(url, {
+          responseType: "arraybuffer",
+          timeout: 60000,
+          headers: {
+            Referer: "https://www.tiktok.com/",
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+          }
+        });
+
+        return Buffer.from(response.data);
+      };
+
+      // ==========================================
+      // PRIMER VIDEO
+      // ==========================================
+
+      const first = videos[0];
+
+      try {
+
+        const videoBuffer = await loadVideo(first.video);
+
+        await sock.sendMessage(
+          msg.chat,
+          {
+            video: videoBuffer,
+            mimetype: "video/mp4",
+
+            caption:
+`🎬 *RESULTADOS DE TIKTOK*
+
+🔎 *Búsqueda:* ${text}
+
+📹 *Videos enviados:* ${videos.length}
+👤 *Autor:* ${first.autor?.nombre || "Desconocido"}
+🔹 *@${first.autor?.usuario || "-"}*
+
+👁️ *Vistas:* ${first.estadisticas?.vistas || 0}
+❤️ *Likes:* ${first.estadisticas?.likes || 0}
+💬 *Comentarios:* ${first.estadisticas?.comentarios || 0}
+🔁 *Compartidos:* ${first.estadisticas?.compartidos || 0}
+
+⏱️ *Duración:* ${first.duracion || 0}s
+📺 *Calidad:* ${first.calidad || "SD"}
+
+🎵 *${first.musica?.titulo || "Audio desconocido"}*
+🎤 ${first.musica?.autor || "Desconocido"}
+
+━━━━━━━━━━━━━━━━━━
+✨ *KanBot • TikTok Search*`,
+
+            contextInfo: {
+              externalAdReply: {
+                title:
+                  first.titulo?.slice(0, 70) ||
+                  "TikTok Search",
+
+                body:
+                  `TikTok • ${videos.length} video(s)`,
+
+                mediaType: 1,
+
+                mediaUrl:
+                  first.url ||
+                  "https://www.tiktok.com/",
+
+                thumbnailUrl:
+                  first.portada,
+
+                sourceUrl:
+                  first.url,
+
+                renderLargerThumbnail: true,
+                showAdAttribution: false
+              }
+            }
+          },
+          {
+            quoted: msg
+          }
         );
+
+      } catch (e) {
+
+        console.error(
+          "❌ Error enviando primer video:",
+          e.message
+        );
+
+        // Si falla el primero, intentamos continuar
       }
 
-      let results = data.resultados;
+      // ==========================================
+      // ENVIAR RESTO DE VIDEOS
+      // ==========================================
 
-      // Mezclar resultados
-      shuffleArray(results);
+      for (let i = 1; i < videos.length; i++) {
 
-      let cards = [];
-
-      // Máximo 7 tarjetas
-      for (const result of results.slice(0, 7)) {
+        const video = videos[i];
 
         try {
 
-          const autor = result.autor || {};
-          const stats = result.estadisticas || {};
-          const musica = result.musica || {};
+          const videoBuffer = await loadVideo(
+            video.video
+          );
 
-          cards.push({
-
-            body:
-              proto.Message.InteractiveMessage.Body.fromObject({
-                text:
-                  `👤 ${autor.nombre || "Desconocido"}\n` +
-                  `   @${autor.usuario || "-"}\n\n` +
-
-                  `👁️ Vistas: ${stats.vistas || 0}\n` +
-                  `❤️ Likes: ${stats.likes || 0}\n` +
-                  `💬 Comentarios: ${stats.comentarios || 0}\n` +
-                  `🔁 Compartidos: ${stats.compartidos || 0}\n` +
-                  `⭐ Favoritos: ${stats.favoritos || 0}\n` +
-                  `⏱️ Duración: ${result.duracion || 0}s\n` +
-                  `📺 Calidad: ${result.calidad || "SD"}`
-              }),
-
-            footer:
-              proto.Message.InteractiveMessage.Footer.fromObject({
-                text:
-                  `🎵 ${musica.titulo || "Audio desconocido"}` +
-                  ` • ${musica.autor || ""}`
-              }),
-
-            header:
-              proto.Message.InteractiveMessage.Header.fromObject({
-                title:
-                  result.titulo?.slice(0, 80) ||
-                  "TikTok Video",
-
-                hasMediaAttachment: true,
-
-                videoMessage:
-                  await createVideoMessage(result.video)
-              }),
-
-            nativeFlowMessage:
-              proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-
-                buttons: [
-                  {
-                    name: "cta_url",
-
-                    buttonParamsJson: JSON.stringify({
-                      display_text: "Ver en TikTok",
-                      url: result.url
-                    })
-                  }
-                ]
-
-              })
-          });
+          await sock.sendMessage(
+            msg.chat,
+            {
+              video: videoBuffer,
+              mimetype: "video/mp4"
+            },
+            {
+              quoted: msg
+            }
+          );
 
         } catch (e) {
 
           console.error(
-            "Error cargando video:",
-            result.id,
+            `❌ Error descargando video ${i + 1}:`,
             e.message
           );
 
         }
       }
 
-      if (!cards.length) {
-        throw new Error(
-          "No fue posible generar las tarjetas."
-        );
-      }
-
       // ==========================================
-      // MENSAJE CARRUSEL
+      // FINALIZAR
       // ==========================================
-
-      const waMsg = generateWAMessageFromContent(
-        msg.chat,
-
-        {
-          viewOnceMessage: {
-            message: {
-
-              messageContextInfo: {
-                deviceListMetadata: {},
-                deviceListMetadataVersion: 2
-              },
-
-              interactiveMessage:
-                proto.Message.InteractiveMessage.fromObject({
-
-                  body: {
-                    text:
-                      `✨ *RESULTADOS DE:* ${text}`
-                  },
-
-                  footer: {
-                    text:
-                      `🔎 Se encontraron ${data.total || results.length} resultados\n` +
-                      `👤 Creadores: ${data.creadores || "Desconocidos"}\n` +
-                      `by ☆KanBot☆`
-                  },
-
-                  header: {
-                    hasMediaAttachment: false
-                  },
-
-                  carouselMessage: {
-                    cards
-                  }
-
-                })
-            }
-          }
-        },
-
-        {
-          quoted: msg
-        }
-      );
-
-      await sock.relayMessage(
-        msg.chat,
-        waMsg.message,
-        {
-          messageId: waMsg.key.id
-        }
-      );
 
       await msg.react("✅");
 
-    } catch (err) {
+    } catch (e) {
 
       console.error(
-        "Error TikTok Search:",
-        err
+        "❌ Error TikTok Search:",
+        e
       );
 
       await msg.react("❌");
 
       await msg.reply(
-        `❌ *ERROR:* ${err.message}`
+        `❌ *Error al buscar videos en TikTok.*\n\n${e.message}`
       );
     }
   }

@@ -137,7 +137,7 @@ export default async (sock, msg) => {
     if (!isOwner && !cmds.includes(command)) return;
   }
   if (chat?.isBanned && !(command === 'bot' && text === 'on') && !isOwner) {
-    await msg.reply(`ꕥ El bot *${settings.botname || 'Yuki'}* está desactivado en este grupo.\n\n> ✎ Un *administrador* puede activarlo con el comando:\n> » *${usedPrefix}bot on*`);
+    await msg.reply(`ꕥ El bot *${settings.botname || 'Kan'}* está desactivado en este grupo.\n\n> ✎ Un *administrador* puede activarlo con el comando:\n> » *${usedPrefix}bot on*`);
     return;
   }
 
@@ -146,11 +146,11 @@ export default async (sock, msg) => {
   if (!cmdData) {
     if (settings.prefix === 1) return;
     await sock.readMessages([msg.key]);
-    return msg.reply(`ꕤ El comando *${command}* no existe.\n✎ Usa *${usedPrefix}help* para ver la lista de comandos disponibles.`);
+  //  return msg.reply(`ꕤ El comando *${command}* no existe.\n✎ Usa *${usedPrefix}help* para ver la lista de comandos disponibles.`);
   }
   if (cmdData.isOwner && !isOwner) {
     if (settings.prefix === 1) return;
-    return msg.reply(`ꕤ El comando *${command}* no existe.\n✎ Usa *${usedPrefix}help* para ver la lista de comandos disponibles.`);
+   // return msg.reply(`ꕤ El comando *${command}* no existe.\n✎ Usa *${usedPrefix}help* para ver la lista de comandos disponibles.`);
   }
   if (cmdData.isAdmin && !isAdmins) return sock.reply(msg.chat, '《✧》 Este comando solo puede ser ejecutado por los Administradores del Grupo.', msg);
   if (cmdData.botAdmin && !isBotAdmins) return sock.reply(msg.chat, '《✧》 Este comando solo puede ser ejecutado si el Socket es Administrador del Grupo.', msg);

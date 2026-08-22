@@ -127,9 +127,42 @@ console.log('[MAIN] Pasó metadata:', msg.chat);
   let match = matchs.find(p => p[0]) || null;
 
   const botprimaryId = chat?.primaryBot;
-  if (!botprimaryId || botprimaryId === botJid) {
-    await Promise.allSettled((global.cmdsExecute ?? []).filter(p => p.type === 'before').map(p => p.fn({ msg, sock, match, groupMetadata, participants, isAdmins, isBotAdmins, isOwner, __dirname: p.dirname }).catch(e => console.error(chalk.gray(`[ ✿ ] Error before-plugin ${p.key}: ${e.message}`)))));
-  }
+if (!botprimaryId || botprimaryId === botJid) {
+    const beforePlugins = (global.cmdsExecute ?? []).filter(
+        p => p.type === 'before'
+    );
+
+    for (const p of beforePlugins) {
+        console.log(`[BEFORE] Iniciando: ${p.key}`);
+
+        try {
+            await Promise.race([
+                p.fn({
+                    msg,
+                    sock,
+                    match,
+                    groupMetadata,
+                    participants,
+                    isAdmins,
+                    isBotAdmins,
+                    isOwner,
+                    __dirname: p.dirname
+                }),
+
+                new Promise((_, reject) =>
+                    setTimeout(
+                        () => reject(new Error('TIMEOUT 5000ms')),
+                        5000
+                    )
+                )
+            ]);
+
+            console.log(`[BEFORE] OK: ${p.key}`);
+        } catch (e) {
+            console.log(`[BEFORE] ERROR: ${p.key} → ${e.message}`);
+        }
+    }
+}
 
   if (!match) return;
   if (msg.isCommands) return;

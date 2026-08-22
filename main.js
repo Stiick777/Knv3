@@ -49,6 +49,7 @@ function getAllSessionBots() {
 
 export default async (sock, msg) => {
   const sender = msg.sender;
+  console.log('[MAIN] Entró mensaje:', msg.text);
   const from = msg.key.remoteJid;
   const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
   const chat = db.getChat(msg.chat);
@@ -60,6 +61,7 @@ export default async (sock, msg) => {
   const isROwner = [botJid, ...(settings.owner ? [settings.owner] : []), ...global.owner.map(num => num + '@s.whatsapp.net')].includes(sender);
 
   let groupMetadata = null;
+  console.log('[MAIN] Metadata OK:', msg.chat);
   let groupName = '';
   if (msg.isGroup) {
     groupMetadata = getCachedMeta(msg.chat);

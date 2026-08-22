@@ -66,8 +66,25 @@ export default async (sock, msg) => {
   if (msg.isGroup) {
     groupMetadata = getCachedMeta(msg.chat);
     if (!groupMetadata) {
-      groupMetadata = await sock.groupMetadata(msg.chat).catch(() => null);
-      if (groupMetadata) setCachedMeta(msg.chat, groupMetadata);
+    console.log(`[META] Solicitando metadata: ${msg.chat}`);
+
+    try {
+        groupMetadata = await Promise.race([
+            sock.groupMetadata(msg.chat),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout')), 5000)
+            )
+        ]);
+
+        console.log(`[META] Metadata obtenida: ${msg.chat}`);
+
+        if (groupMetadata) {
+            setCachedMeta(msg.chat, groupMetadata);
+        }
+    } catch (e) {
+        console.log(`[META] ERROR ${msg.chat}: ${e.message}`);
+        groupMetadata = null;
+    }
     }
     groupName = groupMetadata?.subject || '';
   }

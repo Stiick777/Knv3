@@ -49,7 +49,6 @@ function getAllSessionBots() {
 
 export default async (sock, msg) => {
   const sender = msg.sender;
-  console.log('[MAIN] Entró mensaje:', msg.text);
   const from = msg.key.remoteJid;
   const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
   const chat = db.getChat(msg.chat);
@@ -61,39 +60,15 @@ export default async (sock, msg) => {
   const isROwner = [botJid, ...(settings.owner ? [settings.owner] : []), ...global.owner.map(num => num + '@s.whatsapp.net')].includes(sender);
 
   let groupMetadata = null;
-  console.log('[MAIN] Metadata OK:', msg.chat);
   let groupName = '';
-if (msg.isGroup) {
+  if (msg.isGroup) {
     groupMetadata = getCachedMeta(msg.chat);
-
     if (!groupMetadata) {
-        console.log(`[META] Solicitando metadata: ${msg.chat}`);
-
-        try {
-            groupMetadata = await Promise.race([
-                sock.groupMetadata(msg.chat),
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Timeout')), 5000)
-                )
-            ]);
-
-            console.log(`[META] Metadata obtenida: ${msg.chat}`);
-
-            if (groupMetadata) {
-                setCachedMeta(msg.chat, groupMetadata);
-            }
-        } catch (e) {
-            console.log(`[META] ERROR ${msg.chat}: ${e.message}`);
-            groupMetadata = null;
-        }
-    } else {
-        console.log(`[META] Usando caché: ${msg.chat}`);
+      groupMetadata = await sock.groupMetadata(msg.chat).catch(() => null);
+      if (groupMetadata) setCachedMeta(msg.chat, groupMetadata);
     }
-
     groupName = groupMetadata?.subject || '';
-}
-
-console.log('[MAIN] Pasó metadata:', msg.chat);
+  }
   const participants = groupMetadata?.participants || [];
   const adminSet = new Set(participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin').flatMap(p => [p.id?.split('@')[0], p.lid?.split('@')[0], p.phoneNumber?.split('@')[0]].filter(Boolean)));
   const senderBase = sender.split('@')[0];
@@ -127,42 +102,9 @@ console.log('[MAIN] Pasó metadata:', msg.chat);
   let match = matchs.find(p => p[0]) || null;
 
   const botprimaryId = chat?.primaryBot;
-if (!botprimaryId || botprimaryId === botJid) {
-    const beforePlugins = (global.cmdsExecute ?? []).filter(
-        p => p.type === 'before'
-    );
-
-    for (const p of beforePlugins) {
-        console.log(`[BEFORE] Iniciando: ${p.key}`);
-
-        try {
-            await Promise.race([
-                p.fn({
-                    msg,
-                    sock,
-                    match,
-                    groupMetadata,
-                    participants,
-                    isAdmins,
-                    isBotAdmins,
-                    isOwner,
-                    __dirname: p.dirname
-                }),
-
-                new Promise((_, reject) =>
-                    setTimeout(
-                        () => reject(new Error('TIMEOUT 5000ms')),
-                        5000
-                    )
-                )
-            ]);
-
-            console.log(`[BEFORE] OK: ${p.key}`);
-        } catch (e) {
-            console.log(`[BEFORE] ERROR: ${p.key} → ${e.message}`);
-        }
-    }
-}
+  if (!botprimaryId || botprimaryId === botJid) {
+    await Promise.allSettled((global.cmdsExecute ?? []).filter(p => p.type === 'before').map(p => p.fn({ msg, sock, match, groupMetadata, participants, isAdmins, isBotAdmins, isOwner, __dirname: p.dirname }).catch(e => console.error(chalk.gray(`[ ✿ ] Error before-plugin ${p.key}: ${e.message}`)))));
+  }
 
   if (!match) return;
   if (msg.isCommands) return;

@@ -63,31 +63,37 @@ export default async (sock, msg) => {
   let groupMetadata = null;
   console.log('[MAIN] Metadata OK:', msg.chat);
   let groupName = '';
-  if (msg.isGroup) {
+if (msg.isGroup) {
     groupMetadata = getCachedMeta(msg.chat);
+
     if (!groupMetadata) {
-    console.log(`[META] Solicitando metadata: ${msg.chat}`);
+        console.log(`[META] Solicitando metadata: ${msg.chat}`);
 
-    try {
-        groupMetadata = await Promise.race([
-            sock.groupMetadata(msg.chat),
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout')), 5000)
-            )
-        ]);
+        try {
+            groupMetadata = await Promise.race([
+                sock.groupMetadata(msg.chat),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Timeout')), 5000)
+                )
+            ]);
 
-        console.log(`[META] Metadata obtenida: ${msg.chat}`);
+            console.log(`[META] Metadata obtenida: ${msg.chat}`);
 
-        if (groupMetadata) {
-            setCachedMeta(msg.chat, groupMetadata);
+            if (groupMetadata) {
+                setCachedMeta(msg.chat, groupMetadata);
+            }
+        } catch (e) {
+            console.log(`[META] ERROR ${msg.chat}: ${e.message}`);
+            groupMetadata = null;
         }
-    } catch (e) {
-        console.log(`[META] ERROR ${msg.chat}: ${e.message}`);
-        groupMetadata = null;
+    } else {
+        console.log(`[META] Usando caché: ${msg.chat}`);
     }
-    }
+
     groupName = groupMetadata?.subject || '';
-  }
+}
+
+console.log('[MAIN] Pasó metadata:', msg.chat);
   const participants = groupMetadata?.participants || [];
   const adminSet = new Set(participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin').flatMap(p => [p.id?.split('@')[0], p.lid?.split('@')[0], p.phoneNumber?.split('@')[0]].filter(Boolean)));
   const senderBase = sender.split('@')[0];

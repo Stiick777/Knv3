@@ -12,6 +12,7 @@ export default {
   command: ["playlist", "ytbuscar", "yts", "ytsearch"],
   category: "search",
   description: "",
+
   run: async ({ msg, sock, text, args, command, usedPrefix }) => {
 
     if (!text) text = args?.join(" ");
@@ -33,7 +34,7 @@ export default {
         return msg.reply("⚠️ No se encontraron resultados.");
       }
 
-      let cards = [];
+      const cards = [];
 
       for (const video of videos) {
 
@@ -68,26 +69,38 @@ export default {
           }),
 
           nativeFlowMessage:
-  proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-    buttons: [
-      {
-        name: "cta_copy",
-        buttonParamsJson: JSON.stringify({
-          display_text: "🎵 Copiar MP3",
-          copy_code: `/yta ${video.url}`
-        })
-      },
-      {
-        name: "cta_copy",
-        buttonParamsJson: JSON.stringify({
-          display_text: "🎥 Copiar MP4",
-          copy_code: `/ytv ${video.url}`
-        })
-      }
-    ]
-  })
-        });
+            proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
 
+              buttons: [
+
+                {
+                  name: "quick_reply",
+                  buttonParamsJson: JSON.stringify({
+                    display_text: "🎵 MP3",
+                    id: `/yta ${video.url}`
+                  })
+                },
+
+                {
+                  name: "quick_reply",
+                  buttonParamsJson: JSON.stringify({
+                    display_text: "🎥 MP4",
+                    id: `/ytv ${video.url}`
+                  })
+                },
+
+                {
+                  name: "cta_copy",
+                  buttonParamsJson: JSON.stringify({
+                    display_text: "🔗 Copiar URL",
+                    copy_code: video.url
+                  })
+                }
+
+              ]
+
+            })
+        });
       }
 
       const waMsg = generateWAMessageFromContent(
@@ -95,18 +108,23 @@ export default {
         {
           viewOnceMessage: {
             message: {
+
               messageContextInfo: {
                 deviceListMetadata: {},
                 deviceListMetadataVersion: 2
               },
+
               interactiveMessage:
                 proto.Message.InteractiveMessage.fromObject({
+
                   body: {
                     text: `🔎 *RESULTADOS PARA:* ${text}`
                   },
 
                   footer: {
-                    text: `📺 Se encontraron ${search.videos.length} resultados\nby ☆KanBot☆`
+                    text:
+                      `📺 Se encontraron ${search.videos.length} resultados\n` +
+                      `by ☆KanBot☆`
                   },
 
                   header: {
@@ -116,6 +134,7 @@ export default {
                   carouselMessage: {
                     cards
                   }
+
                 })
             }
           }
@@ -141,8 +160,7 @@ export default {
 
       await msg.react("❌");
 
-      msg.reply(`❌ Error: ${e.message}`);
-
+      await msg.reply(`❌ Error: ${e.message}`);
     }
-  },
+  }
 };

@@ -1,8 +1,6 @@
 import moment from 'moment-timezone';
 import db from '#db';
-import { promises as fs } from 'fs';
 
-const charactersFilePath = './core/characters.json';
 const growth = Math.pow(Math.PI / Math.E, 1.618) * Math.E * 0.75;
 
 function xpRange(level, multiplier = global.multiplier || 2) {
@@ -25,7 +23,9 @@ export default {
     if (!user) {
       return msg.reply('✎ El usuario *mencionado* no está *registrado* en el bot');
     }
-    
+    const idBot = sock.user.id.split(':')[0] + '@s.whatsapp.net' || '';
+    const settings = db.getSettings(idBot) || {};
+    const currency = settings.currency || '';
     const user2 = db.getUser(userId) || {};
     const name = user2.name || '';
     const birth = user2.birth || 'Sin especificar';
@@ -41,27 +41,26 @@ export default {
     const pasatiempo = user2.pasatiempo ? `${user2.pasatiempo}` : 'No definido';
     const exp = user2.exp || 0;
     const nivel = user2.level || 0;
-     
-    let haremCount = 0;
-let favLine = '';
-
-try {
-  const characters = JSON.parse(
-    await fs.readFile(charactersFilePath, 'utf8')
-  );
-
-  const ownedCharacters = characters.filter(c => c.user === userId);
-
-  haremCount = ownedCharacters.length;
-
-  if (user.favorite) {
-    const favorite = ownedCharacters.find(c => c.id === user.favorite);
-
-    if (favorite) {
-      favLine = `\n๑ Claim favorito » *${favorite.name}*`;
-    }
-  }
-} catch {}
+    const chocolates = user.coins || 0;
+    const banco = user.bank || 0;
+    const totalCoins = chocolates + banco;
+    const favId = user.favorite;
+    let favLine = '';
+    if (favId) {
+      const character = db.getCharacter(favId);
+      if (character) {
+        favLine = `\n๑ Claim favorito » *${character.name || '???'}*`;
+      }
+    }    
+    const ownedIDs = Array.isArray(user.characters) ? user.characters : [];
+    let haremValue = 0;    
+    for (const id of ownedIDs) {
+      const character = db.getCharacter(id);
+      if (character) {
+        haremValue += character.value || 0;
+      }
+    }    
+    const haremCount = ownedIDs.length;
     const perfil = await sock.profilePictureUrl(userId, 'image').catch((_) => 'https://cdn.yuki-wabot.my.id/files/2PVh.jpeg');    
     const allUsers = db.getUser() || [];
     const users = Array.isArray(allUsers) ? allUsers.map(u => ({ ...u, jid: u.id })) : [];
@@ -83,7 +82,9 @@ try {
 ➨ Progreso › *${progreso} => ${xp}* _(${porcentaje}%)_
 ☆ Puesto › *#${rank}*
 
-ꕥ Personajes › *${haremCount}* - *${favLine}*
+ꕥ Harem › *${haremCount}*
+♤ Valor total › *${haremValue.toLocaleString()}*${favLine}
+⛁ Coins totales › *¥${totalCoins.toLocaleString()} ${currency}*
 ❒ Comandos ejecutados › *${comandos.toLocaleString()}*`;     
       await sock.sendMessage(msg.chat, { image: { url: perfil }, caption: profileText }, { quoted: msg });
     } catch (e) {

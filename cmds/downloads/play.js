@@ -5,6 +5,7 @@ export default {
   command: ['play'],
   category: 'downloads',
   description: 'Descarga audio de YouTube',
+
   run: async ({ msg, sock, args, text }) => {
     if (!text) {
       return msg.reply(`*𝙸𝚗𝚐𝚛𝚎𝚜𝚊 𝚎𝚕 𝚗𝚘𝚖𝚋𝚛𝚎 𝚍𝚎 𝚕𝚘 𝚚𝚞𝚎 𝚚𝚞𝚒𝚎𝚛𝚎𝚜 𝚋𝚞𝚜𝚌𝚊𝚛*`);
@@ -12,21 +13,29 @@ export default {
 
     await msg.react('🕓');
 
-    // Buscar en YouTube
-    const yt_play = await search(args.join(' '));
+    try {
+      // 🔎 Buscar en YouTube
+      const yt_play = await search(args.join(' '));
 
-    // Verificar duración
-    const duracion = yt_play[0].duration.seconds || 0;
-    if (duracion > 3600) {
-      return msg.reply("❗ *El audio es superior a 1h*");
-    }
+      if (!yt_play || !yt_play.length) {
+        await msg.react('❌');
+        return msg.reply('❌ No encontré ningún resultado en YouTube.');
+      }
 
-    const texto1 = `
+      // ⏱️ Verificar duración
+      const duracion = yt_play[0].duration?.seconds || 0;
+
+      if (duracion > 3600) {
+        await msg.react('❌');
+        return msg.reply('❗ *El audio es superior a 1h*');
+      }
+
+      const texto1 = `
 𝚈𝚘𝚞𝚝𝚞𝚋𝚎 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚜
 
 > 𝚃𝚒𝚝𝚞𝚕𝚘 :  ${yt_play[0].title}
 > 𝙲𝚛𝚎𝚊𝚍𝚘 :  ${yt_play[0].ago}
-> 𝙳𝚞𝚛𝚊𝚌𝚒𝚘𝚗 :  ${secondString(yt_play[0].duration.seconds)}
+> 𝙳𝚞𝚛𝚊𝚌𝚒𝚘𝚗 :  ${secondString(duracion)}
 
 🚀 𝙎𝙀 𝙀𝙎𝙏𝘼 𝘿𝙀𝙎𝘼𝙍𝙂𝘼𝙉𝘿𝙊 𝙎𝙐 𝘼𝙐𝘿𝙄𝙊, 𝙀𝙎𝙋𝙀𝙍𝙀 𝙐𝙉 𝙈𝙊𝙈𝙀𝙉𝙏𝙊
 ===========================
@@ -34,96 +43,101 @@ export default {
 > Provided by Stiiven
 `.trim();
 
-    await sock.sendFile(
-      msg.chat,
-      yt_play[0].thumbnail,
-      'error.jpg',
-      texto1,
-      msg,
-      null
-    );
-    
-try {
-  await msg.react('🕓');
+      // 🖼️ Enviar miniatura
+      await sock.sendFile(
+        msg.chat,
+        yt_play[0].thumbnail,
+        'error.jpg',
+        texto1,
+        msg,
+        null
+      );
 
-  const url = yt_play[0].url;
-  let title = 'audio';
-  let downloadUrl = '';
+      // =====================================================
+      // 🎵 ÚNICA API: LEMPI
+      // =====================================================
 
-  // 🥇 Faa API
-  try {
-    const res = await fetch(
-      `https://api-faa.my.id/faa/ytmp3?url=${encodeURIComponent(url)}`
-    );
-    const json = await res.json();
+      const url = yt_play[0].url;
 
-    if (json.status && json.result?.mp3) {
-      title = json.result.title || title;
-      downloadUrl = json.result.mp3;
-    } else {
-      throw new Error('Faa sin datos');
+      const apiUrl =
+        `https://api.lempi.lat/dl/yta?url=${encodeURIComponent(url)}&apikey=montekey28`;
+
+      const res = await fetch(apiUrl);
+      const json = await res.json();
+
+      console.log('Respuesta Lempi:', json);
+
+      if (!json.status || !json.datos?.url) {
+        throw new Error('La API de Lempi no devolvió el audio.');
+      }
+
+      const downloadUrl = json.datos.url;
+      const title = json.titulo || yt_play[0].title || 'audio';
+
+      // 🎵 Enviar audio
+      await sock.sendMessage(
+        msg.chat,
+        {
+          audio: { url: downloadUrl },
+          mimetype: 'audio/mpeg',
+          fileName: `${title}.mp3`,
+          ptt: false
+        },
+        { quoted: msg }
+      );
+
+      await msg.react('✅');
+
+    } catch (err) {
+      console.error('Error en play:', err);
+
+      await msg.react('❌');
+
+      await sock.sendMessage(
+        msg.chat,
+        {
+          text: '❌ Error al descargar el audio.'
+        },
+        { quoted: msg }
+      );
     }
-
-  } catch {
-
-    // 🔁 Neji API
-    const res = await fetch(
-      `https://neji-api.vercel.app/api/downloader/ytmp3?url=${encodeURIComponent(url)}`
-    );
-    const json = await res.json();
-
-    if (json.status && json.result?.url) {
-      title = json.result.title || title;
-      downloadUrl = json.result.url;
-    } else {
-      throw new Error('Todas las APIs fallaron');
-    }
-  }
-
-  await sock.sendMessage(
-    msg.chat,
-    {
-      audio: { url: downloadUrl },
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
-      ptt: false
-    },
-    { quoted: msg }
-  );
-
-  await msg.react('✅');
-
-} catch (err) {
-  console.error(err);
-  await msg.react('❌');
-
-  await sock.sendMessage(
-    msg.chat,
-    {
-      text: '❌ Error al descargar el audio (todas las APIs fallaron).'
-    },
-    { quoted: msg }
-  );
-}
   }
 };
 
-// 📌 Funciones compartidas
+
+// 📌 Buscar en YouTube
 async function search(query, options = {}) {
-  const search = await yts.search({ query, hl: 'es', gl: 'ES', ...options });
+  const search = await yts.search({
+    query,
+    hl: 'es',
+    gl: 'ES',
+    ...options
+  });
+
   return search.videos;
 }
 
+
+// 📌 Convertir segundos a texto
 function secondString(seconds) {
   seconds = Number(seconds);
+
   const d = Math.floor(seconds / (3600 * 24));
   const h = Math.floor((seconds % 3600) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
 
-  const dDisplay = d > 0 ? d + (d == 1 ? ' día, ' : ' días, ') : '';
-  const hDisplay = h > 0 ? h + (h == 1 ? ' hora, ' : ' horas, ') : '';
-  const mDisplay = m > 0 ? m + (m == 1 ? ' minuto, ' : ' minutos, ') : '';
-  const sDisplay = s > 0 ? s + (s == 1 ? ' segundo' : ' segundos') : '';
+  const dDisplay =
+    d > 0 ? d + (d == 1 ? ' día, ' : ' días, ') : '';
+
+  const hDisplay =
+    h > 0 ? h + (h == 1 ? ' hora, ' : ' horas, ') : '';
+
+  const mDisplay =
+    m > 0 ? m + (m == 1 ? ' minuto, ' : ' minutos, ') : '';
+
+  const sDisplay =
+    s > 0 ? s + (s == 1 ? ' segundo' : ' segundos') : '';
+
   return dDisplay + hDisplay + mDisplay + sDisplay;
 }

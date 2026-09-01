@@ -18,44 +18,41 @@ export default {
     try {
 
       // =========================
-      // BUSCAR EN YOSOYYO
+      // API ALYACORE
       // =========================
 
-      const api = `https://yosoyyo-api-ofc.onrender.com/api/youtube?q=${encodeURIComponent(text)}&apiKey=yosoyyo_sk_vdri1g4p`;
+      const api = `https://api.alyacore.xyz/dl/youtubeplay?query=${encodeURIComponent(text)}&key=LUFFY-FIX67`;
 
       const res = await fetch(api);
       const json = await res.json();
 
       if (
-        json.status !== 200 ||
-        !Array.isArray(json.result) ||
-        !json.result[0]
+        !json.status ||
+        !json.result ||
+        !json.result.dl
       ) {
-        throw new Error('No se encontraron resultados.');
-      }
-
-      // Primer resultado
-      const video = json.result[0];
-
-      // =========================
-      // COMPROBAR MP3
-      // =========================
-
-      const mp3 = video.download?.mp3;
-
-      if (!mp3) {
         throw new Error('La API no devolvió un enlace MP3 válido.');
       }
+
+      const video = json.result;
 
       // =========================
       // DATOS DEL VIDEO
       // =========================
 
       const titulo = video.title || 'Sin título';
-      const autor = video.channelName || 'Desconocido';
-      const duracion = video.duration || 'Desconocida';
-      const thumbnail = video.thumbnailUrl;
-      const videoUrl = video.videoUrl || '';
+      const autor = video.channel || 'Desconocido';
+      const duracionSegundos = Number(video.duration) || 0;
+      const thumbnail = video.thumbnail;
+      const mp3 = video.dl;
+      const calidad = video.quality || 'Desconocida';
+      const fileName = video.fileName || `${cleanFileName(titulo)}.mp3`;
+
+      // =========================
+      // DURACIÓN
+      // =========================
+
+      const duracion = secondString(duracionSegundos);
 
       // =========================
       // MENSAJE DE INFORMACIÓN
@@ -65,14 +62,14 @@ export default {
 𝚈𝚘𝚞𝚝𝚞𝚋𝚎 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊
 ===========================
 > *𝚃𝚒𝚝𝚞𝚕𝚘* : ${titulo}
-> *𝙰𝚞𝚝𝚘𝚛* : ${autor}
+> *𝙲𝚊𝚗𝚊𝚕* : ${autor}
 > *𝙳𝚞𝚛𝚊𝚌𝚒𝚘𝚗* : ${duracion}
-> *𝚄𝚁𝙻* : ${videoUrl}
+> *𝙲𝚊𝚕𝚒𝚍𝚊𝚍* : ${calidad}
 
 *🚀 Se está descargando el audio, espere...*
 ===========================
 ✰ KanBot ✰
-> *Provided by YOSOYYO*
+> *Provided by AlyaCore*
 `.trim();
 
       // =========================
@@ -118,7 +115,7 @@ export default {
 
       const buffer = await audioRes.buffer();
 
-      // Si HEAD no devolvió tamaño,
+      // Si HEAD no devuelve tamaño,
       // usamos el tamaño real del buffer.
       if (!size && buffer?.length) {
         size = buffer.length;
@@ -139,6 +136,7 @@ export default {
 🎵 *Título:* ${titulo}
 👤 *Autor:* ${autor}
 ⏱️ *Duración:* ${duracion}
+🎚️ *Calidad:* ${calidad}
 📦 *Peso:* ${formatSize(size)}
 `;
 
@@ -157,7 +155,7 @@ export default {
           {
             document: buffer,
             mimetype: 'audio/mpeg',
-            fileName: `${cleanFileName(titulo)}.mp3`,
+            fileName: fileName,
             caption: cap
           },
           {
@@ -176,7 +174,7 @@ export default {
           {
             audio: buffer,
             mimetype: 'audio/mpeg',
-            fileName: `${cleanFileName(titulo)}.mp3`,
+            fileName: fileName,
             ptt: false
           },
           {
@@ -224,7 +222,7 @@ async function getSize(url) {
       ? parseInt(contentLength, 10)
       : null;
 
-  } catch (error) {
+  } catch {
 
     return null;
 
@@ -256,6 +254,41 @@ function formatSize(bytes) {
 
   return `${bytes.toFixed(2)} ${units[i]}`;
 
+}
+
+
+// ========================================
+// CONVERTIR SEGUNDOS A TIEMPO
+// ========================================
+
+function secondString(seconds) {
+
+  seconds = Number(seconds);
+
+  const d = Math.floor(seconds / (3600 * 24));
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+
+  const partes = [];
+
+  if (d > 0) {
+    partes.push(`${d} día${d !== 1 ? 's' : ''}`);
+  }
+
+  if (h > 0) {
+    partes.push(`${h} hora${h !== 1 ? 's' : ''}`);
+  }
+
+  if (m > 0) {
+    partes.push(`${m} minuto${m !== 1 ? 's' : ''}`);
+  }
+
+  if (s > 0 || partes.length === 0) {
+    partes.push(`${s} segundo${s !== 1 ? 's' : ''}`);
+  }
+
+  return partes.join(', ');
 }
 
 

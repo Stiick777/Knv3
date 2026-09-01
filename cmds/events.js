@@ -72,7 +72,10 @@ Nos alegra tenerte aquí.
 ¡Adiós, ✰ @${phone}!
 DE ${metadata.subject}
 ● ${tiempo}
-╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯`;
+╰══•🔥ೋ•๑♡๑•ೋ🔥•══╯
+
+Gracias por haber estado con nosotros.
+🥀*ੈ✩‧₊˚༺☆༻*ੈ✩˚🍁`;
           }
           await sock.sendMessage(anu.id, { image: { url: pp }, caption, mentions: [jid] });
         }

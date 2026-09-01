@@ -54,27 +54,30 @@ export default {
       );
 
       // =====================================================
-      // 🎵 ÚNICA API: LEMPI
+      // 🎵 API DELIRIUS
       // =====================================================
 
       const url = yt_play[0].url;
 
       const apiUrl =
-        `https://api.lempi.lat/dl/yta?url=${encodeURIComponent(url)}&apikey=montekey28`;
+        `https://api.delirius.online/download/ytmp3?url=${encodeURIComponent(url)}`;
 
       const res = await fetch(apiUrl);
       const json = await res.json();
 
-      console.log('Respuesta Lempi:', json);
+      console.log('Respuesta Delirius:', json);
 
-      if (!json.status || !json.datos?.url) {
-        throw new Error('La API de Lempi no devolvió el audio.');
+      if (!json.status || !json.data?.download) {
+        throw new Error('Delirius no devolvió el audio');
       }
 
-      const downloadUrl = json.datos.url;
-      const title = json.titulo || yt_play[0].title || 'audio';
+      const downloadUrl = json.data.download;
+      const title = json.data.title || yt_play[0].title || 'audio';
 
-      // 🎵 Enviar audio
+      // =====================================================
+      // 🎵 ENVIAR AUDIO
+      // =====================================================
+
       await sock.sendMessage(
         msg.chat,
         {

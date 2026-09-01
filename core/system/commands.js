@@ -62,6 +62,7 @@ export const menuObject = {
 ╞˚₊·͟͟͞͞➳❥ .pindl <url>
 ╞˚₊·͟͟͞͞➳❥ .play2
 ╞˚₊·͟͟͞͞➳❥ .play
+╞˚₊·͟͟͞͞➳❥ .playv1
 ╞˚₊·͟͟͞͞➳❥ .tiktok
 ╞˚₊·͟͟͞͞➳❥ .playv2 <texto>
 ╞˚₊·͟͟͞͞➳❥ .ytmp3 <url>

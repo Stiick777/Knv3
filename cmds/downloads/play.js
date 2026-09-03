@@ -65,8 +65,6 @@ export default {
       const res = await fetch(apiUrl);
       const json = await res.json();
 
-      console.log('Respuesta Delirius:', json);
-
       if (!json.status || !json.data?.download) {
         throw new Error('Delirius no devolvió el audio');
       }

@@ -1,9 +1,4 @@
 import yts from "yt-search";
-import {
-  proto,
-  generateWAMessageFromContent,
-  prepareWAMessageMedia
-} from "baileys";
 
 export default {
   command: ["playlist", "ytbuscar", "yts", "ytsearch"],
@@ -12,7 +7,12 @@ export default {
 
   run: async ({ msg, sock, text, args, command, usedPrefix }) => {
 
-    if (!text) text = args?.join(" ");
+    // ==============================
+    // TEXTO DE BÚSQUEDA
+    // ==============================
+    if (!text) {
+      text = args?.join(" ");
+    }
 
     if (!text?.trim()) {
       return msg.reply(
@@ -22,6 +22,7 @@ export default {
     }
 
     try {
+
       await msg.react("⌛");
 
       // ==============================
@@ -30,7 +31,7 @@ export default {
       const search = await yts(text.trim());
 
       const videos = search.videos
-        .filter(v => v?.url && v?.thumbnail)
+        .filter(video => video?.url && video?.thumbnail)
         .slice(0, 6);
 
       if (!videos.length) {
@@ -39,171 +40,65 @@ export default {
       }
 
       // ==============================
-      // CREAR TARJETAS
+      // ENVIAR RESULTADOS
       // ==============================
-      const cards = [];
+      for (let i = 0; i < videos.length; i++) {
 
-      for (const video of videos) {
+        const video = videos[i];
 
-        // Preparar correctamente la imagen
-        const media = await prepareWAMessageMedia(
+        const title = video.title || "Sin título";
+        const author = video.author?.name || "Desconocido";
+        const duration = video.timestamp || "Desconocida";
+        const ago = video.ago || "Desconocido";
+        const views = Number(video.views || 0).toLocaleString("es-CO");
+
+        const caption =
+          `🔎 *Resultado ${i + 1}/${videos.length}*\n\n` +
+          `🎬 *${title}*\n\n` +
+          `👤 *Canal:* ${author}\n` +
+          `⏱️ *Duración:* ${duration}\n` +
+          `📅 *Publicado:* ${ago}\n` +
+          `👀 *Vistas:* ${views}\n\n` +
+          `🔗 ${video.url}`;
+
+        await sock.sendMessage(
+          msg.chat,
           {
             image: {
               url: video.thumbnail
-            }
-          },
-          {
-            upload: sock.waUploadToServer
-          }
-        );
+            },
 
-        const card = proto.Message.InteractiveMessage.CarouselMessage.Card.fromObject({
-          
-          // ==========================
-          // CABECERA
-          // ==========================
-          header: proto.Message.InteractiveMessage.Header.fromObject({
-            title: video.author?.name || "YouTube",
-            hasMediaAttachment: true,
-            ...media
-          }),
+            caption,
 
-          // ==========================
-          // CUERPO
-          // ==========================
-          body: proto.Message.InteractiveMessage.Body.fromObject({
-            text:
-              `🎬 *${video.title}*\n\n` +
-              `👤 ${video.author?.name || "Desconocido"}\n` +
-              `⏱️ ${video.timestamp || "Desconocido"}\n` +
-              `📅 ${video.ago || "Desconocido"}\n` +
-              `👀 ${Number(video.views || 0).toLocaleString("es-CO")} vistas`
-          }),
+            footer: "☆ KanBot ☆",
 
-          // ==========================
-          // FOOTER
-          // ==========================
-          footer: proto.Message.InteractiveMessage.Footer.fromObject({
-            text: "☆ KanBot ☆"
-          }),
+            buttonsFormat: "buttons",
 
-          // ==========================
-          // BOTONES
-          // ==========================
-          nativeFlowMessage:
-            proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+            buttons: [
 
-              buttons: [
-
-                // MP3
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "🎵 MP3",
-                    id: `${usedPrefix}yta ${video.url}`
-                  })
-                },
-
-                // MP4
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "🎥 MP4",
-                    id: `${usedPrefix}ytv ${video.url}`
-                  })
-                },
-
-                // COPIAR URL
-                {
-                  name: "cta_copy",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "🔗 Copiar URL",
-                    copy_code: video.url
-                  })
-                }
-
-              ],
-
-              messageParamsJson: ""
-            })
-        });
-
-        cards.push(card);
-      }
-
-      // ==============================
-      // MENSAJE PRINCIPAL
-      // ==============================
-      const carousel = proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-        cards
-      });
-
-      const interactiveMessage =
-        proto.Message.InteractiveMessage.fromObject({
-
-          // ==========================
-          // CUERPO PRINCIPAL
-          // ==========================
-          body: proto.Message.InteractiveMessage.Body.fromObject({
-            text:
-              `🔎 *RESULTADOS PARA:*\n` +
-              `_${text.trim()}_`
-          }),
-
-          // ==========================
-          // FOOTER PRINCIPAL
-          // ==========================
-          footer: proto.Message.InteractiveMessage.Footer.fromObject({
-            text:
-              `📺 ${videos.length} resultados encontrados\n` +
-              `☆ KanBot ☆`
-          }),
-
-          // ==========================
-          // HEADER
-          // ==========================
-          header: proto.Message.InteractiveMessage.Header.fromObject({
-            hasMediaAttachment: false
-          }),
-
-          // ==========================
-          // CARRUSEL
-          // ==========================
-          carouselMessage: carousel
-        });
-
-      // ==============================
-      // CONSTRUIR MENSAJE WHATSAPP
-      // ==============================
-      const waMsg = generateWAMessageFromContent(
-        msg.chat,
-        {
-          viewOnceMessage: {
-            message: {
-              messageContextInfo: {
-                deviceListMetadata: {},
-                deviceListMetadataVersion: 2
+              {
+                text: "🎵 MP3",
+                id: `${usedPrefix}yta ${video.url}`
               },
 
-              interactiveMessage
-            }
-          }
-        },
-        {
-          quoted: msg
-        }
-      );
+              {
+                text: "🎥 MP4",
+                id: `${usedPrefix}ytv ${video.url}`
+              },
 
-      // ==============================
-      // ENVIAR
-      // ==============================
-      await sock.relayMessage(
-        msg.chat,
-        waMsg.message,
-        {
-          messageId: waMsg.key.id
-        }
-      );
+              {
+                text: "🔗 Copiar URL",
+                copy: video.url
+              }
+
+            ]
+
+          },
+          {
+            quoted: msg
+          }
+        );
+      }
 
       await msg.react("✅");
 

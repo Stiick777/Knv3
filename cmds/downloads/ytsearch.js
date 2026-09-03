@@ -8,6 +8,16 @@ const {
   prepareWAMessageMedia
 } = baileys;
 
+console.log(
+  Object.keys(proto.Message.InteractiveMessage || {})
+);
+
+console.log(
+  Object.keys(proto.Message.InteractiveMessage?.CarouselMessage || {})
+);
+console.log(
+  proto.Message.InteractiveMessage?.CarouselMessage
+);
 export default {
   command: ["playlist", "ytbuscar", "yts", "ytsearch"],
   category: "search",

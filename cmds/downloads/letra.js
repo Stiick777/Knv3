@@ -19,24 +19,31 @@ export default {
 
       await msg.react('🕓');
 
-      const apiKey = 'yosoyyo_sk_vdri1g4p';
-      const url = `https://yosoyyo-api-ofc.onrender.com/api/lyrics?q=${encodeURIComponent(query)}&apiKey=${apiKey}`;
+      const url = `https://api.delirius.online/search/lyrics?query=${encodeURIComponent(query)}`;
 
       const res = await fetch(url);
       const json = await res.json();
 
-      if (!res.ok || json.status !== 200 || !json.result) {
+      if (!res.ok || !json.status || !json.data) {
         await msg.react('❌');
         return msg.reply('❌ No se encontró la letra de esa canción.');
       }
 
-      const { title, artist, lyrics } = json.result;
+      const { title, artists, album, duration, lyrics } = json.data;
+
+      if (!lyrics) {
+        await msg.react('❌');
+        return msg.reply('❌ No se encontró la letra de esa canción.');
+      }
 
       await msg.react('✅');
 
-      const text = `*🎵 LETRA ENCONTRADA*\n\n` +
-        `*📀 Título:* ${title}\n` +
-        `*🎤 Artista:* ${artist}\n\n` +
+      const text =
+        `*🎵 LETRA ENCONTRADA*\n\n` +
+        `*📀 Título:* ${title || 'Desconocido'}\n` +
+        `*🎤 Artista:* ${artists || 'Desconocido'}\n` +
+        `*💿 Álbum:* ${album || 'Desconocido'}\n` +
+        `*⏱️ Duración:* ${duration || 'Desconocida'}\n\n` +
         `${lyrics}`;
 
       await msg.reply(text);
@@ -44,7 +51,7 @@ export default {
     } catch (e) {
       console.error(e);
       await msg.react('❌');
-      msg.reply('❌ Ocurrió un error al buscar la letra de la canción.');
+      return msg.reply('❌ Ocurrió un error al buscar la letra de la canción.');
     }
   }
 };

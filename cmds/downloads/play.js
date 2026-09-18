@@ -76,16 +76,24 @@ export default {
       // 🎵 ENVIAR AUDIO
       // =====================================================
 
-      await sock.sendMessage(
-        msg.chat,
-        {
-          audio: { url: downloadUrl },
-          mimetype: 'audio/mpeg',
-          fileName: `${title}.mp3`,
-          ptt: false
-        },
-        { quoted: msg }
-      );
+      const audioRes = await fetch(downloadUrl);
+
+if (!audioRes.ok) {
+  throw new Error(`Error descargando audio: ${audioRes.status}`);
+}
+
+const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+
+await sock.sendMessage(
+  msg.chat,
+  {
+    audio: audioBuffer,
+    mimetype: 'audio/mpeg',
+    fileName: `${title}.mp3`,
+    ptt: false
+  },
+  { quoted: msg }
+);
 
       await msg.react('✅');
 

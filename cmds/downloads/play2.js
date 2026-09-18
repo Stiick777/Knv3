@@ -145,86 +145,87 @@ export default {
       // ==========================================
 
       async function enviarVideo(
-        chat,
-        videoUrl,
-        caption,
-        thumbnail,
-        quoted
-      ) {
+  chat,
+  videoUrl,
+  caption,
+  thumbnail,
+  quoted
+) {
+  let filePath = null;
 
-        let filePath = null;
+  try {
+
+    // ==========================================
+    // 📥 DESCARGAR A DISCO
+    // ==========================================
+
+    filePath = await descargarVideo(videoUrl);
+
+    const stats = fs.statSync(filePath);
+
+    // ==========================================
+    // 📖 LEER ARCHIVO SOLO AL MOMENTO DE ENVIAR
+    // ==========================================
+
+    const videoBuffer = await fs.promises.readFile(filePath);
+
+    // ==========================================
+    // 📦 MÁS DE 10 MB → DOCUMENTO
+    // ==========================================
+
+    if (stats.size > 10 * 1024 * 1024) {
+
+      return await sock.sendMessage(
+        chat,
+        {
+          document: videoBuffer,
+          mimetype: 'video/mp4',
+          fileName: 'video.mp4',
+          jpegThumbnail: thumbnail,
+          caption
+        },
+        {
+          quoted
+        }
+      );
+    }
+
+    // ==========================================
+    // 🎬 MENOS DE 10 MB → VIDEO
+    // ==========================================
+
+    return await sock.sendMessage(
+      chat,
+      {
+        video: videoBuffer,
+        mimetype: 'video/mp4',
+        jpegThumbnail: thumbnail,
+        caption
+      },
+      {
+        quoted
+      }
+    );
+
+  } finally {
+
+    // ==========================================
+    // 🗑️ ELIMINAR ARCHIVO
+    // ==========================================
+
+    if (filePath) {
+
+      setTimeout(() => {
 
         try {
-
-          filePath = await descargarVideo(videoUrl);
-
-          const stats = fs.statSync(filePath);
-
-          // ========================================
-          // 📦 MÁS DE 10 MB → DOCUMENTO
-          // ========================================
-
-          if (stats.size > 10 * 1024 * 1024) {
-
-            return await sock.sendMessage(
-              chat,
-              {
-                document: {
-                  url: filePath
-                },
-                mimetype: 'video/mp4',
-                fileName: 'video.mp4',
-                jpegThumbnail: thumbnail,
-                caption
-              },
-              {
-                quoted
-              }
-            );
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
           }
+        } catch {}
 
-          // ========================================
-          // 🎬 MENOS DE 10 MB → VIDEO
-          // ========================================
-
-          return await sock.sendMessage(
-            chat,
-            {
-              video: {
-                url: filePath
-              },
-              mimetype: 'video/mp4',
-              jpegThumbnail: thumbnail,
-              caption
-            },
-            {
-              quoted
-            }
-          );
-
-        } finally {
-
-          // ========================================
-          // 🗑️ ELIMINAR ARCHIVO TEMPORAL
-          // ========================================
-
-          if (filePath) {
-
-            setTimeout(() => {
-
-              try {
-
-                if (fs.existsSync(filePath)) {
-                  fs.unlinkSync(filePath);
-                }
-
-              } catch {}
-
-            }, 10000);
-
-          }
-
-        }
+      }, 10000);
+    }
+  }
       }
 
       // ==========================================

@@ -36,7 +36,7 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   if (!settings.antiPrivate) return false;
 
   // ============================================
-  // DEBUG COMPLETO
+  // DEBUG
   // ============================================
   console.log('\n========== ANT_PRIVATE DEBUG ==========');
 
@@ -47,6 +47,8 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   console.log('msg.participant:', msg.participant);
 
   console.log('msg.remoteJid:', msg.key?.remoteJid);
+
+  console.log('msg.remoteJidAlt:', msg.key?.remoteJidAlt);
 
   console.log('msg.isGroup:', msg.isGroup);
 
@@ -59,13 +61,20 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   // ============================================
   // OBTENER JID
   // ============================================
-  const sender = msg.sender || msg.key?.participant || '';
+  const sender =
+    msg.sender ||
+    msg.key?.remoteJid ||
+    '';
 
   // ============================================
   // NEWSLETTER / CANALES
   // ============================================
   if (sender.endsWith('@newsletter')) {
-    console.log('[AntiPrivate] Newsletter ignorado:', sender);
+    console.log(
+      '[AntiPrivate] Newsletter ignorado:',
+      sender
+    );
+
     return true;
   }
 
@@ -73,92 +82,81 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   // BROADCAST
   // ============================================
   if (sender.endsWith('@broadcast')) {
-    console.log('[AntiPrivate] Broadcast ignorado:', sender);
+    console.log(
+      '[AntiPrivate] Broadcast ignorado:',
+      sender
+    );
+
     return true;
   }
 
   // ============================================
-  // TIPOS DE USUARIO
+  // JID FINAL PARA BLOQUEAR
   // ============================================
-  const isPN = sender.endsWith('@s.whatsapp.net');
-  const isLID = sender.endsWith('@lid');
+  let jid = sender;
 
-  if (!isPN && !isLID) {
-    console.log('[AntiPrivate] JID ignorado:', sender);
-    return true;
-  }
+  // ============================================
+  // @LID
+  // ============================================
+  if (sender.endsWith('@lid')) {
+    console.log(
+      '[AntiPrivate] Detectado @lid:',
+      sender
+    );
 
-  try {
-    let jid = sender;
+    // Baileys ya proporciona el JID real
+    // mediante remoteJidAlt
+    const altJid = msg.key?.remoteJidAlt;
 
-    // ============================================
-    // @LID
-    // ============================================
-    if (isLID) {
-      console.log('[AntiPrivate] Detectado @lid:', sender);
+    console.log(
+      '[AntiPrivate] remoteJidAlt:',
+      altJid
+    );
 
-      // Intentar resolver mediante onWhatsApp
-      const result = await sock
-        .onWhatsApp(sender)
-        .catch(e => {
-          console.log(
-            '[AntiPrivate] onWhatsApp error:',
-            e.message
-          );
-
-          return [];
-        });
+    if (
+      altJid &&
+      altJid.endsWith('@s.whatsapp.net')
+    ) {
+      jid = altJid;
 
       console.log(
-        '[AntiPrivate] Resultado onWhatsApp:',
-        result
-      );
-
-      const user = result?.[0];
-
-      if (user?.jid) {
-        jid = user.jid;
-
-        console.log(
-          '[AntiPrivate] LID convertido:',
-          sender,
-          '=>',
-          jid
-        );
-      } else {
-        console.log(
-          '[AntiPrivate] No se pudo resolver LID:',
-          sender
-        );
-
-        // IMPORTANTE:
-        // No intentamos bloquear directamente el @lid
-        // porque updateBlockStatus no lo acepta.
-        return true;
-      }
-    }
-
-    // ============================================
-    // VALIDAR JID FINAL
-    // ============================================
-    if (!jid || !jid.endsWith('@s.whatsapp.net')) {
-      console.log(
-        '[AntiPrivate] JID final no bloqueable:',
+        '[AntiPrivate] LID convertido:',
+        sender,
+        '=>',
         jid
+      );
+    } else {
+      console.log(
+        '[AntiPrivate] No existe remoteJidAlt válido para:',
+        sender
       );
 
       return true;
     }
+  }
 
+  // ============================================
+  // USUARIO NORMAL
+  // ============================================
+  if (!jid.endsWith('@s.whatsapp.net')) {
+    console.log(
+      '[AntiPrivate] JID no bloqueable:',
+      jid
+    );
+
+    return true;
+  }
+
+  try {
     // ============================================
-    // NOMBRE DEL USUARIO
+    // NOMBRE
     // ============================================
     const mention =
       msg.pushName ||
       jid.split('@')[0];
 
     // ============================================
-    // AVISAR AL USUARIO
+    // AVISO
     // ============================================
     await msg.reply(
       `[ ✰ ] Hola *${mention}*, no está permitido escribir al privado del bot, por lo que serás bloqueado.\n\n> Si quieres usar el bot puedes hacerlo en el grupo oficial.\nhttps://chat.whatsapp.com/FhJrUdTpY8AL9jXcmb4ohT`
@@ -185,5 +183,5 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   }
 
   return false;
-}
 
+}

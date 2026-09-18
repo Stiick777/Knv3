@@ -187,37 +187,3 @@ export async function before({ msg, sock, isOwner, isROwner }) {
   return false;
 }
 
-Ahora necesito que pruebes una cosa
-
-Con "antiPrivate" activado, haz que una persona con una cuenta normal le escriba al privado del bot.
-
-En la consola debería aparecer algo parecido a:
-
-========== ANT_PRIVATE DEBUG ==========
-msg.sender: 19529350541318@lid
-msg.key: {
-  remoteJid: '...',
-  fromMe: false,
-  ...
-}
-msg.participant: ...
-msg.remoteJid: ...
-msg.isGroup: false
-msg.fromMe: false
-msg.pushName: ...
-=======================================
-
-[AntiPrivate] Detectado @lid: 19529350541318@lid
-
-[AntiPrivate] Resultado onWhatsApp: []
-
-Lo importante es todo lo que salga después de "msg.key:", especialmente:
-
-msg.sender:
-msg.key:
-msg.participant:
-msg.remoteJid:
-
-Porque en tu versión de Baileys parece que "onWhatsApp()" no está resolviendo el LID, y probablemente tendremos que obtener el número real mediante el mapeo LID → PN que mantiene la sesión.
-
-Pásame esa salida completa y te adapto el bloqueo para que funcione con tus "@lid" sin romper los canales "@newsletter".

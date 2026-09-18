@@ -1,47 +1,45 @@
 import { EventEmitter } from 'events';
 
 let testerActivo = false;
-let instalado = false;
-
+let monitorInstalado = false;
 const problemas = [];
-const MAX_PROBLEMAS = 20;
 
-let originalOn;
-let originalAddListener;
-let originalOnce;
-let originalPrependListener;
+const MAX_REGISTROS = 20;
 
-function guardarProblema(data) {
+function registrarProblema(data) {
     problemas.push({
         ...data,
         fecha: new Date().toLocaleString('es-CO')
     });
 
-    if (problemas.length > MAX_PROBLEMAS) {
+    if (problemas.length > MAX_REGISTROS) {
         problemas.shift();
     }
 }
 
 function instalarMonitor() {
-    if (instalado) return;
+    if (monitorInstalado) return;
 
-    instalado = true;
+    monitorInstalado = true;
 
-    originalOn = EventEmitter.prototype.on;
-    originalAddListener = EventEmitter.prototype.addListener;
-    originalOnce = EventEmitter.prototype.once;
-    originalPrependListener = EventEmitter.prototype.prependListener;
+    const originalOn = EventEmitter.prototype.on;
+    const originalAddListener = EventEmitter.prototype.addListener;
+    const originalOnce = EventEmitter.prototype.once;
+    const originalPrependListener =
+        EventEmitter.prototype.prependListener;
 
-    function revisar(emitter, event) {
+    const revisar = (emitter, event) => {
         if (!testerActivo) return;
 
         try {
             const cantidad = emitter.listenerCount(event);
 
             if (cantidad >= 10) {
-                const nombre = emitter.constructor?.name || 'EventEmitter';
+                const nombre =
+                    emitter.constructor?.name ||
+                    'EventEmitter';
 
-                guardarProblema({
+                registrarProblema({
                     tipo: 'LISTENERS',
                     evento: String(event),
                     cantidad,
@@ -50,47 +48,69 @@ function instalarMonitor() {
                 });
             }
         } catch {}
-    }
+    };
 
     EventEmitter.prototype.on = function (event, listener) {
-        const result = originalOn.call(this, event, listener);
+        const result =
+            originalOn.call(this, event, listener);
 
         revisar(this, event);
 
         return result;
     };
 
-    EventEmitter.prototype.addListener = function (event, listener) {
-        const result = originalAddListener.call(this, event, listener);
+    EventEmitter.prototype.addListener = function (
+        event,
+        listener
+    ) {
+        const result =
+            originalAddListener.call(
+                this,
+                event,
+                listener
+            );
 
         revisar(this, event);
 
         return result;
     };
 
-    EventEmitter.prototype.once = function (event, listener) {
-        const result = originalOnce.call(this, event, listener);
+    EventEmitter.prototype.once = function (
+        event,
+        listener
+    ) {
+        const result =
+            originalOnce.call(
+                this,
+                event,
+                listener
+            );
 
         revisar(this, event);
 
         return result;
     };
 
-    EventEmitter.prototype.prependListener = function (event, listener) {
-        const result = originalPrependListener.call(this, event, listener);
+    EventEmitter.prototype.prependListener =
+        function (event, listener) {
+            const result =
+                originalPrependListener.call(
+                    this,
+                    event,
+                    listener
+                );
 
-        revisar(this, event);
+            revisar(this, event);
 
-        return result;
-    };
+            return result;
+        };
 
     process.on('warning', warning => {
         if (!testerActivo) return;
 
-        guardarProblema({
+        registrarProblema({
             tipo: 'NODE WARNING',
             evento: warning.name,
-            cantidad: null,
             objeto: 'Node.js',
             mensaje: warning.message,
             stack: warning.stack
@@ -98,111 +118,105 @@ function instalarMonitor() {
     });
 }
 
-function formatearProblema(p, index) {
-    let texto = `\n━━━━━━━━━━━━━━━━━━━━\n`;
-    texto += `🔴 #${index + 1} ${p.tipo}\n`;
-    texto += `━━━━━━━━━━━━━━━━━━━━\n`;
+function obtenerStack(stack) {
+    if (!stack) return 'Sin stack disponible';
 
-    if (p.evento) {
-        texto += `Evento: ${p.evento}\n`;
-    }
-
-    if (p.cantidad) {
-        texto += `Listeners: ${p.cantidad}\n`;
-    }
-
-    texto += `Objeto: ${p.objeto}\n`;
-
-    if (p.mensaje) {
-        texto += `Mensaje: ${p.mensaje}\n`;
-    }
-
-    if (p.stack) {
-        const stack = p.stack
-            .split('\n')
-            .slice(1, 8)
-            .join('\n');
-
-        texto += `\n📍 Stack:\n${stack}\n`;
-    }
-
-    return texto;
+    return stack
+        .split('\n')
+        .slice(1, 9)
+        .join('\n');
 }
 
 export default {
-    name: 'tester',
-    aliases: ['test', 'debugger'],
+    command: ['tester', 'test', 'debugger'],
+    category: 'owner',
+    description: 'Monitor global de EventEmitter',
 
-    async execute(sock, msg, args) {
+    async run({ sock, msg, args }) {
         try {
             instalarMonitor();
 
-            const accion = (args[0] || 'status').toLowerCase();
+            const accion =
+                (args?.[0] || 'status').toLowerCase();
 
-            if (accion === 'on' || accion === 'start') {
+            if (
+                accion === 'on' ||
+                accion === 'start'
+            ) {
                 testerActivo = true;
-
                 problemas.length = 0;
 
                 return await sock.sendMessage(
                     msg.key.remoteJid,
                     {
                         text:
-`🧪 *TESTER GLOBAL ACTIVADO*
+`🧪 *TESTER GLOBAL*
 
-Ahora estoy monitoreando globalmente los EventEmitter de Node.js.
+Estado: 🟢 ACTIVADO
 
-📡 Detectaré:
+Ahora estoy monitoreando globalmente:
+
 • WriteStream
 • ReadStream
 • Socket
-• Baileys
 • FFmpeg
+• Baileys
+• node-fetch
 • Descargas
 • Otros EventEmitter
 
-⚠️ También detectaré cuando algún objeto llegue a 10+ listeners.
+⚠️ Detectaré objetos que lleguen a 10+ listeners.
 
-Ahora reproduce el problema:
-• .play
-• .play2
-• .sticker
-• descargas
-• cualquier comando que genere el warning
+Ahora reproduce el error.
 
-Después usa:
+Cuando aparezca el warning usa:
+
 *.tester status*`
                     },
                     { quoted: msg }
                 );
             }
 
-            if (accion === 'off' || accion === 'stop') {
+            if (
+                accion === 'off' ||
+                accion === 'stop'
+            ) {
                 testerActivo = false;
 
                 return await sock.sendMessage(
                     msg.key.remoteJid,
                     {
-                        text: '🛑 *TESTER DESACTIVADO*'
+                        text:
+`🧪 *TESTER GLOBAL*
+
+Estado: 🔴 DESACTIVADO`
                     },
                     { quoted: msg }
                 );
             }
 
-            if (accion === 'clear' || accion === 'limpiar') {
+            if (
+                accion === 'clear' ||
+                accion === 'limpiar'
+            ) {
                 problemas.length = 0;
 
                 return await sock.sendMessage(
                     msg.key.remoteJid,
                     {
-                        text: '🧹 *TESTER LIMPIADO*\n\nSe borraron todos los registros.'
+                        text:
+`🧹 *TESTER*
+
+Registros eliminados correctamente.`
                     },
                     { quoted: msg }
                 );
             }
 
-            if (accion === 'status' || accion === 'estado') {
-
+            if (
+                accion === 'status' ||
+                accion === 'estado'
+            ) {
                 if (!testerActivo) {
                     return await sock.sendMessage(
                         msg.key.remoteJid,
@@ -213,9 +227,8 @@ Después usa:
 Estado: 🔴 DESACTIVADO
 
 Usa:
-*.tester on*
 
-para comenzar el monitoreo.`
+.tester on`
                         },
                         { quoted: msg }
                     );
@@ -232,8 +245,9 @@ Estado: 🟢 ACTIVO
 
 No se han detectado problemas todavía.
 
-Ejecuta tus comandos normalmente y vuelve a usar:
-*.tester status*`
+Reproduce el error y vuelve a ejecutar:
+
+.tester status`
                         },
                         { quoted: msg }
                     );
@@ -243,18 +257,47 @@ Ejecuta tus comandos normalmente y vuelve a usar:
 `🧪 *TESTER GLOBAL*
 
 Estado: 🟢 ACTIVO
-Problemas detectados: ${problemas.length}
+Detectados: ${problemas.length}
 `;
 
-                problemas.slice(-10).forEach((p, i) => {
-                    texto += formatearProblema(
-                        p,
-                        i
-                    );
+                const ultimos =
+                    problemas.slice(-8);
+
+                ultimos.forEach((p, i) => {
+                    texto +=
+`\n━━━━━━━━━━━━━━━━━━━━
+🔴 *PROBLEMA ${i + 1}*
+━━━━━━━━━━━━━━━━━━━━
+`;
+
+                    texto +=
+`Tipo: ${p.tipo}\n`;
+
+                    if (p.evento) {
+                        texto +=
+`Evento: ${p.evento}\n`;
+                    }
+
+                    if (p.cantidad) {
+                        texto +=
+`Listeners: ${p.cantidad}\n`;
+                    }
+
+                    texto +=
+`Objeto: ${p.objeto}\n`;
+
+                    if (p.mensaje) {
+                        texto +=
+`Mensaje: ${p.mensaje}\n`;
+                    }
+
+                    texto +=
+`\n📍 *STACK:*\n${obtenerStack(p.stack)}\n`;
                 });
 
-                texto += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-                texto += `Usa *.tester clear* para limpiar.`;
+                texto +=
+`\n━━━━━━━━━━━━━━━━━━━━
+Usa *.tester clear* para limpiar.`;
 
                 return await sock.sendMessage(
                     msg.key.remoteJid,
@@ -273,23 +316,23 @@ Problemas detectados: ${problemas.length}
 
 Comandos:
 
-*.tester on*
-Activa el monitor.
+.tester on
+→ Activar monitor
 
-*.tester status*
-Muestra los problemas.
+.tester status
+→ Ver problemas
 
-*.tester clear*
-Limpia los registros.
+.tester clear
+→ Limpiar registros
 
-*.tester off*
-Desactiva el monitor.`
+.tester off
+→ Desactivar monitor`
                 },
                 { quoted: msg }
             );
 
         } catch (e) {
-            await sock.sendMessage(
+            return await sock.sendMessage(
                 msg.key.remoteJid,
                 {
                     text: `❌ Error: ${e.message}`

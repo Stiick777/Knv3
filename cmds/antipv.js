@@ -1,38 +1,84 @@
 export async function before({ msg, sock, isOwner, isROwner }) {
+  // ============================================
+  // MENSAJES DEL PROPIO BOT
+  // ============================================
   if (msg.isBaileys && msg.fromMe) return true;
   if (msg.fromMe) return false;
 
-  // Los grupos no son privados
+  // ============================================
+  // GRUPOS
+  // ============================================
   if (msg.isGroup) return false;
 
+  // ============================================
+  // SIN MENSAJE
+  // ============================================
   if (!msg.message) return true;
 
+  // ============================================
+  // OWNER
+  // ============================================
   if (isOwner || isROwner) return false;
 
-  const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
+  // ============================================
+  // JID DEL BOT
+  // ============================================
+  const botJid =
+    sock.user.id.split(':')[0] + '@s.whatsapp.net';
 
   if (msg.sender === botJid) return false;
 
+  // ============================================
+  // CONFIGURACIÓN
+  // ============================================
   const settings = global.db.getSettings(botJid);
 
   if (!settings.antiPrivate) return false;
 
-  const sender = msg.sender || msg.chat || '';
+  // ============================================
+  // DEBUG COMPLETO
+  // ============================================
+  console.log('\n========== ANT_PRIVATE DEBUG ==========');
+
+  console.log('msg.sender:', msg.sender);
+
+  console.log('msg.key:', msg.key);
+
+  console.log('msg.participant:', msg.participant);
+
+  console.log('msg.remoteJid:', msg.key?.remoteJid);
+
+  console.log('msg.isGroup:', msg.isGroup);
+
+  console.log('msg.fromMe:', msg.fromMe);
+
+  console.log('msg.pushName:', msg.pushName);
+
+  console.log('=======================================\n');
 
   // ============================================
-  // IGNORAR CANALES / NEWSLETTERS
+  // OBTENER JID
+  // ============================================
+  const sender = msg.sender || msg.key?.participant || '';
+
+  // ============================================
+  // NEWSLETTER / CANALES
   // ============================================
   if (sender.endsWith('@newsletter')) {
-    return true;
-  }
-
-  // Broadcast
-  if (sender.endsWith('@broadcast')) {
+    console.log('[AntiPrivate] Newsletter ignorado:', sender);
     return true;
   }
 
   // ============================================
-  // USUARIOS NORMALES Y @LID
+  // BROADCAST
+  // ============================================
+  if (sender.endsWith('@broadcast')) {
+    console.log('[AntiPrivate] Broadcast ignorado:', sender);
+    return true;
+  }
+
+  // ============================================
+  // TIPOS DE USUARIO
   // ============================================
   const isPN = sender.endsWith('@s.whatsapp.net');
   const isLID = sender.endsWith('@lid');
@@ -46,42 +92,132 @@ export async function before({ msg, sock, isOwner, isROwner }) {
     let jid = sender;
 
     // ============================================
-    // RESOLVER @LID A @s.whatsapp.net
+    // @LID
     // ============================================
     if (isLID) {
-      const [user] = await sock.onWhatsApp(sender).catch(() => []);
+      console.log('[AntiPrivate] Detectado @lid:', sender);
+
+      // Intentar resolver mediante onWhatsApp
+      const result = await sock
+        .onWhatsApp(sender)
+        .catch(e => {
+          console.log(
+            '[AntiPrivate] onWhatsApp error:',
+            e.message
+          );
+
+          return [];
+        });
+
+      console.log(
+        '[AntiPrivate] Resultado onWhatsApp:',
+        result
+      );
+
+      const user = result?.[0];
 
       if (user?.jid) {
         jid = user.jid;
+
+        console.log(
+          '[AntiPrivate] LID convertido:',
+          sender,
+          '=>',
+          jid
+        );
       } else {
-        console.log('[AntiPrivate] No se pudo resolver LID:', sender);
+        console.log(
+          '[AntiPrivate] No se pudo resolver LID:',
+          sender
+        );
+
+        // IMPORTANTE:
+        // No intentamos bloquear directamente el @lid
+        // porque updateBlockStatus no lo acepta.
         return true;
       }
     }
 
     // ============================================
-    // ASEGURARNOS DE TENER UN JID BLOQUEABLE
+    // VALIDAR JID FINAL
     // ============================================
-    if (!jid.endsWith('@s.whatsapp.net')) {
-      console.log('[AntiPrivate] JID no bloqueable:', jid);
+    if (!jid || !jid.endsWith('@s.whatsapp.net')) {
+      console.log(
+        '[AntiPrivate] JID final no bloqueable:',
+        jid
+      );
+
       return true;
     }
 
+    // ============================================
+    // NOMBRE DEL USUARIO
+    // ============================================
     const mention =
       msg.pushName ||
       jid.split('@')[0];
 
+    // ============================================
+    // AVISAR AL USUARIO
+    // ============================================
     await msg.reply(
       `[ ✰ ] Hola *${mention}*, no está permitido escribir al privado del bot, por lo que serás bloqueado.\n\n> Si quieres usar el bot puedes hacerlo en el grupo oficial.\nhttps://chat.whatsapp.com/FhJrUdTpY8AL9jXcmb4ohT`
     );
 
-    await sock.updateBlockStatus(jid, 'block');
+    // ============================================
+    // BLOQUEAR
+    // ============================================
+    await sock.updateBlockStatus(
+      jid,
+      'block'
+    );
 
-    console.log('[AntiPrivate] Usuario bloqueado:', jid);
+    console.log(
+      '[AntiPrivate] Usuario bloqueado:',
+      jid
+    );
 
   } catch (e) {
-    console.error('[AntiPrivate] Error:', e);
+    console.error(
+      '[AntiPrivate] Error:',
+      e.message
+    );
   }
 
   return false;
 }
+
+Ahora necesito que pruebes una cosa
+
+Con "antiPrivate" activado, haz que una persona con una cuenta normal le escriba al privado del bot.
+
+En la consola debería aparecer algo parecido a:
+
+========== ANT_PRIVATE DEBUG ==========
+msg.sender: 19529350541318@lid
+msg.key: {
+  remoteJid: '...',
+  fromMe: false,
+  ...
+}
+msg.participant: ...
+msg.remoteJid: ...
+msg.isGroup: false
+msg.fromMe: false
+msg.pushName: ...
+=======================================
+
+[AntiPrivate] Detectado @lid: 19529350541318@lid
+
+[AntiPrivate] Resultado onWhatsApp: []
+
+Lo importante es todo lo que salga después de "msg.key:", especialmente:
+
+msg.sender:
+msg.key:
+msg.participant:
+msg.remoteJid:
+
+Porque en tu versión de Baileys parece que "onWhatsApp()" no está resolviendo el LID, y probablemente tendremos que obtener el número real mediante el mapeo LID → PN que mantiene la sesión.
+
+Pásame esa salida completa y te adapto el bloqueo para que funcione con tus "@lid" sin romper los canales "@newsletter".

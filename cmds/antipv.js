@@ -1,54 +1,68 @@
 export async function before({ msg, sock, isOwner, isROwner }) {
-  // Mensajes propios/Baileys
   if (msg.isBaileys && msg.fromMe) return true;
   if (msg.fromMe) return false;
 
-  // Grupos no son privados
+  // Los grupos no son privados
   if (msg.isGroup) return false;
 
-  // Sin mensaje
   if (!msg.message) return true;
 
-  // Owner no se bloquea
   if (isOwner || isROwner) return false;
 
-  // JID del bot
   const botJid = sock.user.id.split(':')[0] + '@s.whatsapp.net';
 
-  // El propio bot
   if (msg.sender === botJid) return false;
 
-  // =====================================================
-  // IGNORAR NEWSLETTERS / CANALES
-  // =====================================================
-  const sender = msg.sender || msg.chat || '';
-
-  if (
-    sender.endsWith('@newsletter') ||
-    sender.endsWith('@broadcast')
-  ) {
-    return true;
-  }
-
-  // Solo permitir JID de usuario real
-  if (!sender.endsWith('@s.whatsapp.net')) {
-    console.log('[AntiPrivate] JID ignorado:', sender);
-    return true;
-  }
-
-  // Configuración
   const settings = global.db.getSettings(botJid);
 
   if (!settings.antiPrivate) return false;
 
+  const sender = msg.sender || msg.chat || '';
+
+  // ============================================
+  // IGNORAR CANALES / NEWSLETTERS
+  // ============================================
+  if (sender.endsWith('@newsletter')) {
+    return true;
+  }
+
+  // Broadcast
+  if (sender.endsWith('@broadcast')) {
+    return true;
+  }
+
+  // ============================================
+  // USUARIOS NORMALES Y @LID
+  // ============================================
+  const isPN = sender.endsWith('@s.whatsapp.net');
+  const isLID = sender.endsWith('@lid');
+
+  if (!isPN && !isLID) {
+    console.log('[AntiPrivate] JID ignorado:', sender);
+    return true;
+  }
+
   try {
-    // Verificar JID mediante onWhatsApp
-    const [user] = await sock.onWhatsApp(sender).catch(() => []);
+    let jid = sender;
 
-    const jid = user?.jid || sender;
+    // ============================================
+    // RESOLVER @LID A @s.whatsapp.net
+    // ============================================
+    if (isLID) {
+      const [user] = await sock.onWhatsApp(sender).catch(() => []);
 
-    // Volver a comprobar antes de bloquear
-    if (!jid || !jid.endsWith('@s.whatsapp.net')) {
+      if (user?.jid) {
+        jid = user.jid;
+      } else {
+        console.log('[AntiPrivate] No se pudo resolver LID:', sender);
+        return true;
+      }
+    }
+
+    // ============================================
+    // ASEGURARNOS DE TENER UN JID BLOQUEABLE
+    // ============================================
+    if (!jid.endsWith('@s.whatsapp.net')) {
       console.log('[AntiPrivate] JID no bloqueable:', jid);
       return true;
     }

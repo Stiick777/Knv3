@@ -200,7 +200,7 @@ export async function startBot() {
     logger,
     browser: Browsers.macOS('Chrome'),
     printQRInTerminal: false,
-    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger, createSignalCache()) },
+    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, logger) },
     markOnlineOnConnect: false,
     syncFullHistory: false,
     shouldSyncHistoryMessage: () => false,

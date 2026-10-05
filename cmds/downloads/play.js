@@ -54,46 +54,50 @@ export default {
       );
 
       // =====================================================
-      // 🎵 API DELIRIUS
+      // 🎵 API ALYACORE
       // =====================================================
 
       const url = yt_play[0].url;
 
       const apiUrl =
-        `https://api.delirius.online/download/ytmp3?url=${encodeURIComponent(url)}`;
+        `https://api.alyacore.xyz/dl/fastytmp3?url=${encodeURIComponent(url)}&key=LUFFY-FIX67`;
 
       const res = await fetch(apiUrl);
       const json = await res.json();
 
-      if (!json.status || !json.data?.download) {
-        throw new Error('Delirius no devolvió el audio');
+      if (!json.status || !json.data?.dl) {
+        throw new Error('AlyaCore no devolvió el audio');
       }
 
-      const downloadUrl = json.data.download;
+      const downloadUrl = json.data.dl;
       const title = json.data.title || yt_play[0].title || 'audio';
+
+      // =====================================================
+      // 🎵 DESCARGAR AUDIO
+      // =====================================================
+
+      const audioRes = await fetch(downloadUrl);
+
+      if (!audioRes.ok) {
+        throw new Error(`Error descargando audio: ${audioRes.status}`);
+      }
+
+      const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
 
       // =====================================================
       // 🎵 ENVIAR AUDIO
       // =====================================================
 
-      const audioRes = await fetch(downloadUrl);
-
-if (!audioRes.ok) {
-  throw new Error(`Error descargando audio: ${audioRes.status}`);
-}
-
-const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-
-await sock.sendMessage(
-  msg.chat,
-  {
-    audio: audioBuffer,
-    mimetype: 'audio/mpeg',
-    fileName: `${title}.mp3`,
-    ptt: false
-  },
-  { quoted: msg }
-);
+      await sock.sendMessage(
+        msg.chat,
+        {
+          audio: audioBuffer,
+          mimetype: 'audio/mpeg',
+          fileName: `${title}.mp3`,
+          ptt: false
+        },
+        { quoted: msg }
+      );
 
       await msg.react('✅');
 

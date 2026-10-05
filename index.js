@@ -212,13 +212,13 @@ export async function startBot() {
     transactionOpts: { maxCommitRetries: 10, delayBetweenTriesMs: 3000 },
     emitOwnEvents: false,
     msgRetryCounterCache,
-    cachedGroupMetadata: async (jid) => getCachedMeta(jid) ?? await sock.getCachedGroupMetadata?.(jid),
+    
     getMessage: async (key) => msgStore.get(key.remoteJid + ':' + key.id),
   });
 
   global.sock = sock;
   instrumentSocket(sock);
-  patchGroupMetadata(sock);
+  //patchGroupMetadata(sock);
   sock.msgRetryCounterCache = msgRetryCounterCache;
   sock.ev.on("creds.update", saveCreds);
   sock.sendText = (jid, text, quoted = "", options) => sock.sendMessage(jid, { text, ...options }, { quoted });

@@ -200,7 +200,7 @@ export async function smsg(sock, msg, store) {
       return jid;
     };
   }
-  patchGroupMetadata(sock);
+ // patchGroupMetadata(sock);
   if (!sock.downloadMediaMessage) {
   sock.downloadMediaMessage = async (message) => {
     const m = message.msg || message;

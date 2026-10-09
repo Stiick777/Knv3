@@ -54,23 +54,30 @@ export default {
       );
 
       // =====================================================
-      // 🎵 API ALYACORE
+      // 🎵 API DELIRIUS
       // =====================================================
 
       const url = yt_play[0].url;
 
       const apiUrl =
-        `https://api.alyacore.xyz/dl/fastytmp3?url=${encodeURIComponent(url)}&key=LUFFY-FIX67`;
+        `https://api.delirius.online/download/ytmp3?url=${encodeURIComponent(url)}`;
 
       const res = await fetch(apiUrl);
-      const json = await res.json();
 
-      if (!json.status || !json.data?.dl) {
-        throw new Error('AlyaCore no devolvió el audio');
+      if (!res.ok) {
+        throw new Error(`Error en API Delirius: ${res.status}`);
       }
 
-      const downloadUrl = json.data.dl;
-      const title = json.data.title || yt_play[0].title || 'audio';
+      const json = await res.json();
+
+      if (!json.status || !json.data?.download) {
+        throw new Error('Delirius no devolvió el enlace de descarga');
+      }
+
+      const downloadUrl = json.data.download;
+      const title = json.data.title && json.data.title !== '-'
+        ? json.data.title
+        : yt_play[0].title || 'audio';
 
       // =====================================================
       // 🎵 DESCARGAR AUDIO
@@ -93,7 +100,7 @@ export default {
         {
           audio: audioBuffer,
           mimetype: 'audio/mpeg',
-          fileName: `${title}.mp3`,
+          fileName: `${title.replace(/[\\/:*?"<>|]/g, '_')}.mp3`,
           ptt: false
         },
         { quoted: msg }
@@ -102,7 +109,7 @@ export default {
       await msg.react('✅');
 
     } catch (err) {
-      console.error('Error en play:', err);
+      console.error('Error en play:', err.message);
 
       await msg.react('❌');
 
@@ -120,14 +127,14 @@ export default {
 
 // 📌 Buscar en YouTube
 async function search(query, options = {}) {
-  const search = await yts.search({
+  const result = await yts.search({
     query,
     hl: 'es',
     gl: 'ES',
     ...options
   });
 
-  return search.videos;
+  return result.videos;
 }
 
 
@@ -136,7 +143,7 @@ function secondString(seconds) {
   seconds = Number(seconds);
 
   const d = Math.floor(seconds / (3600 * 24));
-  const h = Math.floor((seconds % 3600) / 3600);
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
 
@@ -153,4 +160,4 @@ function secondString(seconds) {
     s > 0 ? s + (s == 1 ? ' segundo' : ' segundos') : '';
 
   return dDisplay + hDisplay + mDisplay + sDisplay;
-}
+    }

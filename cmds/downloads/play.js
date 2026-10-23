@@ -1,3 +1,4 @@
+
 import fetch from 'node-fetch';
 import yts from 'yt-search';
 
@@ -22,9 +23,10 @@ export default {
         return msg.reply('❌ No encontré ningún resultado en YouTube.');
       }
 
-      // ⏱️ Verificar duración
-      const duracion = yt_play[0].duration?.seconds || 0;
+      const video = yt_play[0];
+      const duracion = video.duration?.seconds || 0;
 
+      // ⏱️ Verificar duración
       if (duracion > 3600) {
         await msg.react('❌');
         return msg.reply('❗ *El audio es superior a 1h*');
@@ -33,9 +35,9 @@ export default {
       const texto1 = `
 𝚈𝚘𝚞𝚝𝚞𝚋𝚎 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚜
 
-> 𝚃𝚒𝚝𝚞𝚕𝚘 :  ${yt_play[0].title}
-> 𝙲𝚛𝚎𝚊𝚍𝚘 :  ${yt_play[0].ago}
-> 𝙳𝚞𝚛𝚊𝚌𝚒𝚘𝚗 :  ${secondString(duracion)}
+> 𝚃𝚒𝚝𝚞𝚕𝚘 : ${video.title}
+> 𝙲𝚛𝚎𝚊𝚍𝚘 : ${video.ago || 'Desconocido'}
+> 𝙳𝚞𝚛𝚊𝚌𝚒𝚘𝚗 : ${secondString(duracion)}
 
 🚀 𝙎𝙀 𝙀𝙎𝙏𝘼 𝘿𝙀𝙎𝘼𝙍𝙂𝘼𝙉𝘿𝙊 𝙎𝙐 𝘼𝙐𝘿𝙄𝙊, 𝙀𝙎𝙋𝙀𝙍𝙀 𝙐𝙉 𝙈𝙊𝙈𝙀𝙉𝙏𝙊
 ===========================
@@ -46,55 +48,48 @@ export default {
       // 🖼️ Enviar miniatura
       await sock.sendFile(
         msg.chat,
-        yt_play[0].thumbnail,
+        video.thumbnail,
         'error.jpg',
         texto1,
         msg,
         null
       );
 
-      // =====================================================
-      // 🎵 API DELIRIUS
-      // =====================================================
-
-      const url = yt_play[0].url;
-
+      // 🎵 API ALYACORE
       const apiUrl =
-        `https://api.delirius.online/download/ytmp3?url=${encodeURIComponent(url)}`;
+        `https://api.alyacore.xyz/dl/ytmp3?url=${encodeURIComponent(video.url)}&key=LUFFY-FIX67`;
 
       const res = await fetch(apiUrl);
 
       if (!res.ok) {
-        throw new Error(`Error en API Delirius: ${res.status}`);
+        throw new Error(`Error en API AlyaCore: ${res.status}`);
       }
 
       const json = await res.json();
 
-      if (!json.status || !json.data?.download) {
-        throw new Error('Delirius no devolvió el enlace de descarga');
+      if (!json.status || !json.data?.dl) {
+        throw new Error('AlyaCore no devolvió el enlace de descarga');
       }
 
-      const downloadUrl = json.data.download;
-      const title = json.data.title && json.data.title !== '-'
-        ? json.data.title
-        : yt_play[0].title || 'audio';
+      const downloadUrl = json.data.dl;
 
-      // =====================================================
-      // 🎵 DESCARGAR AUDIO
-      // =====================================================
+      const title =
+        json.data.title && json.data.title !== '-'
+          ? json.data.title
+          : video.title || 'audio';
 
+      // 🎵 Descargar audio
       const audioRes = await fetch(downloadUrl);
 
       if (!audioRes.ok) {
         throw new Error(`Error descargando audio: ${audioRes.status}`);
       }
 
-      const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+      const audioBuffer = Buffer.from(
+        await audioRes.arrayBuffer()
+      );
 
-      // =====================================================
-      // 🎵 ENVIAR AUDIO
-      // =====================================================
-
+      // 🎵 Enviar audio
       await sock.sendMessage(
         msg.chat,
         {
@@ -160,4 +155,4 @@ function secondString(seconds) {
     s > 0 ? s + (s == 1 ? ' segundo' : ' segundos') : '';
 
   return dDisplay + hDisplay + mDisplay + sDisplay;
-    }
+}

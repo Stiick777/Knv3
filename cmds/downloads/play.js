@@ -55,28 +55,58 @@ export default {
         null
       );
 
-      // 🎵 API ALYACORE
-      const apiUrl =
-        `https://api.alyacore.xyz/dl/ytmp3?url=${encodeURIComponent(video.url)}&key=LUFFY-FIX67`;
+      
+      // 🎵 APIs PRINCIPAL Y RESPALDOS
+      const apiKey = 'LUFFY-FIX67';
 
-      const res = await fetch(apiUrl);
+      const apis = [
+        {
+          name: 'AlyaCore',
+          url: `https://api.alyacore.xyz/dl/ytmp3?url=${encodeURIComponent(video.url)}&key=${apiKey}`
+        },
+        {
+          name: 'FastYTMP3',
+          url: `https://api.alyacore.xyz/dl/fastytmp3?url=${encodeURIComponent(video.url)}&key=${apiKey}`
+        },
+        {
+          name: 'YTMP3 V2',
+          url: `https://api.alyacore.xyz/dl/ytmp3v2?url=${encodeURIComponent(video.url)}&key=${apiKey}`
+        }
+      ];
 
-      if (!res.ok) {
-        throw new Error(`Error en API AlyaCore: ${res.status}`);
+      let downloadUrl = null;
+      let title = video.title || 'audio';
+
+      // 🔄 Intentar las APIs en orden
+      for (const api of apis) {
+        try {
+          const res = await fetch(api.url);
+
+          if (!res.ok) {
+            continue;
+          }
+
+          const json = await res.json();
+
+          if (json.status && json.data?.dl) {
+            downloadUrl = json.data.dl;
+
+            if (json.data.title && json.data.title !== '-') {
+              title = json.data.title;
+            }
+
+            break;
+          }
+        } catch (e) {
+          // Si falla, continúa con la siguiente API
+          continue;
+        }
       }
 
-      const json = await res.json();
-
-      if (!json.status || !json.data?.dl) {
-        throw new Error('AlyaCore no devolvió el enlace de descarga');
+      // ❌ Si todas las APIs fallan
+      if (!downloadUrl) {
+        throw new Error('Todas las APIs fallaron al obtener el audio');
       }
-
-      const downloadUrl = json.data.dl;
-
-      const title =
-        json.data.title && json.data.title !== '-'
-          ? json.data.title
-          : video.title || 'audio';
 
       // 🎵 Descargar audio
       const audioRes = await fetch(downloadUrl);
@@ -102,6 +132,7 @@ export default {
       );
 
       await msg.react('✅');
+
 
     } catch (err) {
       console.error('Error en play:', err.message);

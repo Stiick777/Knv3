@@ -1,9 +1,11 @@
+
 import fetch from 'node-fetch';
 
 export default {
   command: ['tiktok', 'tt', 'ttdl', 'tiktokdl'],
   category: 'downloads',
   description: 'Descarga videos e imágenes de TikTok',
+
   run: async ({ msg, sock, args, usedPrefix, command }) => {
     if (!args[0]) {
       await msg.react('❌');
@@ -12,7 +14,7 @@ export default {
       );
     }
 
-    if (!/(?:https?:\/\/)?(?:www|vm|vt|tiktok)\.com\/[^\s]+/i.test(args[0])) {
+    if (!/(?:https?:\/\/)?(?:www\.|vm\.|vt\.)?tiktok\.com\/[^\s]+/i.test(args[0])) {
       await msg.react('❌');
       return msg.reply('*☁️ Enlace de TikTok inválido.*');
     }
@@ -20,28 +22,29 @@ export default {
     try {
       await msg.react('🕒');
 
-      const api = `https://api.dorratz.com/v1/tiktok?url=${encodeURIComponent(args[0])}`;
+      const api = `https://api-faa.my.id/faa/tiktok?url=${encodeURIComponent(args[0])}`;
+
       const res = await fetch(api);
 
       if (!res.ok) throw new Error('La API no respondió');
 
       const json = await res.json();
 
-      if (!json.ok || !json.data?.status || !json.data?.data) {
+      if (!json.status || !json.result) {
         throw new Error('Respuesta inválida de la API');
       }
 
-      const r = json.data.data;
+      const r = json.result;
 
       const caption = `
 *👤 Autor:* ${r.author?.nickname || 'Desconocido'}
 *📛 Usuario:* ${r.author?.username || '-'}
 *📝 Título:* ${r.title || 'Sin título'}
 
-*❤️ Likes:* ${Number(r.like || 0).toLocaleString()}
-*👁️ Vistas:* ${Number(r.repro || 0).toLocaleString()}
-*💬 Comentarios:* ${Number(r.comment || 0).toLocaleString()}
-*🔁 Compartidos:* ${Number(r.share || 0).toLocaleString()}
+*❤️ Likes:* ${r.stats?.likes || '0'}
+*👁️ Vistas:* ${r.stats?.views || '0'}
+*💬 Comentarios:* ${r.stats?.comment || '0'}
+*🔁 Compartidos:* ${r.stats?.share || '0'}
 
 📥 *Descargado por KanBot*
 `.trim();
@@ -51,12 +54,15 @@ export default {
       //=========================
       // 🎥 VIDEO
       //=========================
-      if (r.media?.type === 'video') {
-
+      if (r.type === 'video') {
         const video =
-          r.media.hd ||
-          r.media.org ||
-          r.media.wm;
+          r.alternatives?.hd ||
+          r.alternatives?.selected ||
+          r.data;
+
+        if (!video) {
+          throw new Error('No se encontró el video');
+        }
 
         await sock.sendMessage(
           msg.chat,
@@ -67,19 +73,20 @@ export default {
           { quoted: msg }
         );
 
-        if (r.media.music) {
+        // Audio del TikTok
+        if (r.music_info?.url) {
           try {
             await sock.sendMessage(
               msg.chat,
               {
-                audio: { url: r.media.music },
+                audio: { url: r.music_info.url },
                 mimetype: 'audio/mpeg',
                 ptt: false
               },
               { quoted: msg }
             );
           } catch (e) {
-            console.log('Error enviando audio:', e.message);
+            console.error('Error enviando audio:', e.message);
           }
         }
 
@@ -88,37 +95,34 @@ export default {
       }
 
       //=========================
-      // 🖼️ SLIDES / IMÁGENES
+      // 🖼️ IMÁGENES / SLIDES
       //=========================
-      if (
-        r.media?.type === 'image' &&
-        Array.isArray(r.media.images)
-      ) {
-
-        for (let i = 0; i < r.media.images.length; i++) {
+      if (r.type === 'image' && Array.isArray(r.data)) {
+        for (let i = 0; i < r.data.length; i++) {
           await sock.sendMessage(
             msg.chat,
             {
-              image: { url: r.media.images[i] },
+              image: { url: r.data[i] },
               caption: i === 0 ? caption : undefined
             },
             { quoted: msg }
           );
         }
 
-        if (r.media.audio) {
+        // Audio del TikTok de imágenes
+        if (r.music_info?.url) {
           try {
             await sock.sendMessage(
               msg.chat,
               {
-                audio: { url: r.media.audio },
+                audio: { url: r.music_info.url },
                 mimetype: 'audio/mpeg',
                 ptt: false
               },
               { quoted: msg }
             );
           } catch (e) {
-            console.log('Error enviando audio:', e.message);
+            console.error('Error enviando audio:', e.message);
           }
         }
 
@@ -129,7 +133,7 @@ export default {
       throw new Error('Formato de TikTok no soportado.');
 
     } catch (err) {
-      console.error('TikTok Error:', err);
+      console.error('TikTok Error:', err.message);
 
       await msg.react('❌');
 

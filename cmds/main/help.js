@@ -82,7 +82,7 @@ export default {
 
 await sock.sendMessage(msg.chat, {
   image: {
-    url: 'https://i.ibb.co/7tdKgSGx/Menu3.png'
+    url: 'https://i.postimg.cc/L8Hdvjmn/IMG-20261105-WA0028.png'
   },
   caption: menu.trim(),
   contextInfo: {

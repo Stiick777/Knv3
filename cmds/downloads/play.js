@@ -55,7 +55,6 @@ export default {
         null
       );
 
-      
       // 🎵 APIs PRINCIPAL Y RESPALDOS
       const apiKey = 'LUFFY-FIX67';
 
@@ -71,6 +70,18 @@ export default {
         {
           name: 'YTMP3 V2',
           url: `https://api.alyacore.xyz/dl/ytmp3v2?url=${encodeURIComponent(video.url)}&key=${apiKey}`
+        },
+        {
+          name: 'StellarWA V4',
+          url: `https://api.stellarwa.xyz/dl/ytmp3v4?url=${encodeURIComponent(video.url)}&key=proyectsV2`
+        },
+        {
+          name: 'StellarWA YTMP3',
+          url: `https://api.stellarwa.xyz/dl/ytmp3?url=${encodeURIComponent(video.url)}&key=proyectsV2`
+        },
+        {
+          name: 'Faa YTMP3',
+          url: `https://api-faa.my.id/faa/ytmp3?url=${encodeURIComponent(video.url)}`
         }
       ];
 
@@ -88,14 +99,20 @@ export default {
 
           const json = await res.json();
 
-          if (json.status && json.data?.dl) {
-            downloadUrl = json.data.dl;
+          if (json.status) {
+            const data = json.data || json.result;
 
-            if (json.data.title && json.data.title !== '-') {
-              title = json.data.title;
+            const dl = data?.dl || data?.mp3;
+
+            if (dl) {
+              downloadUrl = dl;
+
+              if (data.title && data.title !== '-') {
+                title = data.title;
+              }
+
+              break;
             }
-
-            break;
           }
         } catch (e) {
           // Si falla, continúa con la siguiente API
@@ -132,7 +149,6 @@ export default {
       );
 
       await msg.react('✅');
-
 
     } catch (err) {
       console.error('Error en play:', err.message);

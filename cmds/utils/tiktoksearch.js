@@ -27,10 +27,8 @@ ${usedPrefix + command} gatos 3
     }
 
     const lastArg = args[args.length - 1];
-
     const hasNumber = /^\d+$/.test(lastArg);
 
-    // Texto de búsqueda sin la cantidad
     const text = hasNumber
       ? args.slice(0, -1).join(" ").trim()
       : args.join(" ").trim();
@@ -83,14 +81,11 @@ ${usedPrefix + command} gatos 3`
     try {
 
       // ==========================================
-      // API LEMPI
+      // API TIKTOK SEARCH - FAA
       // ==========================================
 
       const apiUrl =
-        `https://api.lempi.lat/s/tiktok` +
-        `?q=${encodeURIComponent(text)}` +
-        `&count=${amount}` +
-        `&apikey=montekey28`;
+        `https://api-faa.my.id/faa/tiktok-search?q=${encodeURIComponent(text)}`;
 
       const { data } = await axios.get(apiUrl, {
         timeout: 30000
@@ -98,8 +93,8 @@ ${usedPrefix + command} gatos 3`
 
       if (
         !data?.status ||
-        !Array.isArray(data.resultados) ||
-        !data.resultados.length
+        !Array.isArray(data.result) ||
+        !data.result.length
       ) {
         await msg.react("❌");
 
@@ -108,7 +103,17 @@ ${usedPrefix + command} gatos 3`
         );
       }
 
-      const videos = data.resultados.slice(0, amount);
+      const videos = data.result
+        .filter(video => video.url_nowm)
+        .slice(0, amount);
+
+      if (!videos.length) {
+        await msg.react("❌");
+
+        return msg.reply(
+          "❌ Los resultados no contienen videos disponibles para descargar."
+        );
+      }
 
       // ==========================================
       // FUNCIÓN PARA DESCARGAR VIDEO
@@ -137,7 +142,7 @@ ${usedPrefix + command} gatos 3`
 
       try {
 
-        const videoBuffer = await loadVideo(first.video);
+        const videoBuffer = await loadVideo(first.url_nowm);
 
         await sock.sendMessage(
           msg.chat,
@@ -152,7 +157,11 @@ ${usedPrefix + command} gatos 3`
 
 📹 *Videos enviados:* ${videos.length}
 
-📺 *Calidad:* ${first.calidad || "SD"}
+👤 *Usuario:* @${first.author?.username || "Desconocido"}
+
+👁️ *Visualizaciones:* ${first.stats?.views || "Desconocido"}
+
+❤️ *Me gusta:* ${first.stats?.likes || "Desconocido"}
 
 ━━━━━━━━━━━━━━━━━━
 ✨ *KanBot • TikTok Search*`,
@@ -160,7 +169,7 @@ ${usedPrefix + command} gatos 3`
             contextInfo: {
               externalAdReply: {
                 title:
-                  first.titulo?.slice(0, 70) ||
+                  first.title?.slice(0, 70) ||
                   "TikTok Search",
 
                 body:
@@ -169,14 +178,13 @@ ${usedPrefix + command} gatos 3`
                 mediaType: 1,
 
                 mediaUrl:
-                  first.url ||
                   "https://www.tiktok.com/",
 
                 thumbnailUrl:
-                  first.portada,
+                  first.cover,
 
                 sourceUrl:
-                  first.url,
+                  "https://www.tiktok.com/",
 
                 renderLargerThumbnail: true,
                 showAdAttribution: false
@@ -195,7 +203,6 @@ ${usedPrefix + command} gatos 3`
           e.message
         );
 
-        // Si falla el primero, intentamos continuar
       }
 
       // ==========================================
@@ -209,7 +216,7 @@ ${usedPrefix + command} gatos 3`
         try {
 
           const videoBuffer = await loadVideo(
-            video.video
+            video.url_nowm
           );
 
           await sock.sendMessage(
@@ -243,7 +250,7 @@ ${usedPrefix + command} gatos 3`
 
       console.error(
         "❌ Error TikTok Search:",
-        e
+        e.message
       );
 
       await msg.react("❌");

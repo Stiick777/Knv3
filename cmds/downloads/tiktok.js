@@ -22,7 +22,7 @@ export default {
     try {
       await msg.react('🕒');
 
-      const api = `https://api-faa.my.id/faa/tiktok?url=${encodeURIComponent(args[0])}`;
+      const api = `https://api.siputzx.my.id/api/d/tiktok?url=${encodeURIComponent(args[0])}`;
 
       const res = await fetch(api);
 
@@ -30,21 +30,16 @@ export default {
 
       const json = await res.json();
 
-      if (!json.status || !json.result) {
+      if (!json.status || !json.data?.success) {
         throw new Error('Respuesta inválida de la API');
       }
 
-      const r = json.result;
+      const r = json.data;
 
       const caption = `
-*👤 Autor:* ${r.author?.nickname || 'Desconocido'}
-*📛 Usuario:* ${r.author?.username || '-'}
-*📝 Título:* ${r.title || 'Sin título'}
-
-*❤️ Likes:* ${r.stats?.likes || '0'}
-*👁️ Vistas:* ${r.stats?.views || '0'}
-*💬 Comentarios:* ${r.stats?.comment || '0'}
-*🔁 Compartidos:* ${r.stats?.share || '0'}
+*👤 Autor:* ${r.author || 'Desconocido'}
+*📛 Usuario:* ${r.username || '-'}
+*📝 Título:* ${r.description || 'Sin título'}
 
 📥 *Descargado por KanBot*
 `.trim();
@@ -56,9 +51,11 @@ export default {
       //=========================
       if (r.type === 'video') {
         const video =
-          r.alternatives?.hd ||
-          r.alternatives?.selected ||
-          r.data;
+          r.video?.hd?.url ||
+          r.video?.sd?.url ||
+          r.video?.watermark?.url ||
+          r.video?.hd?.source ||
+          r.video?.sd?.source;
 
         if (!video) {
           throw new Error('No se encontró el video');
@@ -74,12 +71,12 @@ export default {
         );
 
         // Audio del TikTok
-        if (r.music_info?.url) {
+        if (r.music?.url) {
           try {
             await sock.sendMessage(
               msg.chat,
               {
-                audio: { url: r.music_info.url },
+                audio: { url: r.music.url },
                 mimetype: 'audio/mpeg',
                 ptt: false
               },
@@ -97,12 +94,21 @@ export default {
       //=========================
       // 🖼️ IMÁGENES / SLIDES
       //=========================
-      if (r.type === 'image' && Array.isArray(r.data)) {
-        for (let i = 0; i < r.data.length; i++) {
+      if ((r.type === 'slide' || r.type === 'image') && Array.isArray(r.images)) {
+
+        const images = r.images
+          .map(img => typeof img === 'string' ? img : img?.url)
+          .filter(Boolean);
+
+        if (!images.length) {
+          throw new Error('No se encontraron imágenes');
+        }
+
+        for (let i = 0; i < images.length; i++) {
           await sock.sendMessage(
             msg.chat,
             {
-              image: { url: r.data[i] },
+              image: { url: images[i] },
               caption: i === 0 ? caption : undefined
             },
             { quoted: msg }
@@ -110,12 +116,12 @@ export default {
         }
 
         // Audio del TikTok de imágenes
-        if (r.music_info?.url) {
+        if (r.music?.url) {
           try {
             await sock.sendMessage(
               msg.chat,
               {
-                audio: { url: r.music_info.url },
+                audio: { url: r.music.url },
                 mimetype: 'audio/mpeg',
                 ptt: false
               },
@@ -132,8 +138,8 @@ export default {
 
       throw new Error('Formato de TikTok no soportado.');
 
-    } catch (err) {
-      console.error('TikTok Error:', err.message);
+    } catch (e) {
+      console.error('TikTok Error:', e.message);
 
       await msg.react('❌');
 

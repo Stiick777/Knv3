@@ -81,11 +81,11 @@ ${usedPrefix + command} gatos 3`
     try {
 
       // ==========================================
-      // API TIKTOK SEARCH - FAA
+      // API TIKTOK SEARCH - STELLARWA
       // ==========================================
 
       const apiUrl =
-        `https://api-faa.my.id/faa/tiktok-search?q=${encodeURIComponent(text)}`;
+        `https://api.stellarwa.xyz/search/tiktok?query=${encodeURIComponent(text)}&key=proyectsV2`;
 
       const { data } = await axios.get(apiUrl, {
         timeout: 30000
@@ -93,8 +93,8 @@ ${usedPrefix + command} gatos 3`
 
       if (
         !data?.status ||
-        !Array.isArray(data.result) ||
-        !data.result.length
+        !Array.isArray(data.data) ||
+        !data.data.length
       ) {
         await msg.react("❌");
 
@@ -103,8 +103,8 @@ ${usedPrefix + command} gatos 3`
         );
       }
 
-      const videos = data.result
-        .filter(video => video.url_nowm)
+      const videos = data.data
+        .filter(video => video.dl)
         .slice(0, amount);
 
       if (!videos.length) {
@@ -142,7 +142,7 @@ ${usedPrefix + command} gatos 3`
 
       try {
 
-        const videoBuffer = await loadVideo(first.url_nowm);
+        const videoBuffer = await loadVideo(first.dl);
 
         await sock.sendMessage(
           msg.chat,
@@ -157,11 +157,11 @@ ${usedPrefix + command} gatos 3`
 
 📹 *Videos enviados:* ${videos.length}
 
-👤 *Usuario:* @${first.author?.username || "Desconocido"}
+👤 *Usuario:* @${first.author?.unique_id || "Desconocido"}
 
-👁️ *Visualizaciones:* ${first.stats?.views || "Desconocido"}
+👁️ *Visualizaciones:* ${first.stats?.plays ?? "Desconocido"}
 
-❤️ *Me gusta:* ${first.stats?.likes || "Desconocido"}
+❤️ *Me gusta:* ${first.stats?.likes ?? "Desconocido"}
 
 ━━━━━━━━━━━━━━━━━━
 ✨ *KanBot • TikTok Search*`,
@@ -178,13 +178,13 @@ ${usedPrefix + command} gatos 3`
                 mediaType: 1,
 
                 mediaUrl:
-                  "https://www.tiktok.com/",
+                  first.url || "https://www.tiktok.com/",
 
                 thumbnailUrl:
                   first.cover,
 
                 sourceUrl:
-                  "https://www.tiktok.com/",
+                  first.url || "https://www.tiktok.com/",
 
                 renderLargerThumbnail: true,
                 showAdAttribution: false
@@ -216,7 +216,7 @@ ${usedPrefix + command} gatos 3`
         try {
 
           const videoBuffer = await loadVideo(
-            video.url_nowm
+            video.dl
           );
 
           await sock.sendMessage(

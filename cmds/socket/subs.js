@@ -118,7 +118,7 @@ export async function startSubBot(
 
       delete reintentos[clientes.userId || id];
       await joinChannels(clientes);
-      console.log(chalk.gray(`[ ✿  ]  SUB-BOT conectado: ${clientes.userId}`));
+      //console.log(chalk.gray(`[ ✿  ]  SUB-BOT conectado: ${clientes.userId}`));
 
       const sentFlagFile = path.join(clientes.sessionFolder, 'msg_sent.flag');
       const hasSentMessage = fs.existsSync(sentFlagFile);

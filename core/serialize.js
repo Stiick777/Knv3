@@ -1,8 +1,7 @@
-import { proto, delay, areJidsSameUser, generateWAMessage, generateWAMessageFromContent, generateWAMessageContent, prepareWAMessageMedia, downloadContentFromMessage, getContentType, getDevice, extractMessageContent, jidDecode } from 'baileys';
+import { proto, delay, areJidsSameUser, generateWAMessage, generateWAMessageFromContent, generateWAMessageContent, generateForwardMessageContent, prepareWAMessageMedia, downloadContentFromMessage, getContentType, getDevice, extractMessageContent, jidDecode, isLidUser, jidNormalizedUser } from 'baileys';
 import fs from 'fs';
 import axios from 'axios';
 import crypto from 'crypto';
-import FileType from 'file-type';
 import path from 'path';
 import exif from './exif.js';
 import db from '#db';
@@ -40,14 +39,36 @@ class BoundedMap {
 
 const groupMetaCache = new Map();
 const lidCache = new BoundedMap(2000, 24 * 60 * 60_000);
+const lidNegativeCache = new BoundedMap(5000, 30_000);
 const META_TTL = 300_000;
-
 const gcMeta = setInterval(() => {
   const now = Date.now();
   for (const [key, val] of groupMetaCache)
     if (now - val.ts > META_TTL) groupMetaCache.delete(key);
 }, 10 * 60 * 1000);
 gcMeta.unref();
+
+function buildAdminSet(participants) {
+  const s = new Set();
+  for (const p of participants ?? []) {
+    if (p.admin !== 'admin' && p.admin !== 'superadmin') continue;
+    const id = p.id?.split('@')[0];
+    const lid = p.lid?.split('@')[0];
+    const phone = p.phoneNumber?.split('@')[0];
+    if (id) s.add(id);
+    if (lid) s.add(lid);
+    if (phone) s.add(phone);
+  }
+  return s;
+}
+
+const adminSetByMeta = new WeakMap();
+function getAdminSet(groupMetadata) {
+  if (!groupMetadata) return new Set();
+  let s = adminSetByMeta.get(groupMetadata);
+  if (!s) { s = buildAdminSet(groupMetadata.participants); adminSetByMeta.set(groupMetadata, s); }
+  return s;
+}
 
 function getCachedMeta(groupJid) {
   const c = groupMetaCache.get(groupJid);
@@ -97,26 +118,77 @@ function resolveParticipantJid(p, sock) {
   const rawLid = p.lid || (p.id?.endsWith('@lid') ? p.id : null) || (p.jid?.endsWith('@lid') ? p.jid : null);
   if (rawLid) {
     if (lidCache.has(rawLid)) return lidCache.get(rawLid);
-    if (typeof sock?.findJidByLid === 'function') {
-      const found = sock.findJidByLid(rawLid);
-      if (found && !found.endsWith('@lid')) {
-        const r = normalizeJid(found);
-        if (r) { lidCache.set(rawLid, r); return r; }
-      }
-    }
     return rawLid;
   }
   return null;
 }
 
-function resolveParticipants(participants, sock) {
+function hasLidStore(sock) {
+  const lm = sock?.signalRepository?.lidMapping;
+  return typeof lm?.getPNsForLIDs === 'function' || typeof lm?.getPNForLID === 'function';
+}
+
+function withTimeout(promise, ms) {
+  return new Promise((resolve) => {
+    let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; resolve(null); } }, ms);
+    Promise.resolve(promise).then(
+      (v) => { if (!done) { done = true; clearTimeout(timer); resolve(v); } },
+      () => { if (!done) { done = true; clearTimeout(timer); resolve(null); } }
+    );
+  });
+}
+
+async function resolveLidsAsync(lids, sock) {
+  const list = [...new Set((lids ?? []).filter(l => l?.endsWith('@lid')))];
+  const result = new Map();
+  if (!list.length) return result;
+  const resolvedSet = new Set();
+  let pending = list.filter(l => !lidNegativeCache.has(l));
+  if (!pending.length || !hasLidStore(sock)) return result;
+  const lm = sock?.signalRepository?.lidMapping;
+  if (!lm) return result;
+  if (typeof lm.getPNsForLIDs === 'function') {
+    let pairs = null;
+    try { pairs = await withTimeout(lm.getPNsForLIDs(pending), 2000); }
+    catch { pairs = null; }
+    if (Array.isArray(pairs)) {
+      for (const pair of pairs) {
+        const n = normalizeJid(pair?.pn);
+        if (pair?.lid && n && !n.endsWith('@lid')) { lidCache.set(pair.lid, n); result.set(pair.lid, n); resolvedSet.add(pair.lid); }
+      }
+    }
+  } else if (typeof lm.getPNForLID === 'function') {
+    await Promise.all(pending.map(async (lid) => {
+      let pn = null;
+      try { pn = await withTimeout(lm.getPNForLID(lid), 2000); }
+      catch { pn = null; }
+      const n = normalizeJid(pn);
+      if (n && !n.endsWith('@lid')) { lidCache.set(lid, n); result.set(lid, n); resolvedSet.add(lid); }
+    }));
+  }
+  for (const l of pending) if (!resolvedSet.has(l)) lidNegativeCache.set(l, true);
+  return result;
+}
+
+async function resolveLidAsync(lid, sock) {
+  if (!lid?.endsWith('@lid')) return null;
+  const map = await resolveLidsAsync([lid], sock);
+  return map.get(lid) || null;
+}
+
+async function resolveParticipants(participants, sock) {
   if (!Array.isArray(participants)) return [];
-  return participants.map(p => {
-    const realJid = resolveParticipantJid(p, sock);
-    if (!realJid) return p;
+  const prelim = participants.map(p => ({ p, realJid: resolveParticipantJid(p, sock) }));
+  const unresolvedLids = prelim.filter(e => e.realJid?.endsWith('@lid')).map(e => e.realJid);
+  const batchResolved = unresolvedLids.length ? await resolveLidsAsync(unresolvedLids, sock) : new Map();
+  const resolved = prelim.map(({ p, realJid }) => {
+    const finalJid = (realJid?.endsWith('@lid') ? batchResolved.get(realJid) : null) || realJid;
+    if (!finalJid) return p;
     const originalLid = p.lid || (p.id?.endsWith('@lid') ? p.id : undefined) || (p.jid?.endsWith('@lid') ? p.jid : undefined);
-    return { ...p, id: realJid, ...(originalLid ? { lid: originalLid } : {}), ...(p.phoneNumber ? { phoneNumber: p.phoneNumber } : {}) };
-  }).filter(p => p.id);
+    return { ...p, id: finalJid, ...(originalLid ? { lid: originalLid } : {}), ...(p.phoneNumber ? { phoneNumber: p.phoneNumber } : {}) };
+  });
+  return resolved.filter(p => p.id);
 }
 
 function resolveJidSync(raw, sock) {
@@ -125,13 +197,6 @@ function resolveJidSync(raw, sock) {
   if (!norm) return null;
   if (!norm.endsWith('@lid')) return norm;
   if (lidCache.has(norm)) return lidCache.get(norm);
-  if (typeof sock?.findJidByLid === 'function') {
-    const found = sock.findJidByLid(norm);
-    if (found && !found.endsWith('@lid')) {
-      const r = normalizeJid(found);
-      if (r) { lidCache.set(norm, r); return r; }
-    }
-  }
   return norm;
 }
 
@@ -142,14 +207,27 @@ async function resolveJidAsync(raw, sock, groupJid) {
   if (!norm.endsWith('@lid')) return norm;
   const sync = resolveJidSync(norm, sock);
   if (sync && !sync.endsWith('@lid')) return sync;
-  if (!groupJid?.endsWith('@g.us')) return norm;
+  const viaStore = await resolveLidAsync(norm, sock);
+  if (viaStore) return viaStore;
+  if (!groupJid?.endsWith('@g.us')) {
+    try {
+      const results = await withTimeout(sock.onWhatsApp(norm), 4000);
+      const hit = Array.isArray(results) ? results.find(r => r?.exists) || results[0] : null;
+      const resolvedJid = hit?.jid ? normalizeJid(hit.jid) : null;
+      if (resolvedJid && !resolvedJid.endsWith('@lid')) {
+        lidCache.set(norm, resolvedJid);
+        return resolvedJid;
+      }
+    } catch {}
+    return norm;
+  }
   const lidBase = norm.split('@')[0];
   let meta = getCachedMeta(groupJid);
   if (!meta) {
     try { meta = await sock.groupMetadata(groupJid); if (meta?.participants) setCachedMeta(groupJid, meta); else meta = null; }
     catch { return norm; }
   }
-  for (const p of meta.participants ?? []) {
+  for (const p of meta?.participants ?? []) {
     const pLidBase = p.lid?.split('@')[0];
     const pIdBase  = (p.id && !p.id.endsWith('@lid')) ? p.id.split('@')[0] : null;
     if (pLidBase !== lidBase && pIdBase !== lidBase) continue;
@@ -169,7 +247,7 @@ function patchGroupMetadata(sock) {
       if (cached) return cached;
       const meta = await orig(jid);
       if (!meta?.participants) return meta;
-      meta.participants = resolveParticipants(meta.participants, sock);
+      meta.participants = await resolveParticipants(meta.participants, sock);
       setCachedMeta(jid, meta);
       return meta;
     } catch (e) {
@@ -178,7 +256,30 @@ function patchGroupMetadata(sock) {
   };
 }
 
-export { normalizeJid, resolveParticipantJid, resolveJidSync, patchGroupMetadata, getCachedMeta, setCachedMeta, deleteCachedMeta, BoundedMap };
+function createMessageCache(max = 1000) {
+  const map = new Map();
+  const bind = (ev) => {
+    ev.on('messages.upsert', ({ messages }) => {
+      for (const m of messages) {
+        if (!m?.message || !m?.key?.id || !m?.key?.remoteJid) continue;
+        const cacheKey = `${m.key.remoteJid}:${m.key.id}`;
+        map.delete(cacheKey);
+        map.set(cacheKey, m.message);
+        while (map.size > max) {
+          map.delete(map.keys().next().value);
+        }
+      }
+    });
+  };
+  const getMessage = async (key) => map.get(`${key.remoteJid}:${key.id}`) ?? undefined;
+  const loadMessage = async (jid, id) => {
+    const message = map.get(`${jid}:${id}`);
+    return message ? { message } : null;
+  };
+  return { bind, getMessage, loadMessage, size: () => map.size };
+}
+
+export { normalizeJid, resolveParticipantJid, resolveJidSync, resolveLidAsync, patchGroupMetadata, getCachedMeta, setCachedMeta, deleteCachedMeta, getAdminSet, createMessageCache, BoundedMap };
 
 export async function getBuffer(url, options = {}) {
   try {
@@ -200,12 +301,32 @@ export async function smsg(sock, msg, store) {
       return jid;
     };
   }
- // patchGroupMetadata(sock);
+  if (!sock.findJidByLid) {
+    sock.findJidByLid = async (pnLid) => {
+      const jid = jidNormalizedUser(pnLid);
+      const result = { lid: undefined, phoneNumber: undefined };
+      try {
+        if (isLidUser(jid)) {
+          result.lid = jid;
+          const [mapped] = await sock.signalRepository.lidMapping.getPNsForLIDs([jid]);
+          result.phoneNumber = mapped?.pn ? jidNormalizedUser(mapped.pn) : undefined;
+        } else {
+          result.phoneNumber = jid;
+          const [mapped] = await sock.signalRepository.lidMapping.getLIDsForPNs([jid]);
+          result.lid = mapped?.lid ? jidNormalizedUser(mapped.lid) : undefined;
+        }
+      } catch {}
+      return result;
+    };
+  }
+  patchGroupMetadata(sock);
   if (!sock.downloadMediaMessage) {
   sock.downloadMediaMessage = async (message) => {
     const m = message.msg || message;
+    const normalized = message.message ? extractMessageContent(message.message) : null;
+    const realType = (normalized && getContentType(normalized)) || message.type;
     const mime = m.mimetype || '';
-    const messageType = (message.type || mime.split('/')[0]).replace(/Message/gi, '');
+    const messageType = (realType || mime.split('/')[0] || '').replace(/Message/gi, '');
     const stream = await downloadContentFromMessage(m, messageType);
     let buffer = Buffer.from([]);
     for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
@@ -217,7 +338,7 @@ export async function smsg(sock, msg, store) {
     msg.id = msg.key.id;
     msg.chat = msg.key.remoteJid;
     msg.fromMe = msg.key.fromMe;
-    msg.isBot = ['HSK', 'BAE', 'B1E', '3EB0', 'B24E', 'WA'].some((a) => msg.id.startsWith(a) && [12, 16, 20, 22, 40].includes(msg.id.length)) || /(.)\\1{5,}|[^a-zA-Z0-9]|[^0-9A-F]/.test(msg.id) || false;
+    msg.isBot = ['HSK', 'BAE', 'B1E', '3EB0', 'B24E', 'WA'].some((a) => msg.id.startsWith(a) && [12, 16, 20, 22, 40].includes(msg.id.length)) || /(.)\1{5,}|[^a-zA-Z0-9]/.test(msg.id) || false;
     msg.isGroup = msg.chat?.endsWith('@g.us') ?? false;
     if (!msg.isGroup && msg.chat?.endsWith('@lid')) {
       const resolved = await resolveJidAsync(msg.chat, sock, null);
@@ -240,23 +361,37 @@ export async function smsg(sock, msg, store) {
         metaParticipants = meta?.participants ?? null;
       } catch {}
     }
-    const resolveMentionJid = (raw) => {
-      if (!raw) return null;
-      const norm = normalizeJid(raw);
-      if (!norm) return null;
-      if (!norm.endsWith('@lid')) return norm;
-      const sync = resolveJidSync(norm, sock);
-      if (sync && !sync.endsWith('@lid')) return sync;
-      if (metaParticipants) {
-        const lidBase = norm.split('@')[0];
-        for (const p of metaParticipants) {
-          if (p.lid?.split('@')[0] === lidBase) return p.id;
-          if (p.id?.split('@')[0] === lidBase) return p.id;
+    const resolveMentionedJids = async (rawList) => {
+      const normalized = (rawList ?? []).map(raw => raw ? normalizeJid(raw) : null);
+      const out = new Array(normalized.length);
+      const needStore = [];
+      for (let i = 0; i < normalized.length; i++) {
+        const norm = normalized[i];
+        if (!norm) { out[i] = null; continue; }
+        if (!norm.endsWith('@lid')) { out[i] = norm; continue; }
+        const sync = resolveJidSync(norm, sock);
+        if (sync && !sync.endsWith('@lid')) { out[i] = sync; continue; }
+        out[i] = norm;
+        needStore.push(i);
+      }
+      if (needStore.length) {
+        const batchResolved = await resolveLidsAsync(needStore.map(i => out[i]), sock);
+        for (const i of needStore) {
+          const lid = out[i];
+          const viaStore = batchResolved.get(lid);
+          if (viaStore) { out[i] = viaStore; continue; }
+          if (metaParticipants) {
+            const lidBase = lid.split('@')[0];
+            for (const p of metaParticipants) {
+              if (p.lid?.split('@')[0] === lidBase) { out[i] = p.id; break; }
+              if (p.id?.split('@')[0] === lidBase) { out[i] = p.id; break; }
+            }
+          }
         }
       }
-      return norm;
+      return out.filter(Boolean);
     };
-    msg.mentionedJid = rawMentioned.map(resolveMentionJid).filter(Boolean);
+    msg.mentionedJid = await resolveMentionedJids(rawMentioned);
     msg.text = msg.msg?.text || msg.msg?.caption || msg.message?.conversation || msg.msg?.contentText || msg.msg?.selectedDisplayText || msg.msg?.title || '';
     let activePrefixes = [];
     if (botSetting.prefix === 1) activePrefixes = [];
@@ -286,13 +421,13 @@ export async function smsg(sock, msg, store) {
       msg.quoted.id = msg.msg.contextInfo.stanzaId;
       msg.quoted.device = getDevice(msg.quoted.id);
       msg.quoted.chat = msg.msg.contextInfo.remoteJid || msg.chat;
-      msg.quoted.isBot = msg.quoted.id ? ['HSK', 'BAE', 'B1E', '3EB0', 'B24E', 'WA'].some((a) => msg.quoted.id.startsWith(a) && [12, 16, 20, 22, 40].includes(msg.quoted.id.length)) || /(.)\\1{5,}|[^a-zA-Z0-9]|[^0-9A-F]/.test(msg.quoted.id) : false;
+      msg.quoted.isBot = msg.quoted.id ? ['HSK', 'BAE', 'B1E', '3EB0', 'B24E', 'WA'].some((a) => msg.quoted.id.startsWith(a) && [12, 16, 20, 22, 40].includes(msg.quoted.id.length)) || /(.)\1{5,}|[^a-zA-Z0-9]/.test(msg.quoted.id) : false;
       const rawQP = msg.msg?.contextInfo?.participant ?? '';
       msg.quoted.sender = await resolveJidAsync(sock.decodeJid(rawQP), sock, msg.chat);
       msg.quoted.fromMe = areJidsSameUser(msg.quoted.sender, sock.decodeJid(sock.user.id));
       msg.quoted.text = msg.quoted.msg?.text || msg.quoted.msg?.caption || msg.quoted.msg?.conversation || msg.quoted.msg?.contentText || msg.quoted.msg?.selectedDisplayText || msg.quoted.msg?.title || '';
       msg.quoted.body = msg.quoted.msg?.text || msg.quoted.msg?.caption || msg.quoted.message?.conversation || msg.quoted.msg?.selectedButtonId || msg.quoted.msg?.singleSelectReply?.selectedRowId || msg.quoted.msg?.selectedId || msg.quoted.msg?.contentText || msg.quoted.msg?.selectedDisplayText || msg.quoted.msg?.title || msg.quoted.msg?.name || '';
-      msg.quoted.mentionedJid = (msg.quoted.msg?.contextInfo?.mentionedJid ?? []).map(resolveMentionJid).filter(Boolean);
+      msg.quoted.mentionedJid = await resolveMentionedJids(msg.quoted.msg?.contextInfo?.mentionedJid ?? []);
       msg.quoted.mentions = msg.quoted.mentionedJid;
       msg.quoted.isGroup = msg.quoted.chat?.endsWith('@g.us');
       let quotedPrefix = '';
@@ -313,16 +448,26 @@ export async function smsg(sock, msg, store) {
       msg.getQuotedObj = async () => {
         if (!msg.quoted.id) return false;
         const q = store ? await store.loadMessage(msg.chat, msg.quoted.id).catch(() => null) : null;
-        return await exports.smsg(sock, q);
+        return await smsg(sock, q);
       };
       msg.quoted.download = () => sock.downloadMediaMessage(msg.quoted);
-      msg.quoted.delete = () => {
-        sock.sendMessage(msg.quoted.chat, { delete: { remoteJid: msg.quoted.chat, fromMe: msg.isBotAdmin ? false : true, id: msg.quoted.id, participant: msg.quoted.sender } });
+      msg.quoted.delete = async () => {
+        let isBotAdmins = false;
+        if (msg.quoted.isGroup) {
+          const botJid = sock?.user?.id ? sock.user.id.split(':')[0] + '@s.whatsapp.net' : '';
+          const botBase = botJid.split('@')[0];
+          let meta = getCachedMeta(msg.quoted.chat);
+          if (!meta) meta = await sock.groupMetadata(msg.quoted.chat).catch(() => null);
+          const participants = meta?.participants || [];
+          const adminSet = new Set(participants.filter((p) => p.admin === 'admin' || p.admin === 'superadmin').flatMap((p) => [p.id?.split('@')[0], p.lid?.split('@')[0], p.phoneNumber?.split('@')[0]].filter(Boolean)));
+          isBotAdmins = adminSet.has(botBase);
+        }
+        return sock.sendMessage(msg.quoted.chat, { delete: { remoteJid: msg.quoted.chat, fromMe: isBotAdmins ? false : true, id: msg.quoted.id, participant: msg.quoted.sender } });
       };
     }
   }
   msg.download = () => sock.downloadMediaMessage(msg);
-  msg.copy = () => exports.smsg(sock, proto.WebMessageInfo.fromObject(proto.WebMessageInfo.toObject(msg)));
+  msg.copy = () => smsg(sock, proto.WebMessageInfo.fromObject(proto.WebMessageInfo.toObject(msg)));
   msg.react = (u) => sock.sendMessage(msg.chat, { react: { text: u, key: msg.key } });
   msg.copyNForward = (jid = msg.chat, forceForward = false, options = {}) => sock.copyNForward(jid, msg, forceForward, options);
 
@@ -340,7 +485,7 @@ export async function smsg(sock, msg, store) {
           const data = await axios.get(content, { responseType: 'arraybuffer' });
           const mime = data.headers['content-type'] || (await FileType.fromBuffer(data.data)).mime;
           if (/gif|image|video|audio|pdf|stream/i.test(mime)) {
-            return sock.sendMedia(chat, data.data, '', caption, quoted, content);
+            return sock.sendFile(chat, data.data, '', caption, quoted, false, options);
           } else {
             return sock.sendMessage(chat, { text: content, mentions, ...options }, { quoted, ephemeralExpiration });
           }
@@ -395,6 +540,14 @@ export async function smsg(sock, msg, store) {
     const clean = { ...options };
     ;['asDocument', 'asSticker', 'asImage', 'asVideo'].forEach(k => delete clean[k]);
     return sock.sendMessage(jid, { ...clean, caption, ptt, [mtype]: buffer, mimetype, fileName: filename }, { quoted });
+  };
+  }
+
+  if (!sock.copyNForward) {
+  sock.copyNForward = async (jid, message, forceForward = false, options = {}) => {
+    const content = generateForwardMessageContent(message, forceForward);
+    if (message.expiration) content[Object.keys(content)[0]].contextInfo = { ...content[Object.keys(content)[0]].contextInfo, expiration: message.expiration };
+    return sock.sendMessage(jid, content, options);
   };
   }
 
@@ -469,6 +622,30 @@ export async function smsg(sock, msg, store) {
     const payload = { response_id: crypto.randomUUID(), sections };
     const content = { messageContextInfo: { threadId: [], deviceListMetadata: { senderKeyIndexes: [], recipientKeyIndexes: [], recipientKeyHash: '', recipientTimestamp: Math.floor(Date.now() / 1000) }, deviceListMetadataVersion: 2, messageSecret: crypto.randomBytes(32).toString('base64') }, botForwardedMessage: { message: { richResponseMessage: { submessages, messageType: 1, unifiedResponse: { data: Buffer.from(JSON.stringify(payload), 'utf8').toString('base64') }, contextInfo: { mentionedJid: [], groupMentions: [], statusAttributions: [], forwardingScore: 2, isForwarded: true, forwardedAiBotMessageInfo: { botJid: '259786046210223@bot' }, forwardOrigin: 4, botMessageSharingInfo: { botEntryPointOrigin: 1, forwardScore: 2 } } } } } };
     return sock.relayMessage(jid, content, {});
+  };
+  }
+
+  if (!sock.sendStatusMessage) {
+  sock.sendStatusMessage = async (jid, options = {}) => {
+    const { type = 'text', text, media, caption, mimetype, fileName, ptt, textArgb, backgroundArgb, font, audienceType, listName, listEmoji } = options;
+    const contextInfo = { statusSourceType: 0, statusAttributions: [{ AttributionData: null, type: 10 }], isGroupStatus: true, statusAudienceMetadata: { audienceType, listName, listEmoji } };
+    let innerMessage;
+    if (type === 'text') {
+      innerMessage = { extendedTextMessage: { text, textArgb, backgroundArgb, font, previewType: 0, contextInfo } };
+    } else {
+      const mediaContent = { [type]: typeof media === 'string' ? { url: media } : media };
+      if (caption) mediaContent.caption = caption;
+      if (mimetype) mediaContent.mimetype = mimetype;
+      if (fileName) mediaContent.fileName = fileName;
+      if (ptt) mediaContent.ptt = ptt;
+      const content = await generateWAMessageContent(mediaContent, { upload: sock.waUploadToServer });
+      const messageKey = `${type}Message`;
+      content[messageKey].contextInfo = contextInfo;
+      innerMessage = { [messageKey]: content[messageKey] };
+    }
+    const message = generateWAMessageFromContent(jid, { groupStatusMessageV2: { message: innerMessage } }, {});
+    await sock.relayMessage(jid, message.message, { messageId: message.key.id });
+    return message;
   };
   }
   

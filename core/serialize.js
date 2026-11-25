@@ -1,5 +1,6 @@
 import { proto, delay, areJidsSameUser, generateWAMessage, generateWAMessageFromContent, generateWAMessageContent, generateForwardMessageContent, prepareWAMessageMedia, downloadContentFromMessage, getContentType, getDevice, extractMessageContent, jidDecode, isLidUser, jidNormalizedUser } from 'baileys';
 import fs from 'fs';
+import FileType from 'file-type';
 import axios from 'axios';
 import crypto from 'crypto';
 import path from 'path';

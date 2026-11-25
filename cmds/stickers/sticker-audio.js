@@ -1,4 +1,7 @@
+import exif from '#core/exif';
+import db from '#db';
 
+const { writeExif } = exif;
 import fs from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';

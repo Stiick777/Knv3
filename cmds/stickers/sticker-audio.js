@@ -14,7 +14,7 @@ import {
   attachAudio,
   detachAudio,
   createAudioMessage
-} from '.../core/sticker-audio.js';
+} from '../../core/sticker-audio.js';
 
 installStickerAudioPatch();
 

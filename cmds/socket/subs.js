@@ -1,7 +1,7 @@
 import db from "#db"
 import makeWASocket, { Browsers, makeCacheableSignalKeyStore, fetchLatestBaileysVersion, DisconnectReason, jidDecode, useMultiFileAuthState } from 'baileys';
 import NodeCache from 'node-cache';
-import handler from '#handler';
+//import handler from '#handler';
 import events from '#events';
 import qrcode from "qrcode";
 import pino from 'pino';

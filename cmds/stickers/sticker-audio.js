@@ -54,6 +54,43 @@ function ffmpeg(args, outputBuffer = false) {
     });
   });
 }
+function getStickerMetadata(msg, args = []) {
+  const user = db.getUser(msg.sender);
+
+  const name = user.name || 'Usuario';
+
+  const meta1 = user.metadatos
+    ? String(user.metadatos).trim()
+    : '';
+
+  const meta2 = user.metadatos2
+    ? String(user.metadatos2).trim()
+    : '';
+
+  const texto1 = meta1 || '✰ 𝙺𝚊𝚗𝙱𝚘𝚝 ✰';
+  const texto2 = meta1
+    ? (meta2 || '')
+    : `@${name}`;
+
+  const filteredText = args.join(' ')
+    .trim();
+
+  const marca = filteredText
+    .split(/[\u2022|]/)
+    .map(part => part.trim());
+
+  const pack = marca[0] || texto1;
+
+  const author = marca.length > 1
+    ? marca[1]
+    : (filteredText ? (meta1 ? texto2 : '') : texto2);
+
+  return {
+    packname: pack,
+    author,
+    categories: ['']
+  };
+}
 
 function getMedia(msg) {
   return (msg?.msg || msg || {});
@@ -189,7 +226,7 @@ async function createImageSticker(input, webp) {
   await createSticker(input, webp, false);
 }
 
-async function sendSoundSticker(sock, chat, webp, ogg, quoted, animated) {
+async function sendSoundSticker(sock, chat, webp, ogg, quoted, animated, msg, args) {
   const options = {
     upload: sock.waUploadToServer
   };
@@ -199,10 +236,35 @@ async function sendSoundSticker(sock, chat, webp, ogg, quoted, animated) {
     mimetype: AUDIO_MIME
   }, options);
 
-  const uploadedSticker = await prepareWAMessageMedia({
-    sticker: fs.readFileSync(webp),
-    isAnimated: animated
-  }, options);
+  // Obtener metadatos personalizados.
+const metadata = getStickerMetadata(msg, args);
+
+// Aplicar EXIF al sticker.
+const webpBuffer = fs.readFileSync(webp);
+
+const exifPath = await writeExif(
+  {
+    mimetype: 'image/webp',
+    data: webpBuffer
+  },
+  metadata
+);
+
+let stickerBuffer;
+
+try {
+  stickerBuffer = fs.readFileSync(exifPath);
+} finally {
+  if (fs.existsSync(exifPath)) {
+    fs.unlinkSync(exifPath);
+  }
+}
+
+// Subir el sticker con sus metadatos.
+const uploadedSticker = await prepareWAMessageMedia({
+  sticker: stickerBuffer,
+  isAnimated: animated
+}, options);
 
   const audio = uploadedAudio.audioMessage;
   const seconds = Math.max(1, Math.ceil(await getDuration(ogg)));
@@ -323,7 +385,7 @@ export default {
   category: 'stickers',
   description: 'Crear stickers con audio.',
 
-  run: async ({ msg, sock, usedPrefix, command }) => {
+  run: async ({ msg, sock, usedPrefix, command, args = [] }) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     const inputPath = path.join(TEMP, `${id}-input`);
@@ -418,13 +480,15 @@ export default {
       });
 
       await sendSoundSticker(
-        sock,
-        msg.chat,
-        webpPath,
-        oggPath,
-        msg,
-        animated
-      );
+  sock,
+  msg.chat,
+  webpPath,
+  oggPath,
+  msg,
+  animated,
+  msg,
+  args
+);
 
       await sock.sendMessage(msg.chat, {
         react: { text: '✅', key: msg.key }

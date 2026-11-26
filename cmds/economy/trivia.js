@@ -6,7 +6,7 @@ const gam = new Map();
 
 function cargarPreguntas() {
   try {
-    const data = fs.readFileSync('../../trivia.json', 'utf-8');
+    const data = fs.readFileSync('./core/trivia.json', 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     console.error('Error cargando preguntas de trivia:', error.message);

@@ -121,6 +121,9 @@ export const menuObject = {
 ╰──〔❨✧✧❩〕──╯`,
   nsfw: `╭──〔 𝑱𝑼𝑬𝑮𝑶𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .69 @tag
+╞˚₊·͟͟͞͞➳❥ .violar
+╞˚₊·͟͟͞͞➳❥ .chupartetas
+╞˚₊·͟͟͞͞➳❥ .chuparpatas
 ╞˚₊·͟͟͞͞➳❥ .sonrojarse @tag
 ╞˚₊·͟͟͞͞➳❥ .divorce
 ╞˚₊·͟͟͞͞➳❥ .embarazar @tag

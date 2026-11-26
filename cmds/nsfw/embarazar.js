@@ -1,14 +1,15 @@
-import fs from 'fs';
-import path from 'path';
+
+import db from '#db';
 
 export default {
   command: ['preg', 'embarazar', 'preñar'],
   category: 'fun',
   description: '',
+
   run: async ({ msg, sock }) => {
     let who;
 
-    if (msg.mentionedJid.length > 0) {
+    if (msg.mentionedJid?.length > 0) {
       who = msg.mentionedJid[0];
     } else if (msg.quoted) {
       who = msg.quoted.sender;
@@ -16,14 +17,14 @@ export default {
       who = msg.sender;
     }
 
-    let name = sock.getName(who);
-    let name2 = sock.getName(msg.sender);
+    const name = db.getUser(who)?.name || who.split('@')[0];
+    const name2 = db.getUser(msg.sender)?.name || msg.pushName || msg.sender.split('@')[0];
 
     await msg.react('😏');
 
     let str;
 
-    if (msg.mentionedJid.length > 0) {
+    if (msg.mentionedJid?.length > 0) {
       str = `\`${name2}\` embarazó a \`${name || who}\` (⊙_⊙;).`;
     } else if (msg.quoted) {
       str = `\`${name2}\` embarazó a \`${name || who}\`.`;
@@ -32,14 +33,13 @@ export default {
     }
 
     if (msg.isGroup) {
-      let pp = 'https://files.catbox.moe/054z2h.mp4';
-      let pp2 = 'https://files.catbox.moe/3ucfc0.mp4';
-      let pp3 = 'https://files.catbox.moe/brnwzh.mp4';
+      const videos = [
+        'https://files.catbox.moe/054z2h.mp4',
+        'https://files.catbox.moe/3ucfc0.mp4',
+        'https://files.catbox.moe/brnwzh.mp4'
+      ];
 
-      const videos = [pp, pp2, pp3];
       const video = videos[Math.floor(Math.random() * videos.length)];
-
-      let mentions = [who];
 
       await sock.sendMessage(
         msg.chat,
@@ -47,12 +47,12 @@ export default {
           video: { url: video },
           gifPlayback: true,
           caption: str,
-          mentions
+          mentions: [who]
         },
         {
           quoted: msg
         }
       );
     }
-  },
+  }
 };

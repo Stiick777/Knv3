@@ -26,6 +26,7 @@ export const menuObject = {
 ╞˚₊·͟͟͞͞➳❥ .eboard
 ╞˚₊·͟͟͞͞➳❥ .einfo
 ╞˚₊·͟͟͞͞➳❥ .pay
+╞˚₊·͟͟͞͞➳❥ .trivia
 ╞˚₊·͟͟͞͞➳❥ .mine
 ╞˚₊·͟͟͞͞➳❥ .menusal
 ╞˚₊·͟͟͞͞➳❥ .ppt

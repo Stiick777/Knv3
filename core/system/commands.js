@@ -85,6 +85,7 @@ export const menuObject = {
 ╰──〔❨✧✧❩〕──╯`,
   stickers: `╭──〔 𝑺𝑻𝑰𝑪𝑲𝑬𝑹𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .brat <txt>
+╞˚₊·͟͟͞͞➳❥ .sa 
 ╞˚₊·͟͟͞͞➳❥ .emojimix <emoji+emoji>
 ╞˚₊·͟͟͞͞➳❥ .qc
 ╞˚₊·͟͟͞͞➳❥ .sticker
@@ -121,6 +122,7 @@ export const menuObject = {
 ╰──〔❨✧✧❩〕──╯`,
   nsfw: `╭──〔 𝑱𝑼𝑬𝑮𝑶𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .69 @tag
+╞˚₊·͟͟͞͞➳❥ .top <texto>
 ╞˚₊·͟͟͞͞➳❥ .violar
 ╞˚₊·͟͟͞͞➳❥ .chupartetas
 ╞˚₊·͟͟͞͞➳❥ .chuparpatas

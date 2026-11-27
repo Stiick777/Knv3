@@ -43,8 +43,8 @@ export default {
         'https://files.catbox.moe/m94q5i.mp4',
 
         'https://files.catbox.moe/9i63rq.mp4',
-        'https://files.catbox.moe/bw9qqd.mp4',
-        'https://files.catbox.moe/a8e6j2.mp4'
+        'https://files.catbox.moe/bw9qqd.mp4'
+      
       ];
 
       const video = videos[Math.floor(Math.random() * videos.length)];

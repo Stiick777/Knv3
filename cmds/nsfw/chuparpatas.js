@@ -2,7 +2,7 @@
 import db from '#db';
 
 export default {
-  command: ['chuparpata', 'chupaepatas'],
+  command: ['chuparpata', 'chuparpatas'],
   category: 'fun',
   description: '',
   run: async ({ msg, sock, groupMetadata }) => {

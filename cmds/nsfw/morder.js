@@ -43,7 +43,7 @@ export default {
         'https://files.catbox.moe/nxr7vx.mp4',
 
         'https://files.catbox.moe/j5yobc.mp4',
-        'https://files.catbox.moe/bw9qqd.mp4'
+        'https://files.catbox.moe/o31g5x.mp4'
       
       ];
 

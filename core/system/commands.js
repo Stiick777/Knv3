@@ -123,6 +123,8 @@ export const menuObject = {
 ╰──〔❨✧✧❩〕──╯`,
   nsfw: `╭──〔 𝑱𝑼𝑬𝑮𝑶𝑺 〕─
 ╞˚₊·͟͟͞͞➳❥ .69 @tag
+╞˚₊·͟͟͞͞➳❥ .cafe
+╞˚₊·͟͟͞͞➳❥ .saludo
 ╞˚₊·͟͟͞͞➳❥ .top <texto>
 ╞˚₊·͟͟͞͞➳❥ .violar
 ╞˚₊·͟͟͞͞➳❥ .chupartetas

@@ -38,11 +38,11 @@ export default {
 
     if (msg.isGroup) {
       const videos = [
-        'https://files.catbox.moe/zsovfx.mp4',
-        'https://files.catbox.moe/g0jfq7.mp4',
-        'https://files.catbox.moe/m94q5i.mp4',
+        'https://files.catbox.moe/nssx5g.mp4',
+        'https://files.catbox.moe/c23bw3.mp4',
+        'https://files.catbox.moe/nxr7vx.mp4',
 
-        'https://files.catbox.moe/9i63rq.mp4',
+        'https://files.catbox.moe/j5yobc.mp4',
         'https://files.catbox.moe/bw9qqd.mp4'
       
       ];

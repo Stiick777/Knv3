@@ -88,6 +88,14 @@ export default async (sock, msg) => {
   const isBotAdmins = msg.isGroup ? adminSet.has(botBase) : false;
   const isAdmins = msg.isGroup ? adminSet.has(senderBase) : false;
 
+const isKanOn = msg.command?.toLowerCase() === 'kan' &&
+  msg.args?.[0]?.toLowerCase() === 'on';
+
+if (chat?.isBanned && !isKanOn && !isOwner) {
+  await msg.reply(`ꕥ El bot *${settings.botname || 'Kan'}* está desactivado en este grupo.\n\n> ✎ Un *administrador* puede activarlo con el comando:\n> » *${settings.prefix?.[0] || '.'}kan on*`);
+  return;
+}
+  
   Promise.allSettled((global.cmdsExecute ?? []).filter(p => p.type === 'all').map(p => p.fn({ msg, sock, groupMetadata, participants, isAdmins, isBotAdmins, isOwner, __dirname: p.dirname }).catch(e => console.error(chalk.gray(`[ ✿ ] Error all-plugin ${p.key}: ${e.message}`)))));
 
   const today = statsDay();
@@ -151,10 +159,10 @@ export default async (sock, msg) => {
     const cmds = ['allmenu', 'help', 'menu', 'infobot', 'botinfo', 'invite', 'invitar', 'ping', 'speed', 'p', 'status', 'estado', 'report', 'reporte', 'sug', 'suggest', 'token', 'join', 'unir', 'logout', 'reload', 'self', 'setbanner', 'setbotbanner', 'setchannel', 'setbotchannel', 'setbotcurrency', 'setcurrency', 'seticon', 'setboticon', 'setlink', 'setbotlink', 'setbotname', 'setname', 'setbotowner', 'setowner', 'setimage', 'setpfp', 'setprefix', 'setbotprefix', 'setstatus', 'setusername', 'code', 'qr', 'codepremium', 'qrpremium', 'codemod', 'qrmod'];
     if (!isOwner && !cmds.includes(command)) return;
   }
-  if (chat?.isBanned && !(command === 'kan' && text.trim().toLowerCase() === 'on') && !isOwner) {
+  /*if (chat?.isBanned && !(command === 'kan' && text.trim().toLowerCase() === 'on') && !isOwner) {
   await msg.reply(`ꕥ El bot *${settings.botname || 'Kan'}* está desactivado en este grupo.\n\n> ✎ Un *administrador* puede activarlo con el comando:\n> » *${usedPrefix}kan on*`);
   return;
-  }
+  }*/
 
   if (chat.adminonly && !isAdmins) return;
   const cmdData = global.comandos.get(command);

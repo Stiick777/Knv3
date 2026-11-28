@@ -52,6 +52,7 @@
     "pino": "^8.8.0",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
+    "similarity": "^1.2.1",
     "readline-sync": "^1.4.10",
     "syntax-error": "^1.4.0",
     "ws": "^8.18.3",

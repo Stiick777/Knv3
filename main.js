@@ -114,6 +114,16 @@ export default async (sock, msg) => {
   }) : typeof pluginPrefix === 'string' ? [[new RegExp(strRegex(pluginPrefix)).exec(msg.text), new RegExp(strRegex(pluginPrefix))]] : [[null, null]];
   let match = matchs.find(p => p[0]) || null;
 
+console.log('[TRIVIA DEBUG]', {
+  chat: msg.chat,
+  sender: msg.sender,
+  primaryBot: chat?.primaryBot,
+  botJid,
+  beforePlugins: (global.cmdsExecute ?? [])
+    .filter(p => p.type === 'before')
+    .map(p => p.key)
+});
+  
   const botprimaryId = chat?.primaryBot;
   if (!botprimaryId || botprimaryId === botJid) {
     await Promise.allSettled((global.cmdsExecute ?? []).filter(p => p.type === 'before').map(p => p.fn({ msg, sock, match, groupMetadata, participants, isAdmins, isBotAdmins, isOwner, __dirname: p.dirname }).catch(e => console.error(chalk.gray(`[ ✿ ] Error before-plugin ${p.key}: ${e.message}`)))));

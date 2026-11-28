@@ -19,16 +19,13 @@ function elegirPreguntaAleatoria(preguntas) {
 }
 
 function obtenerRespuesta(msg) {
-  const texto =
+  return String(
     msg.text ||
     msg.body ||
     msg.msg?.text ||
     msg.msg?.conversation ||
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    '';
-
-  return String(texto).trim().toLowerCase();
+    ''
+  ).trim().toLowerCase();
 }
 
 export default {
@@ -46,9 +43,7 @@ export default {
     }
 
     if (gam.has(msg.sender)) {
-      return msg.reply(
-        '⚠️ Ya tienes una trivia en curso. ¡Responde antes de iniciar otra!'
-      );
+      return msg.reply('⚠️ Ya tienes una trivia en curso. ¡Responde antes de iniciar otra!');
     }
 
     const preguntas = cargarPreguntas();
@@ -59,10 +54,25 @@ export default {
 
     const pregunta = elegirPreguntaAleatoria(preguntas);
 
+    let mensaje = `🎲 *Trivia - KanBot*\n\n*${pregunta.pregunta}*\n\n`;
+
+    for (const [key, value] of Object.entries(pregunta.opciones)) {
+      mensaje += `*${key.toUpperCase()}.* ${value}\n`;
+    }
+
+    mensaje += '\n📌 *Responde citando este mensaje con A, B o C en 1 minuto.*';
+
+    // Enviar y obtener el verdadero mensaje de la pregunta.
+    const preguntaMsg = await msg.reply(mensaje);
+
+    if (!preguntaMsg?.key?.id) {
+      return msg.reply('⚠️ No se pudo iniciar la trivia. Inténtalo nuevamente.');
+    }
+
     const juego = {
       pregunta,
       chat: msg.chat,
-      msg,
+      preguntaMsg,
       tiempoExpira: null
     };
 
@@ -75,7 +85,7 @@ export default {
           {
             text: `⏳ ¡Tiempo agotado! La respuesta correcta era *${juego.pregunta.respuestaCorrecta.toUpperCase()}*`
           },
-          { quoted: juego.msg }
+          { quoted: juego.preguntaMsg }
         );
       } catch (error) {
         console.error('Error al finalizar trivia:', error.message);
@@ -85,16 +95,6 @@ export default {
     }, 60000);
 
     gam.set(msg.sender, juego);
-
-    let mensaje = `🎲 *Trivia - KanBot*\n\n*${pregunta.pregunta}*\n\n`;
-
-    for (const [key, value] of Object.entries(pregunta.opciones)) {
-      mensaje += `*${key.toUpperCase()}.* ${value}\n`;
-    }
-
-    mensaje += '\n📌 *Responde citando este mensaje con A, B o C en 1 minuto.*';
-
-    await msg.reply(mensaje);
   },
 
   before: async ({ msg, sock }) => {
@@ -108,13 +108,13 @@ export default {
 
       if (!['a', 'b', 'c'].includes(respuestaUsuario)) return;
 
-      // Comprobar que el usuario citó el mensaje de la trivia
+      // Comprobar que realmente está citando la pregunta.
       if (!msg.quoted) return;
 
-      const idTrivia = juego.msg.key?.id || juego.msg.id;
-      const idCitado = msg.quoted.id;
+      const idPregunta = juego.preguntaMsg.key.id;
+      const idCitado = msg.quoted.id || msg.quoted.key?.id;
 
-      if (!idTrivia || !idCitado || idTrivia !== idCitado) return;
+      if (!idCitado || idCitado !== idPregunta) return;
 
       const respuestaCorrecta = String(
         juego.pregunta.respuestaCorrecta

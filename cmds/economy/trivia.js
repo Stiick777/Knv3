@@ -18,6 +18,19 @@ function elegirPreguntaAleatoria(preguntas) {
   return preguntas[Math.floor(Math.random() * preguntas.length)];
 }
 
+function obtenerRespuesta(msg) {
+  const texto =
+    msg.text ||
+    msg.body ||
+    msg.msg?.text ||
+    msg.msg?.conversation ||
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    '';
+
+  return String(texto).trim().toLowerCase();
+}
+
 export default {
   command: ['trivia'],
   category: 'fun',
@@ -33,7 +46,9 @@ export default {
     }
 
     if (gam.has(msg.sender)) {
-      return msg.reply('⚠️ Ya tienes una trivia en curso. ¡Responde antes de iniciar otra!');
+      return msg.reply(
+        '⚠️ Ya tienes una trivia en curso. ¡Responde antes de iniciar otra!'
+      );
     }
 
     const preguntas = cargarPreguntas();
@@ -44,10 +59,15 @@ export default {
 
     const pregunta = elegirPreguntaAleatoria(preguntas);
 
-    const tiempoExpira = setTimeout(async () => {
-      const juego = gam.get(msg.sender);
+    const juego = {
+      pregunta,
+      chat: msg.chat,
+      msg,
+      tiempoExpira: null
+    };
 
-      if (!juego) return;
+    juego.tiempoExpira = setTimeout(async () => {
+      if (gam.get(msg.sender) !== juego) return;
 
       try {
         await sock.sendMessage(
@@ -64,12 +84,7 @@ export default {
       gam.delete(msg.sender);
     }, 60000);
 
-    gam.set(msg.sender, {
-      pregunta,
-      tiempoExpira,
-      chat: msg.chat,
-      msg
-    });
+    gam.set(msg.sender, juego);
 
     let mensaje = `🎲 *Trivia - KanBot*\n\n*${pregunta.pregunta}*\n\n`;
 
@@ -77,49 +92,63 @@ export default {
       mensaje += `*${key.toUpperCase()}.* ${value}\n`;
     }
 
-    mensaje += '\n📌 *Responde con A, B o C en 1 minuto.*';
+    mensaje += '\n📌 *Responde citando este mensaje con A, B o C en 1 minuto.*';
 
     await msg.reply(mensaje);
   },
 
   before: async ({ msg, sock }) => {
-    const juego = gam.get(msg.sender);
+    try {
+      const juego = gam.get(msg.sender);
 
-    if (!juego) return;
+      if (!juego) return;
+      if (msg.chat !== juego.chat) return;
 
-    if (msg.chat !== juego.chat) return;
+      const respuestaUsuario = obtenerRespuesta(msg);
 
-    const respuestaUsuario = (msg.text || '').toLowerCase().trim();
+      if (!['a', 'b', 'c'].includes(respuestaUsuario)) return;
 
-    if (!['a', 'b', 'c'].includes(respuestaUsuario)) return;
+      // Comprobar que el usuario citó el mensaje de la trivia
+      if (!msg.quoted) return;
 
-    const respuestaCorrecta = juego.pregunta.respuestaCorrecta.toLowerCase();
+      const idTrivia = juego.msg.key?.id || juego.msg.id;
+      const idCitado = msg.quoted.id;
 
-    clearTimeout(juego.tiempoExpira);
-    gam.delete(msg.sender);
+      if (!idTrivia || !idCitado || idTrivia !== idCitado) return;
 
-    if (respuestaUsuario === respuestaCorrecta) {
-      const reward = Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000;
+      const respuestaCorrecta = String(
+        juego.pregunta.respuestaCorrecta
+      ).trim().toLowerCase();
 
-      const botId = sock?.user?.id.split(':')[0] + '@s.whatsapp.net';
-      const botSettings = db.getSettings(botId);
-      const monedas = botSettings?.currency || 'Coins';
+      clearTimeout(juego.tiempoExpira);
+      gam.delete(msg.sender);
 
-      db.setCreate('chat_users', [msg.chat, msg.sender], 'coins', 0);
+      if (respuestaUsuario === respuestaCorrecta) {
+        const reward = Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000;
 
-      const user = db.getChatUser(msg.chat, msg.sender);
+        const botId = sock?.user?.id?.split(':')[0] + '@s.whatsapp.net';
+        const botSettings = db.getSettings(botId);
+        const monedas = botSettings?.currency || 'Coins';
 
-      user.coins = (user.coins || 0) + reward;
+        db.setCreate('chat_users', [msg.chat, msg.sender], 'coins', 0);
 
-      db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);
+        const user = db.getChatUser(msg.chat, msg.sender);
+
+        user.coins = (user.coins || 0) + reward;
+
+        db.setChatUser(msg.chat, msg.sender, 'coins', user.coins);
+
+        return msg.reply(
+          `🎉 ¡Correcto! ✅ La respuesta era *${respuestaCorrecta.toUpperCase()}*\n\n✨ Has ganado *+${reward.toLocaleString()} ${monedas}* 💰`
+        );
+      }
 
       return msg.reply(
-        `🎉 ¡Correcto! ✅ La respuesta era *${respuestaCorrecta.toUpperCase()}*\n\n✨ Has ganado *+${reward.toLocaleString()} ${monedas}* 💰`
+        `❌ Incorrecto. La respuesta correcta era *${respuestaCorrecta.toUpperCase()}*`
       );
-    }
 
-    return msg.reply(
-      `❌ Incorrecto. La respuesta correcta era *${respuestaCorrecta.toUpperCase()}*`
-    );
+    } catch (error) {
+      console.error('Error en respuestas de trivia:', error.message);
+    }
   }
 };

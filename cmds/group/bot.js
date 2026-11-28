@@ -1,6 +1,6 @@
 import db from '#db';
 export default {
-  command: ['bot'],
+  command: ['kan'],
   category: 'group',
   description: 'Activar o desactivar el bot en el grupo.',
   isAdmin: true,

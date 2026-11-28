@@ -153,19 +153,31 @@ export default {
         );
       }
 
-      db.setCreate('chat_users', [msg.chat, id], 'coins', 0);
+      // Obtener saldo igual que el comando balance
+const chatId = msg.chat;
+const userId = msg.sender;
 
-      const user = db.getChatUser(msg.chat, id);
+const user = db.getChatUser(chatId, userId);
 
-      if (!user || (user.coins || 0) < APUESTA) {
-        return msg.reply(
-          `❌ No tienes suficientes ${monedas} para apostar.\nNecesitas al menos *${APUESTA.toLocaleString()} ${monedas}*.`
-        );
-      }
+if (!user) {
+  return msg.reply('No se pudo consultar tu saldo de Yenes.');
+}
 
-      user.coins = (user.coins || 0) - APUESTA;
-      db.setChatUser(msg.chat, id, 'coins', user.coins);
+const saldo = Number(user.coins) || 0;
 
+if (saldo < APUESTA) {
+  return msg.reply(
+    `ꕥ No tienes suficientes ${monedas} para apostar.\n\n` +
+    `⛁ Tu saldo: *¥${saldo.toLocaleString()} ${monedas}*\n` +
+    `⛀ Apuesta necesaria: *¥${APUESTA.toLocaleString()} ${monedas}*`
+  );
+}
+
+// Descontar una sola vez
+user.coins = saldo - APUESTA;
+db.setChatUser(chatId, userId, 'coins', user.coins);
+
+      
       partida.equipoUsuario =
         partida.equipo1.toLowerCase() === equipoSeleccionado.toLowerCase()
           ? partida.equipo1

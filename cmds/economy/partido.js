@@ -53,7 +53,7 @@ const partidos = new Map();
 const ultimoPartido = new Map();
 
 const timeout = 300000;
-const limiteDiario = 86400000;
+const limiteDiario = 3600000; // 1 hora
 
 const APUESTA = 1000;
 const PREMIO_EXACTO = 20000;

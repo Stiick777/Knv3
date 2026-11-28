@@ -98,12 +98,7 @@ export default {
   },
 
   before: async ({ msg, sock }) => {
-    console.log('[TRIVIA BEFORE]', {
-  sender: msg.sender,
-  chat: msg.chat,
-  text: msg.text,
-  quotedId: msg.quoted?.id
-});
+    
     try {
       const juego = gam.get(msg.sender);
 
